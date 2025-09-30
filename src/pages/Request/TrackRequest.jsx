@@ -70,9 +70,11 @@ const TrackRequest = () => {
       const data = await apiClient.get(`/requests?${params.toString()}`);
       const nextResults = Array.isArray(data) ? data : [];
 
+
       const matchingRequest = nextResults.find(
         (request) => request.orderNumber?.toLowerCase() === trimmedOrderNumber.toLowerCase(),
       );
+
 
 
       if (matchingRequest) {
