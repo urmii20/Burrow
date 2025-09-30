@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, Phone } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
-const Register: React.FC = () => {
+const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -14,13 +14,13 @@ const Register: React.FC = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [acceptTerms, setAcceptTerms] = useState(false);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [errors, setErrors] = useState({});
 
   const { state, register } = useAuth();
   const navigate = useNavigate();
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+    const newErrors = {};
 
     if (!formData.name.trim()) {
       newErrors.name = 'Full name is required';
@@ -58,30 +58,29 @@ const Register: React.FC = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+
     if (!validateForm()) return;
 
     try {
       await register(formData);
       navigate('/dashboard');
-    } catch (error) {
-      // Error handling is done in AuthContext
+    } catch {
+      // Error handling is managed within AuthContext
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChange = (event) => {
     setFormData({
       ...formData,
-      [e.target.name]: e.target.value
+      [event.target.name]: event.target.value
     });
-    
-    // Clear error when user starts typing
-    if (errors[e.target.name]) {
+
+    if (errors[event.target.name]) {
       setErrors({
         ...errors,
-        [e.target.name]: ''
+        [event.target.name]: ''
       });
     }
   };
@@ -241,7 +240,7 @@ const Register: React.FC = () => {
               name="accept-terms"
               type="checkbox"
               checked={acceptTerms}
-              onChange={(e) => setAcceptTerms(e.target.checked)}
+              onChange={(event) => setAcceptTerms(event.target.checked)}
               className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
             />
             <label htmlFor="accept-terms" className="ml-2 block text-sm text-gray-700">

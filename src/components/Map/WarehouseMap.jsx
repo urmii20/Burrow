@@ -1,27 +1,24 @@
 import React, { useState } from 'react';
+import PropTypes from 'prop-types';
 import { MapPin, Navigation } from 'lucide-react';
 import { warehouses } from '../../data/mockData';
-import { Warehouse } from '../../types';
 
-interface WarehouseMapProps {
-  onWarehouseSelect?: (warehouse: Warehouse) => void;
-  selectedWarehouseId?: string;
-}
-
-const WarehouseMap: React.FC<WarehouseMapProps> = ({ 
-  onWarehouseSelect, 
-  selectedWarehouseId 
-}) => {
-  const [userLocation, setUserLocation] = useState<string>('');
-  const [nearbyWarehouses, setNearbyWarehouses] = useState<Warehouse[]>(warehouses);
+const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
+  const [userLocation, setUserLocation] = useState('');
+  const [nearbyWarehouses, setNearbyWarehouses] = useState(warehouses);
 
   const handleLocationSearch = () => {
-    // Simulate finding nearby warehouses based on user input
-    if (userLocation.toLowerCase().includes('delhi')) {
-      setNearbyWarehouses(warehouses.filter(w => w.address.includes('Delhi') || w.address.includes('Noida')));
-    } else if (userLocation.toLowerCase().includes('mumbai')) {
-      setNearbyWarehouses(warehouses.filter(w => w.address.includes('Mumbai') || w.address.includes('Pune')));
-    } else if (userLocation.toLowerCase().includes('bangalore')) {
+    const searchTerm = userLocation.toLowerCase();
+
+    if (searchTerm.includes('delhi')) {
+      setNearbyWarehouses(
+        warehouses.filter(w => w.address.includes('Delhi') || w.address.includes('Noida'))
+      );
+    } else if (searchTerm.includes('mumbai')) {
+      setNearbyWarehouses(
+        warehouses.filter(w => w.address.includes('Mumbai') || w.address.includes('Pune'))
+      );
+    } else if (searchTerm.includes('bangalore')) {
       setNearbyWarehouses(warehouses.filter(w => w.address.includes('Bangalore')));
     } else {
       setNearbyWarehouses(warehouses);
@@ -32,7 +29,7 @@ const WarehouseMap: React.FC<WarehouseMapProps> = ({
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="mb-6">
         <h3 className="text-xl font-semibold text-gray-900 mb-4">Find Nearby Warehouses</h3>
-        
+
         <div className="flex gap-3">
           <div className="flex-1">
             <input
@@ -53,7 +50,6 @@ const WarehouseMap: React.FC<WarehouseMapProps> = ({
         </div>
       </div>
 
-      {/* Map Placeholder */}
       <div className="bg-gray-100 rounded-lg h-64 mb-6 flex items-center justify-center">
         <div className="text-center text-gray-500">
           <MapPin className="h-12 w-12 mx-auto mb-2" />
@@ -62,10 +58,9 @@ const WarehouseMap: React.FC<WarehouseMapProps> = ({
         </div>
       </div>
 
-      {/* Warehouses List */}
       <div className="space-y-3">
         <h4 className="font-medium text-gray-900">Nearby Warehouses</h4>
-        
+
         {nearbyWarehouses.map((warehouse) => (
           <div
             key={warehouse.id}
@@ -97,3 +92,8 @@ const WarehouseMap: React.FC<WarehouseMapProps> = ({
 };
 
 export default WarehouseMap;
+
+WarehouseMap.propTypes = {
+  onWarehouseSelect: PropTypes.func,
+  selectedWarehouseId: PropTypes.string,
+};
