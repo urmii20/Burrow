@@ -2,7 +2,7 @@ import React from 'react';
 import { Package, Mail, Phone, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const Footer: React.FC = () => {
+const Footer = () => {
   return (
     <footer className="bg-gray-50 border-t border-gray-200">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -58,7 +58,7 @@ const Footer: React.FC = () => {
 
         <div className="border-t border-gray-200 mt-8 pt-8 text-center">
           <p className="text-sm text-gray-600">
-            © 2024 Burrow. All rights reserved. | 
+            © 2024 Burrow. All rights reserved. |
             <Link to="/privacy" className="hover:text-blue-500 transition-colors ml-1">Privacy Policy</Link>
           </p>
         </div>
