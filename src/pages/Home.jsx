@@ -2,11 +2,10 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Clock, Shield, MapPin, Calendar, ArrowRight, CheckCircle } from 'lucide-react';
 import WarehouseMap from '../components/Map/WarehouseMap';
-import { Warehouse } from '../types';
 
-const Home: React.FC = () => {
+const Home = () => {
   const navigate = useNavigate();
-  const [selectedWarehouse, setSelectedWarehouse] = useState<Warehouse | null>(null);
+  const [selectedWarehouse, setSelectedWarehouse] = useState(null);
 
   const handleGetStarted = () => {
     if (selectedWarehouse) {
@@ -24,12 +23,12 @@ const Home: React.FC = () => {
     {
       icon: Shield,
       title: 'Avoid Porch Piracy',
-      description: 'Secure storage until you\'re ready to receive your packages'
+      description: "Secure storage until you're ready to receive your packages"
     },
     {
       icon: Clock,
       title: 'Vacation Holds',
-      description: 'Store packages while you\'re away and schedule delivery for your return'
+      description: "Store packages while you're away and schedule delivery for your return"
     },
     {
       icon: MapPin,
@@ -58,7 +57,6 @@ const Home: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Hero Section */}
       <section className="bg-gradient-to-br from-blue-50 to-indigo-100 py-20">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -67,7 +65,7 @@ const Home: React.FC = () => {
               <span className="text-blue-500"> Possible</span>
             </h1>
             <p className="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
-              Take control of your deliveries. Schedule them on your terms. Perfect for gifts, 
+              Take control of your deliveries. Schedule them on your terms. Perfect for gifts,
               vacation holds, and avoiding porch piracy.
             </p>
             <button
@@ -81,7 +79,6 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* Warehouse Map Section */}
       <section className="py-16 bg-gray-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -95,15 +92,15 @@ const Home: React.FC = () => {
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
             <div>
-              <WarehouseMap 
+              <WarehouseMap
                 onWarehouseSelect={setSelectedWarehouse}
                 selectedWarehouseId={selectedWarehouse?.id}
               />
             </div>
-            
+
             <div className="space-y-6">
               <h3 className="text-2xl font-semibold text-gray-900">Why Choose Burrow?</h3>
-              
+
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
                   <div key={index} className="flex items-start space-x-4">
@@ -133,7 +130,6 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* How It Works */}
       <section className="py-16 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-12">
@@ -155,7 +151,6 @@ const Home: React.FC = () => {
         </div>
       </section>
 
-      {/* CTA Section */}
       <section className="py-16 bg-blue-500">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h2 className="text-3xl font-bold text-white mb-4">

@@ -1,6 +1,4 @@
-import { Warehouse, Request } from '../types';
-
-export const warehouses: Warehouse[] = [
+export const warehouses = [
   {
     id: '1',
     name: 'Burrow Delhi Hub',
@@ -57,7 +55,7 @@ export const warehouses: Warehouse[] = [
   }
 ];
 
-export const mockRequests: Request[] = [
+export const mockRequests = [
   {
     id: 'REQ001',
     userId: '2',

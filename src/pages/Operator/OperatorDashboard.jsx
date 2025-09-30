@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import { Search, Filter, Eye, CheckCircle, XCircle, Clock } from 'lucide-react';
 import { mockRequests } from '../../data/mockData';
-import { Request, RequestStatus } from '../../types';
 
-const OperatorDashboard: React.FC = () => {
+const OperatorDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [statusFilter, setStatusFilter] = useState<RequestStatus | 'all'>('all');
-  const [selectedRequest, setSelectedRequest] = useState<Request | null>(null);
+  const [statusFilter, setStatusFilter] = useState('all');
+  const [selectedRequest, setSelectedRequest] = useState(null);
 
   const filteredRequests = mockRequests.filter(request => {
-    const matchesSearch = request.orderNumber.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         request.productDescription.toLowerCase().includes(searchTerm.toLowerCase());
+    const lowerSearch = searchTerm.toLowerCase();
+    const matchesSearch =
+      request.orderNumber.toLowerCase().includes(lowerSearch) ||
+      request.productDescription.toLowerCase().includes(lowerSearch);
     const matchesStatus = statusFilter === 'all' || request.status === statusFilter;
-    
+
     return matchesSearch && matchesStatus;
   });
 
@@ -23,7 +24,7 @@ const OperatorDashboard: React.FC = () => {
     delivered: mockRequests.filter(req => req.status === 'delivered').length
   };
 
-  const getStatusBadge = (status: RequestStatus) => {
+  const getStatusBadge = (status) => {
     const config = {
       submitted: { color: 'bg-blue-100 text-blue-800', label: 'Submitted' },
       approval_pending: { color: 'bg-yellow-100 text-yellow-800', label: 'Pending Approval' },
@@ -44,15 +45,19 @@ const OperatorDashboard: React.FC = () => {
     );
   };
 
-  const handleStatusUpdate = (requestId: string, newStatus: RequestStatus) => {
-    // In a real app, this would update the database
+  const handleStatusUpdate = (requestId, newStatus) => {
     console.log(`Updating request ${requestId} to status ${newStatus}`);
-    // For demo purposes, we'll just log it
+  };
+
+  const handleModalStatusChange = (newStatus) => {
+    if (!selectedRequest) return;
+
+    setSelectedRequest({ ...selectedRequest, status: newStatus });
+    handleStatusUpdate(selectedRequest.id, newStatus);
   };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -65,7 +70,6 @@ const OperatorDashboard: React.FC = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center">
@@ -116,7 +120,6 @@ const OperatorDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Filters and Search */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
@@ -126,7 +129,7 @@ const OperatorDashboard: React.FC = () => {
                   type="text"
                   placeholder="Search by order number or product..."
                   value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
+                  onChange={(event) => setSearchTerm(event.target.value)}
                   className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 />
               </div>
@@ -137,7 +140,7 @@ const OperatorDashboard: React.FC = () => {
                 <Filter className="h-5 w-5 text-gray-400" />
                 <select
                   value={statusFilter}
-                  onChange={(e) => setStatusFilter(e.target.value as RequestStatus | 'all')}
+                  onChange={(event) => setStatusFilter(event.target.value)}
                   className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 >
                   <option value="all">All Status</option>
@@ -154,7 +157,6 @@ const OperatorDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Requests Table */}
         <div className="bg-white rounded-lg shadow-md overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">Delivery Requests</h2>
@@ -246,7 +248,6 @@ const OperatorDashboard: React.FC = () => {
           )}
         </div>
 
-        {/* Request Detail Modal */}
         {selectedRequest && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
@@ -300,7 +301,8 @@ const OperatorDashboard: React.FC = () => {
                         {selectedRequest.destinationAddress.line1}
                         {selectedRequest.destinationAddress.line2 && `, ${selectedRequest.destinationAddress.line2}`}
                         <br />
-                        {selectedRequest.destinationAddress.city}, {selectedRequest.destinationAddress.state} {selectedRequest.destinationAddress.pincode}
+                        {selectedRequest.destinationAddress.city}, {selectedRequest.destinationAddress.state}{' '}
+                        {selectedRequest.destinationAddress.pincode}
                       </p>
                     </div>
                   </div>
@@ -310,7 +312,7 @@ const OperatorDashboard: React.FC = () => {
                   <h4 className="font-medium text-gray-900 mb-2">Update Status</h4>
                   <select
                     value={selectedRequest.status}
-                    onChange={(e) => handleStatusUpdate(selectedRequest.id, e.target.value as RequestStatus)}
+                    onChange={(event) => handleModalStatusChange(event.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
                     <option value="submitted">Submitted</option>

@@ -4,45 +4,62 @@ import { Package, Plus, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
 import { mockRequests } from '../../data/mockData';
 import { useAuth } from '../../context/AuthContext';
 
-const ConsumerDashboard: React.FC = () => {
+const ConsumerDashboard = () => {
   const { state } = useAuth();
-  
-  // Filter requests for current user
+
   const userRequests = mockRequests.filter(req => req.userId === state.user?.id);
-  
+
   const stats = {
     active: userRequests.filter(req => !['delivered', 'rejected'].includes(req.status)).length,
     pending: userRequests.filter(req => ['submitted', 'approval_pending', 'payment_pending'].includes(req.status)).length,
     completed: userRequests.filter(req => req.status === 'delivered').length
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status) => {
     switch (status) {
       case 'submitted':
       case 'approval_pending':
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">Pending</span>;
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+            Pending
+          </span>
+        );
       case 'approved':
       case 'parcel_arrived':
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">In Progress</span>;
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+            In Progress
+          </span>
+        );
       case 'delivered':
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">Delivered</span>;
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+            Delivered
+          </span>
+        );
       case 'rejected':
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">Rejected</span>;
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+            Rejected
+          </span>
+        );
       default:
-        return <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">Unknown</span>;
+        return (
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+            Unknown
+          </span>
+        );
     }
   };
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Welcome Section */}
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900">Welcome back, {state.user?.name}!</h1>
           <p className="text-gray-600 mt-1">Manage your deliveries and schedule new requests</p>
         </div>
 
-        {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center">
@@ -81,7 +98,6 @@ const ConsumerDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Quick Actions */}
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
@@ -92,7 +108,7 @@ const ConsumerDashboard: React.FC = () => {
               <Plus className="h-5 w-5 mr-2" />
               New Request
             </Link>
-            
+
             <Link
               to="/track"
               className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
@@ -100,7 +116,7 @@ const ConsumerDashboard: React.FC = () => {
               <Package className="h-5 w-5 mr-2" />
               Track Parcel
             </Link>
-            
+
             <Link
               to="/schedule"
               className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
@@ -111,12 +127,11 @@ const ConsumerDashboard: React.FC = () => {
           </div>
         </div>
 
-        {/* Recent Requests */}
         <div className="bg-white rounded-lg shadow-md">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900">Recent Requests</h2>
           </div>
-          
+
           <div className="divide-y divide-gray-200">
             {userRequests.length > 0 ? (
               userRequests.slice(0, 5).map((request) => (
@@ -136,7 +151,7 @@ const ConsumerDashboard: React.FC = () => {
                         Scheduled: {new Date(request.scheduledDeliveryDate).toLocaleDateString()} at {request.deliveryTimeSlot}
                       </p>
                     </div>
-                    
+
                     <div className="flex items-center space-x-2">
                       <Link
                         to={`/request/${request.id}`}
