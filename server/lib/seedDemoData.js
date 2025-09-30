@@ -2,18 +2,17 @@
 import bcrypt from 'bcryptjs';
 
 
-const DEMO_USERS = [
-
+export const DEMO_USERS = [
   {
     name: 'Demo Customer',
     email: 'user@test.com',
-    password: 'user123',
-    role: 'consumer'
+    password: 'UserDemo1',
+
   },
   {
     name: 'Burrow Admin',
     email: 'admin@burrow.com',
-    password: 'admin123',
+    password: 'AdminDemo1',
     role: 'admin'
   }
 ];
@@ -81,6 +80,15 @@ async function upsertUser(usersCollection, userConfig) {
   }
 }
 
+export function isDemoUserEmail(email) {
+  if (!email) {
+    return false;
+  }
+
+  const normalisedEmail = email.trim().toLowerCase();
+  return DEMO_USERS.some((user) => user.email === normalisedEmail);
+}
+
 
 export async function seedDemoUsers(db) {
 
@@ -90,7 +98,6 @@ export async function seedDemoUsers(db) {
 
   const usersCollection = db.collection('users');
 
-
   const requestedEmails = options.emails?.map((email) => email.trim().toLowerCase());
   const usersToSeed = requestedEmails?.length
     ? DEMO_USERS.filter((user) => requestedEmails.includes(user.email))
@@ -99,6 +106,7 @@ export async function seedDemoUsers(db) {
 
 
   for (const userConfig of DEMO_USERS) {
+
 
     await upsertUser(usersCollection, userConfig);
   }
