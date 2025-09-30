@@ -55,14 +55,15 @@ const TrackRequest = () => {
       const params = new URLSearchParams({ orderNumber: trimmedOrderNumber });
       const data = await apiClient.get(`/requests?${params.toString()}`);
       const nextResults = Array.isArray(data) ? data : [];
-      setResults(nextResults);
-
       const matchingRequest = nextResults.find(
         (request) => request.orderNumber?.toLowerCase() === trimmedOrderNumber.toLowerCase(),
       );
 
       if (matchingRequest) {
+        setResults([matchingRequest]);
         navigate(`/request/${matchingRequest.id}`);
+      } else {
+        setResults([]);
       }
     } catch (requestError) {
       setError(requestError.message || 'Unable to fetch delivery requests at the moment.');
@@ -174,7 +175,7 @@ const TrackRequest = () => {
               ) : (
                 <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 p-8 text-center">
                   <Package className="h-10 w-10 text-gray-400 mb-3" />
-                  <p className="text-sm font-medium text-gray-900">No delivery requests found</p>
+                  <p className="text-sm font-medium text-gray-900">No results found</p>
                   <p className="mt-1 text-sm text-gray-500">
                     Double-check your order number or create a new delivery request if you haven&apos;t scheduled one yet.
                   </p>
