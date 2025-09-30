@@ -1,13 +1,47 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, Filter, Eye, CheckCircle, XCircle, Clock } from 'lucide-react';
-import { mockRequests } from '../../data/mockData';
+
+import apiClient from '../../lib/api';
 
 const OperatorDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [requests, setRequests] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const filteredRequests = mockRequests.filter(request => {
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchRequests = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const response = await apiClient.get('/requests');
+        if (isMounted) {
+          setRequests(response ?? []);
+        }
+      } catch (fetchError) {
+        if (isMounted) {
+          setError(fetchError?.message || 'Unable to fetch requests');
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchRequests();
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  const filteredRequests = requests.filter(request => {
     const lowerSearch = searchTerm.toLowerCase();
     const matchesSearch =
       request.orderNumber.toLowerCase().includes(lowerSearch) ||
@@ -18,10 +52,10 @@ const OperatorDashboard = () => {
   });
 
   const stats = {
-    total: mockRequests.length,
-    pending: mockRequests.filter(req => req.status === 'approval_pending').length,
-    approved: mockRequests.filter(req => req.status === 'approved').length,
-    delivered: mockRequests.filter(req => req.status === 'delivered').length
+    total: requests.length,
+    pending: requests.filter(req => req.status === 'approval_pending').length,
+    approved: requests.filter(req => req.status === 'approved').length,
+    delivered: requests.filter(req => req.status === 'delivered').length
   };
 
   const getStatusBadge = (status) => {
@@ -162,6 +196,12 @@ const OperatorDashboard = () => {
             <h2 className="text-lg font-semibold text-gray-900">Delivery Requests</h2>
           </div>
 
+          {error && (
+            <div className="px-6 py-4 bg-red-50 border-b border-red-100 text-sm text-red-600">
+              {error}
+            </div>
+          )}
+
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -184,7 +224,23 @@ const OperatorDashboard = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredRequests.map((request) => (
+                {isLoading && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-6 text-center text-sm text-gray-500">
+                      Loading requests...
+                    </td>
+                  </tr>
+                )}
+
+                {!isLoading && !filteredRequests.length && !error && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-6 text-center text-sm text-gray-500">
+                      No requests found matching your criteria.
+                    </td>
+                  </tr>
+                )}
+
+                {!isLoading && filteredRequests.map((request) => (
                   <tr key={request.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">{request.id}</div>
@@ -240,12 +296,6 @@ const OperatorDashboard = () => {
               </tbody>
             </table>
           </div>
-
-          {filteredRequests.length === 0 && (
-            <div className="px-6 py-8 text-center">
-              <p className="text-gray-600">No requests found matching your criteria.</p>
-            </div>
-          )}
         </div>
 
         {selectedRequest && (
