@@ -63,7 +63,7 @@ const NewRequest = () => {
   const [formData, setFormData] = useState(initialFormData);
   const [selectedFile, setSelectedFile] = useState(null);
   const [errors, setErrors] = useState({});
-  the const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('card');
 
@@ -560,3 +560,88 @@ const NewRequest = () => {
                     <span className="font-medium">₹{charges.deliveryCharge}</span>
                   </div>
                  
+                  <div className="flex justify-between border-t border-gray-200 pt-3">
+                    <span className="text-gray-600">GST (18%)</span>
+                    <span className="font-medium">₹{charges.gst.toFixed(2)}</span>
+                  </div>
+                  <div className="flex justify-between border-t border-gray-200 pt-3">
+                    <span className="text-gray-900 font-semibold">Total Payable</span>
+                    <span className="text-gray-900 font-semibold">₹{charges.total.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-6">
+                <div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">Payment Method</h3>
+                  <div className="space-y-3">
+                    {paymentOptions.map((option) => (
+                      <label
+                        key={option.id}
+                        className={`flex items-center justify-between border rounded-lg px-4 py-3 cursor-pointer transition-colors ${
+                          selectedPaymentMethod === option.id
+                            ? 'border-blue-500 bg-blue-50'
+                            : 'border-gray-200 hover:border-blue-300'
+                        }`}
+                      >
+                        <div className="flex items-center">
+                          <input
+                            type="radio"
+                            name="paymentMethod"
+                            value={option.id}
+                            checked={selectedPaymentMethod === option.id}
+                            onChange={() => setSelectedPaymentMethod(option.id)}
+                            className="h-4 w-4 text-blue-600 focus:ring-blue-500"
+                          />
+                          <span className="ml-3 text-sm font-medium text-gray-900">{option.label}</span>
+                        </div>
+                        {selectedPaymentMethod === option.id && (
+                          <span className="text-xs text-blue-600 font-medium">Selected</span>
+                        )}
+                      </label>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="bg-blue-50 border border-blue-100 rounded-lg p-4 text-sm text-blue-900">
+                  <p className="font-medium">Secure digital payments</p>
+                  <p className="mt-1 text-blue-800">
+                    Complete the payment using your preferred method. A receipt will be emailed to you once the
+                    transaction is processed successfully.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {submitError && <p className="mt-6 text-sm text-red-600">{submitError}</p>}
+
+            <div className="flex justify-between mt-8">
+              <button
+                onClick={() => {
+                  setSubmitError(null);
+                  setCurrentStep(2);
+                }}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                disabled={isSubmitting}
+              >
+                Previous
+              </button>
+              <button
+                onClick={handleSubmit}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60 disabled:cursor-not-allowed"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? 'Submitting...' : 'Submit Request'}
+              </button>
+            </div>
+          </div>
+        )}
+
+        {submitError && currentStep !== 3 && (
+          <p className="mt-4 text-sm text-red-600">{submitError}</p>
+        )}
+      </div>
+    </div>
+  );
+};
+
+export default NewRequest;
