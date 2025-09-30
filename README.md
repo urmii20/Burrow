@@ -27,8 +27,12 @@ This repository contains the Burrow delivery reschedule web experience. It now i
 1. Copy `.env.sample` to `.env` in the project root.
 2. The sample file already includes the shared Atlas cluster connection string: `mongodb+srv://dev:dev123@cluster0.rhivlko.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0` with the `dev` database. Update these values only if you are using a different cluster or database name.
 3. Optionally update `CORS_ORIGIN` with the allowed frontend origins (comma separated) and `PORT` if you want the server to listen on a custom port.
-
 If the environment variables are not set, the backend automatically falls back to the shared connection string and database name above so local development works out of the box.
+2. Update the MongoDB credentials. For the shared development cluster use:
+   - **Connection string**: `mongodb+srv://dev:dev123@cluster0.rhivlko.mongodb.net/`
+   - **Database name**: `dev`
+3. Optionally update `CORS_ORIGIN` with the allowed frontend origins (comma separated) and `PORT` if you want the server to listen on a custom port.
+
 
 ### Installing dependencies
 
