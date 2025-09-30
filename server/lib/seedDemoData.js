@@ -1,12 +1,13 @@
 /* eslint-env node */
 import bcrypt from 'bcryptjs';
 
+
 export const DEMO_USERS = [
   {
     name: 'Demo Customer',
     email: 'user@test.com',
     password: 'UserDemo1',
-    role: 'consumer'
+
   },
   {
     name: 'Burrow Admin',
@@ -88,7 +89,9 @@ export function isDemoUserEmail(email) {
   return DEMO_USERS.some((user) => user.email === normalisedEmail);
 }
 
-export async function seedDemoUsers(db, options = {}) {
+
+export async function seedDemoUsers(db) {
+
   if (!db) {
     throw new Error('Cannot seed demo users without an active database connection.');
   }
@@ -100,7 +103,11 @@ export async function seedDemoUsers(db, options = {}) {
     ? DEMO_USERS.filter((user) => requestedEmails.includes(user.email))
     : DEMO_USERS;
 
-  for (const userConfig of usersToSeed) {
+
+
+  for (const userConfig of DEMO_USERS) {
+
+
     await upsertUser(usersCollection, userConfig);
   }
 }
