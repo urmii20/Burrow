@@ -10,6 +10,7 @@ import Register from './pages/Auth/Register';
 import ConsumerDashboard from './pages/Dashboard/ConsumerDashboard';
 import NewRequest from './pages/Request/NewRequest';
 import RequestStatus from './pages/Request/RequestStatus';
+import TrackRequest from './pages/Request/TrackRequest';
 import OperatorDashboard from './pages/Operator/OperatorDashboard';
 
 const ProtectedRoute = ({ children, requireAuth = true, allowedRoles = [] }) => {
@@ -68,6 +69,15 @@ const AppContent = () => {
             element={
               <ProtectedRoute allowedRoles={['consumer']}>
                 <NewRequest />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/track"
+            element={
+              <ProtectedRoute allowedRoles={['consumer']}>
+                <TrackRequest />
               </ProtectedRoute>
             }
           />

@@ -53,7 +53,7 @@ router.get('/', async (req, res) => {
     return;
   }
 
-  const { userId, status } = req.query;
+  const { userId, status, orderNumber } = req.query;
 
   const query = {};
 
@@ -67,6 +67,10 @@ router.get('/', async (req, res) => {
 
   if (status) {
     query.status = status;
+  }
+
+  if (orderNumber && orderNumber.trim()) {
+    query.orderNumber = orderNumber.trim();
   }
 
   const requests = await db
@@ -187,7 +191,8 @@ router.post('/', async (req, res) => {
       deliveryCharge: paymentDetails.deliveryCharge ?? 0,
       gst: paymentDetails.gst ?? 0,
       totalAmount: paymentDetails.totalAmount ?? 0,
-      paymentStatus: paymentDetails.paymentStatus ?? 'pending'
+      paymentStatus: paymentDetails.paymentStatus ?? 'pending',
+      paymentMethod: paymentDetails.paymentMethod ?? 'card'
     },
     createdAt: now,
     updatedAt: now
@@ -315,19 +320,38 @@ router.patch('/:id/payment', async (req, res) => {
 
   const now = new Date();
 
+  const updateSet = {
+    'paymentDetails.paymentStatus': paymentStatus,
+    updatedAt: now
+  };
+
+  if (paymentDetails.baseHandlingFee !== undefined) {
+    updateSet['paymentDetails.baseHandlingFee'] = paymentDetails.baseHandlingFee;
+  }
+
+  if (paymentDetails.storageFee !== undefined) {
+    updateSet['paymentDetails.storageFee'] = paymentDetails.storageFee;
+  }
+
+  if (paymentDetails.deliveryCharge !== undefined) {
+    updateSet['paymentDetails.deliveryCharge'] = paymentDetails.deliveryCharge;
+  }
+
+  if (paymentDetails.gst !== undefined) {
+    updateSet['paymentDetails.gst'] = paymentDetails.gst;
+  }
+
+  if (paymentDetails.totalAmount !== undefined) {
+    updateSet['paymentDetails.totalAmount'] = paymentDetails.totalAmount;
+  }
+
+  if (paymentDetails.paymentMethod !== undefined) {
+    updateSet['paymentDetails.paymentMethod'] = paymentDetails.paymentMethod;
+  }
+
   const updateResult = await db.collection('deliveryRequests').findOneAndUpdate(
     { _id: requestId },
-    {
-      $set: {
-        'paymentDetails.paymentStatus': paymentStatus,
-        'paymentDetails.baseHandlingFee': paymentDetails.baseHandlingFee,
-        'paymentDetails.storageFee': paymentDetails.storageFee,
-        'paymentDetails.deliveryCharge': paymentDetails.deliveryCharge,
-        'paymentDetails.gst': paymentDetails.gst,
-        'paymentDetails.totalAmount': paymentDetails.totalAmount,
-        updatedAt: now
-      }
-    },
+    { $set: updateSet },
     { returnDocument: 'after' }
   );
 
