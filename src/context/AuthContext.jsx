@@ -12,6 +12,17 @@ const initialState = {
   error: null
 };
 
+const normaliseUser = (user) => {
+  if (!user) {
+    return user;
+  }
+
+  return {
+    ...user,
+    role: user.role === 'customer' ? 'consumer' : user.role
+  };
+};
+
 const authReducer = (state, action) => {
   switch (action.type) {
     case 'LOGIN_START':
@@ -39,10 +50,11 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const user = await apiClient.post('/auth/login', { email, password });
+      const normalisedUser = normaliseUser(user);
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-      dispatch({ type: 'LOGIN_SUCCESS', payload: user });
-      return user;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(normalisedUser));
+      dispatch({ type: 'LOGIN_SUCCESS', payload: normalisedUser });
+      return normalisedUser;
     } catch (error) {
       dispatch({
         type: 'LOGIN_FAILURE',
@@ -57,10 +69,11 @@ export const AuthProvider = ({ children }) => {
 
     try {
       const user = await apiClient.post('/auth/register', userData);
+      const normalisedUser = normaliseUser(user);
 
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
-      dispatch({ type: 'LOGIN_SUCCESS', payload: user });
-      return user;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(normalisedUser));
+      dispatch({ type: 'LOGIN_SUCCESS', payload: normalisedUser });
+      return normalisedUser;
     } catch (error) {
       dispatch({
         type: 'LOGIN_FAILURE',
@@ -86,8 +99,9 @@ export const AuthProvider = ({ children }) => {
     if (storedUser) {
       try {
         const parsedUser = JSON.parse(storedUser);
+        const normalisedUser = normaliseUser(parsedUser);
         if (parsedUser) {
-          dispatch({ type: 'LOGIN_SUCCESS', payload: parsedUser });
+          dispatch({ type: 'LOGIN_SUCCESS', payload: normalisedUser });
         }
       } catch (error) {
         console.error('Failed to parse stored user data', error);
