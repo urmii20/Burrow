@@ -69,7 +69,16 @@ const TrackRequest = () => {
       const params = new URLSearchParams({ orderNumber: trimmedOrderNumber });
       const data = await apiClient.get(`/requests?${params.toString()}`);
       const nextResults = Array.isArray(data) ? data : [];
-      const matchingRequest = findMatchingRequest(nextResults, trimmedOrderNumber);
+
+
+      const matchingRequest = nextResults.find(
+        (request) => request.orderNumber?.toLowerCase() === trimmedOrderNumber.toLowerCase(),
+      );
+
+
+
+
+
 
       if (matchingRequest) {
         setResults([matchingRequest]);

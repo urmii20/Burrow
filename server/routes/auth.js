@@ -2,6 +2,32 @@ import bcrypt from 'bcryptjs';
 import { Router } from 'express';
 
 import { serialiseDocument, toObjectId } from '../utils/formatters.js';
+import { isDemoUserEmail, seedDemoUsers } from '../lib/seedDemoData.js';
+
+const DEMO_ACCOUNTS = {
+  'user@test.com': {
+    password: 'UserDemo1',
+    user: {
+      id: 'demo-user',
+      name: 'Demo Customer',
+      email: 'user@test.com',
+      role: 'consumer',
+      privileges: ['consumer'],
+      isActive: true
+    }
+  },
+  'admin@burrow.com': {
+    password: 'AdminDemo1',
+    user: {
+      id: 'demo-operator',
+      name: 'Demo Operator',
+      email: 'admin@burrow.com',
+      role: 'operator',
+      privileges: ['operator'],
+      isActive: true
+    }
+  }
+};
 
 const DEMO_ACCOUNTS = {
   'user@test.com': {
@@ -102,6 +128,7 @@ router.post('/login', async (req, res) => {
 
   let user = await usersCollection.findOne({ email: normalisedEmail, isActive: { $ne: false } });
 
+
   const respondWithDemoAccountIfValid = () => {
     const demoAccount = DEMO_ACCOUNTS[normalisedEmail];
     if (demoAccount && password === demoAccount.password) {
@@ -109,6 +136,14 @@ router.post('/login', async (req, res) => {
     }
     return null;
   };
+
+
+  if (!user && isDemoUserEmail(normalisedEmail)) {
+    await seedDemoUsers(db, { emails: [normalisedEmail] });
+    user = await usersCollection.findOne({ email: normalisedEmail, isActive: { $ne: false } });
+  }
+
+
 
   if (!user) {
     const response = respondWithDemoAccountIfValid();
