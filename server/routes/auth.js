@@ -4,6 +4,31 @@ import { Router } from 'express';
 import { serialiseDocument, toObjectId } from '../utils/formatters.js';
 import { isDemoUserEmail, seedDemoUsers } from '../lib/seedDemoData.js';
 
+const DEMO_ACCOUNTS = {
+  'user@test.com': {
+    password: 'UserDemo1',
+    user: {
+      id: 'demo-user',
+      name: 'Demo Customer',
+      email: 'user@test.com',
+      role: 'consumer',
+      privileges: ['consumer'],
+      isActive: true
+    }
+  },
+  'admin@burrow.com': {
+    password: 'AdminDemo1',
+    user: {
+      id: 'demo-operator',
+      name: 'Demo Operator',
+      email: 'admin@burrow.com',
+      role: 'operator',
+      privileges: ['operator'],
+      isActive: true
+    }
+  }
+};
+
 const router = Router();
 
 const SENSITIVE_USER_FIELDS = ['password', 'passwordHash'];
@@ -78,12 +103,19 @@ router.post('/login', async (req, res) => {
 
   let user = await usersCollection.findOne({ email: normalisedEmail, isActive: { $ne: false } });
 
+
   if (!user && isDemoUserEmail(normalisedEmail)) {
     await seedDemoUsers(db, { emails: [normalisedEmail] });
     user = await usersCollection.findOne({ email: normalisedEmail, isActive: { $ne: false } });
   }
 
+
   if (!user) {
+    const response = respondWithDemoAccountIfValid();
+    if (response) {
+      return response;
+    }
+
     return res.status(401).json({ message: 'Invalid email or password.' });
   }
 
@@ -92,13 +124,20 @@ router.post('/login', async (req, res) => {
     : user.password === password;
 
   if (!passwordMatches) {
+    const response = respondWithDemoAccountIfValid();
+    if (response) {
+      return response;
+    }
+
     return res.status(401).json({ message: 'Invalid email or password.' });
   }
 
-  await usersCollection.updateOne(
-    { _id: user._id },
-    { $set: { lastLoginAt: new Date() } }
-  );
+  if (user._id) {
+    await usersCollection.updateOne(
+      { _id: user._id },
+      { $set: { lastLoginAt: new Date() } }
+    );
+  }
 
   return res.json({ data: sanitiseUser(user) });
 });
