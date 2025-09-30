@@ -1,0 +1,128 @@
+import bcrypt from 'bcryptjs';
+import { Router } from 'express';
+
+import { serialiseDocument, toObjectId } from '../utils/formatters.js';
+
+const router = Router();
+
+const SENSITIVE_USER_FIELDS = ['password', 'passwordHash'];
+
+function sanitiseUser(user) {
+  if (!user) {
+    return null;
+  }
+
+  const safeUser = serialiseDocument(user);
+  for (const field of SENSITIVE_USER_FIELDS) {
+    delete safeUser[field];
+  }
+
+  return safeUser;
+}
+
+router.post('/register', async (req, res) => {
+  const db = req.db;
+  if (!db) {
+    return res.status(503).json({ message: 'Database is not ready yet. Please try again.' });
+  }
+
+  const { name, email, password, role = 'customer' } = req.body ?? {};
+
+  if (!name || !email || !password) {
+    return res.status(400).json({ message: 'Name, email and password are required.' });
+  }
+
+  const normalisedEmail = email.trim().toLowerCase();
+  const usersCollection = db.collection('users');
+
+  const existingUser = await usersCollection.findOne({ email: normalisedEmail });
+  if (existingUser) {
+    return res.status(409).json({ message: 'A user with this email already exists.' });
+  }
+
+  const passwordHash = await bcrypt.hash(password, 10);
+  const now = new Date();
+
+  const user = {
+    name: name.trim(),
+    email: normalisedEmail,
+    passwordHash,
+    role,
+    isActive: true,
+    createdAt: now,
+    updatedAt: now
+  };
+
+  const result = await usersCollection.insertOne(user);
+
+  return res.status(201).json({
+    data: sanitiseUser({ ...user, _id: result.insertedId })
+  });
+});
+
+router.post('/login', async (req, res) => {
+  const db = req.db;
+  if (!db) {
+    return res.status(503).json({ message: 'Database is not ready yet. Please try again.' });
+  }
+
+  const { email, password } = req.body ?? {};
+
+  if (!email || !password) {
+    return res.status(400).json({ message: 'Email and password are required.' });
+  }
+
+  const normalisedEmail = email.trim().toLowerCase();
+  const usersCollection = db.collection('users');
+
+  const user = await usersCollection.findOne({ email: normalisedEmail, isActive: { $ne: false } });
+
+  if (!user) {
+    return res.status(401).json({ message: 'Invalid email or password.' });
+  }
+
+  const passwordMatches = user.passwordHash
+    ? await bcrypt.compare(password, user.passwordHash)
+    : user.password === password;
+
+  if (!passwordMatches) {
+    return res.status(401).json({ message: 'Invalid email or password.' });
+  }
+
+  await usersCollection.updateOne(
+    { _id: user._id },
+    { $set: { lastLoginAt: new Date() } }
+  );
+
+  return res.json({ data: sanitiseUser(user) });
+});
+
+router.post('/logout', (_req, res) => {
+  res.json({ message: 'Logged out' });
+});
+
+router.get('/:id', async (req, res) => {
+  const db = req.db;
+  if (!db) {
+    return res.status(503).json({ message: 'Database is not ready yet. Please try again.' });
+  }
+
+  const { id } = req.params;
+
+  let objectId;
+  try {
+    objectId = toObjectId(id, 'User id');
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+
+  const user = await db.collection('users').findOne({ _id: objectId });
+
+  if (!user) {
+    return res.status(404).json({ message: 'User not found' });
+  }
+
+  return res.json({ data: sanitiseUser(user) });
+});
+
+export default router;
