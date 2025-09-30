@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { Router } from 'express';
 
 import { serialiseDocument, toObjectId } from '../utils/formatters.js';
+import { isDemoUserEmail, seedDemoUsers } from '../lib/seedDemoData.js';
 
 const DEMO_ACCOUNTS = {
   'user@test.com': {
@@ -102,13 +103,12 @@ router.post('/login', async (req, res) => {
 
   let user = await usersCollection.findOne({ email: normalisedEmail, isActive: { $ne: false } });
 
-  const respondWithDemoAccountIfValid = () => {
-    const demoAccount = DEMO_ACCOUNTS[normalisedEmail];
-    if (demoAccount && password === demoAccount.password) {
-      return res.json({ data: sanitiseUser(demoAccount.user) });
-    }
-    return null;
-  };
+
+  if (!user && isDemoUserEmail(normalisedEmail)) {
+    await seedDemoUsers(db, { emails: [normalisedEmail] });
+    user = await usersCollection.findOne({ email: normalisedEmail, isActive: { $ne: false } });
+  }
+
 
   if (!user) {
     const response = respondWithDemoAccountIfValid();

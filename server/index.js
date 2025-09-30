@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import express from 'express';
 
 import { connectToDatabase } from './lib/mongoClient.js';
+import { seedDemoUsers } from './lib/seedDemoData.js';
 import authRoutes from './routes/auth.js';
 import deliveryRequestRoutes from './routes/deliveryRequests.js';
 import warehouseRoutes from './routes/warehouses.js';
@@ -45,6 +46,7 @@ const PORT = process.env.PORT || 4000;
 async function start() {
   try {
     const db = await connectToDatabase();
+    await seedDemoUsers(db);
     app.set('db', db);
 
     app.listen(PORT, () => {
