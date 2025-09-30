@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ArrowLeft, Download, MessageCircle, Calendar } from 'lucide-react';
+import { ArrowLeft, Download, MessageCircle } from 'lucide-react';
 import StatusTracker from '../../components/StatusTracker/StatusTracker';
 
 import apiClient from '../../lib/api';
@@ -124,11 +124,56 @@ const RequestStatus = () => {
             </div>
 
             <div className="flex items-center space-x-3">
-              <button className="flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
+              <button
+                type="button"
+                onClick={() => {
+                  const paymentDetails = request.paymentDetails ?? {};
+                  const paymentStatusValue = paymentDetails.paymentStatus ?? 'pending';
+                  const formattedPaymentStatus =
+                    paymentStatusValue.charAt(0).toUpperCase() + paymentStatusValue.slice(1);
+                  const receiptLines = [
+                    `Receipt for Request ${request.id}`,
+                    `Order Number: ${request.orderNumber}`,
+                    `Platform: ${request.platform}`,
+                    `Product: ${request.productDescription}`,
+                    '',
+                    'Payment Details:',
+                    `  Base Handling Fee: ₹${paymentDetails.baseHandlingFee ?? 0}`,
+                    `  Storage Fee: ₹${paymentDetails.storageFee ?? 0}`,
+                    `  Delivery Charge: ₹${paymentDetails.deliveryCharge ?? 0}`,
+                    `  GST: ₹${paymentDetails.gst ?? 0}`,
+                    `  Total Amount: ₹${paymentDetails.totalAmount ?? 0}`,
+                    `  Payment Method: ${paymentDetails.paymentMethod ?? 'Not specified'}`,
+                    `  Payment Status: ${formattedPaymentStatus}`,
+                    '',
+                    `Generated on: ${new Date().toLocaleString()}`
+                  ];
+
+                  const blob = new Blob([receiptLines.join('\n')], {
+                    type: 'text/plain;charset=utf-8'
+                  });
+                  const url = URL.createObjectURL(blob);
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = `burrow-receipt-${request.id}.txt`;
+                  link.click();
+                  URL.revokeObjectURL(url);
+                }}
+                className="flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+              >
                 <Download className="h-4 w-4 mr-2" />
                 Download Receipt
               </button>
-              <button className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+              <button
+                type="button"
+                onClick={() => {
+                  const footer = document.getElementById('site-footer');
+                  if (footer) {
+                    footer.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                  }
+                }}
+                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+              >
                 <MessageCircle className="h-4 w-4 mr-2" />
                 Contact Support
               </button>
@@ -208,10 +253,6 @@ const RequestStatus = () => {
                 </div>
               </div>
 
-              <button className="w-full mt-4 flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors">
-                <Calendar className="h-4 w-4 mr-2" />
-                Reschedule Delivery
-              </button>
             </div>
 
             {warehouse && (
