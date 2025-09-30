@@ -148,7 +148,7 @@ const ConsumerDashboard = () => {
 
         <div className="bg-white rounded-lg shadow-md p-6 mb-8">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Link
               to="/new-request"
               className="flex items-center justify-center px-4 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors"
@@ -163,14 +163,6 @@ const ConsumerDashboard = () => {
             >
               <Package className="h-5 w-5 mr-2" />
               Track Parcel
-            </Link>
-
-            <Link
-              to="/new-request?step=schedule"
-              className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
-            >
-              <Clock className="h-5 w-5 mr-2" />
-              Schedule Delivery
             </Link>
           </div>
         </div>

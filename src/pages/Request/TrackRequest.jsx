@@ -1,9 +1,10 @@
 import React, { useState } from 'react';
 import { Package, Search, AlertCircle, MapPin, Calendar, Clock } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import apiClient from '../../lib/api';
 
 const TrackRequest = () => {
+  const navigate = useNavigate();
   const [orderNumber, setOrderNumber] = useState('');
   const [isSearching, setIsSearching] = useState(false);
   const [error, setError] = useState(null);
@@ -53,7 +54,16 @@ const TrackRequest = () => {
     try {
       const params = new URLSearchParams({ orderNumber: trimmedOrderNumber });
       const data = await apiClient.get(`/delivery-requests?${params.toString()}`);
-      setResults(Array.isArray(data) ? data : []);
+      const nextResults = Array.isArray(data) ? data : [];
+      setResults(nextResults);
+
+      const matchingRequest = nextResults.find(
+        (request) => request.orderNumber?.toLowerCase() === trimmedOrderNumber.toLowerCase(),
+      );
+
+      if (matchingRequest) {
+        navigate(`/request/${matchingRequest.id}`);
+      }
     } catch (requestError) {
       setError(requestError.message || 'Unable to fetch delivery requests at the moment.');
       setResults([]);
@@ -125,15 +135,15 @@ const TrackRequest = () => {
               <label htmlFor="orderNumber" className="block text-sm font-medium text-gray-700">
                 Order number
               </label>
-              <div className="mt-1 flex rounded-md shadow-sm">
-                <div className="relative flex-grow">
+              <div className="mt-2 flex flex-col gap-3 sm:grid sm:grid-cols-[1fr_auto] sm:items-center">
+                <div className="relative sm:max-w-none">
                   <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
                     <Search className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
                     id="orderNumber"
                     type="text"
-                    className="focus:ring-blue-500 focus:border-blue-500 block w-full pl-10 sm:text-sm border-gray-300 rounded-md"
+                    className="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-11 pr-4 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
                     placeholder="e.g. BRW-2458"
                     value={orderNumber}
                     onChange={(event) => setOrderNumber(event.target.value)}
@@ -141,7 +151,7 @@ const TrackRequest = () => {
                 </div>
                 <button
                   type="submit"
-                  className="ml-3 inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-60"
+                  className="inline-flex h-12 w-full items-center justify-center rounded-lg border border-transparent bg-blue-600 px-6 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-60 disabled:hover:bg-blue-600 sm:h-full sm:w-auto"
                   disabled={isSearching}
                 >
                   {isSearching ? 'Searching...' : 'Track'}
