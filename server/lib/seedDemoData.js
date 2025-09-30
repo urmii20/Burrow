@@ -1,6 +1,7 @@
 /* eslint-env node */
 import bcrypt from 'bcryptjs';
 
+
 export const DEMO_USERS = [
   {
     name: 'Demo Customer',
@@ -15,6 +16,7 @@ export const DEMO_USERS = [
     password: 'AdminDemo1',
     role: 'operator',
     privileges: ['operator']
+
   }
 ];
 
@@ -54,6 +56,7 @@ async function upsertUser(usersCollection, userConfig) {
     updates.role = userConfig.role;
   }
 
+
   if (userConfig.privileges?.length) {
     const existingPrivileges = existingUser.privileges ?? [];
     const targetPrivileges = userConfig.privileges;
@@ -66,6 +69,7 @@ async function upsertUser(usersCollection, userConfig) {
       updates.privileges = targetPrivileges;
     }
   }
+
 
   if (existingUser.isActive === false) {
     updates.isActive = true;
@@ -104,7 +108,10 @@ export function isDemoUserEmail(email) {
   return DEMO_USERS.some((user) => user.email === normalisedEmail);
 }
 
-export async function seedDemoUsers(db, options = {}) {
+
+export async function seedDemoUsers(db) {
+
+
   if (!db) {
     throw new Error('Cannot seed demo users without an active database connection.');
   }
@@ -116,7 +123,13 @@ export async function seedDemoUsers(db, options = {}) {
     ? DEMO_USERS.filter((user) => requestedEmails.includes(user.email))
     : DEMO_USERS;
 
-  for (const userConfig of usersToSeed) {
+
+
+
+  for (const userConfig of DEMO_USERS) {
+
+
+
     await upsertUser(usersCollection, userConfig);
   }
 }
