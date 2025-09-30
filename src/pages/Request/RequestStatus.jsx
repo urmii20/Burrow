@@ -4,6 +4,7 @@ import { ArrowLeft, Download, MessageCircle } from 'lucide-react';
 import StatusTracker from '../../components/StatusTracker/StatusTracker';
 
 import apiClient from '../../lib/api';
+import { mockRequests as mockRequestsData, warehouses as mockWarehouseData } from '../../data/mockData';
 
 const RequestStatus = () => {
   const { id } = useParams();
@@ -37,6 +38,19 @@ const RequestStatus = () => {
         }
       } catch (fetchError) {
         if (!isMounted) {
+          return;
+        }
+
+        const normalisedId = typeof id === 'string' ? id.toLowerCase() : '';
+        const fallbackRequest = mockRequestsData.find((item) => {
+          const orderNumber = item.orderNumber?.toLowerCase();
+          const requestId = item.id?.toLowerCase();
+          return requestId === normalisedId || orderNumber === normalisedId;
+        });
+
+        if (fallbackRequest) {
+          setRequest(fallbackRequest);
+          setWarehouses(mockWarehouseData);
           return;
         }
 

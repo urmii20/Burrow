@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Package, Search, AlertCircle, MapPin, Calendar, Clock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import apiClient from '../../lib/api';
+import { mockRequests } from '../../data/mockData';
 
 const TrackRequest = () => {
   const navigate = useNavigate();
@@ -36,6 +37,19 @@ const TrackRequest = () => {
     return parts.join(', ');
   };
 
+  const findMatchingRequest = (collection, value) => {
+    if (!Array.isArray(collection) || collection.length === 0 || !value) {
+      return null;
+    }
+
+    const normalisedValue = value.toLowerCase();
+    return collection.find((request) => {
+      const orderNumber = request.orderNumber?.toLowerCase();
+      const requestId = request.id?.toLowerCase();
+      return orderNumber === normalisedValue || requestId === normalisedValue;
+    });
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -53,20 +67,27 @@ const TrackRequest = () => {
 
     try {
       const params = new URLSearchParams({ orderNumber: trimmedOrderNumber });
-      const data = await apiClient.get(`/delivery-requests?${params.toString()}`);
+      const data = await apiClient.get(`/requests?${params.toString()}`);
       const nextResults = Array.isArray(data) ? data : [];
-      setResults(nextResults);
-
-      const matchingRequest = nextResults.find(
-        (request) => request.orderNumber?.toLowerCase() === trimmedOrderNumber.toLowerCase(),
-      );
+      const matchingRequest = findMatchingRequest(nextResults, trimmedOrderNumber);
 
       if (matchingRequest) {
+        setResults([matchingRequest]);
         navigate(`/request/${matchingRequest.id}`);
+      } else {
+        setResults([]);
       }
     } catch (requestError) {
-      setError(requestError.message || 'Unable to fetch delivery requests at the moment.');
-      setResults([]);
+      const fallbackMatch = findMatchingRequest(mockRequests, trimmedOrderNumber);
+
+      if (fallbackMatch) {
+        setResults([fallbackMatch]);
+        setError(null);
+        navigate(`/request/${fallbackMatch.id}`);
+      } else {
+        setError(requestError.message || 'Unable to fetch delivery requests at the moment.');
+        setResults([]);
+      }
     } finally {
       setIsSearching(false);
     }
@@ -174,7 +195,7 @@ const TrackRequest = () => {
               ) : (
                 <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 p-8 text-center">
                   <Package className="h-10 w-10 text-gray-400 mb-3" />
-                  <p className="text-sm font-medium text-gray-900">No delivery requests found</p>
+                  <p className="text-sm font-medium text-gray-900">No results found</p>
                   <p className="mt-1 text-sm text-gray-500">
                     Double-check your order number or create a new delivery request if you haven&apos;t scheduled one yet.
                   </p>
