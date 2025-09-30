@@ -53,7 +53,7 @@ router.get('/', async (req, res) => {
     return;
   }
 
-  const { userId, status } = req.query;
+  const { userId, status, orderNumber } = req.query;
 
   const query = {};
 
@@ -67,6 +67,10 @@ router.get('/', async (req, res) => {
 
   if (status) {
     query.status = status;
+  }
+
+  if (orderNumber && orderNumber.trim()) {
+    query.orderNumber = orderNumber.trim();
   }
 
   const requests = await db

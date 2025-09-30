@@ -166,7 +166,7 @@ const ConsumerDashboard = () => {
             </Link>
 
             <Link
-              to="/schedule"
+              to="/new-request?step=schedule"
               className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
             >
               <Clock className="h-5 w-5 mr-2" />
