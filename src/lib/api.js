@@ -2,7 +2,6 @@ const DEFAULT_HEADERS = {
   Accept: 'application/json'
 };
 
-const nodeProcess = typeof globalThis !== 'undefined' ? globalThis.process : undefined;
 
 const API_BASE_URL = (() => {
   if (typeof import.meta !== 'undefined') {
