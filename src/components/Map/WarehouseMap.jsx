@@ -1,29 +1,92 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { MapPin, Navigation } from 'lucide-react';
-import { warehouses } from '../../data/mockData';
+import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import marker2x from 'leaflet/dist/images/marker-icon-2x.png';
+import marker1x from 'leaflet/dist/images/marker-icon.png';
+import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+
+import { warehouses as warehouseOptions } from '../../data/mockData';
+
+const defaultIcon = L.icon({
+  iconUrl: marker1x,
+  iconRetinaUrl: marker2x,
+  shadowUrl: markerShadow,
+  iconSize: [25, 41],
+  iconAnchor: [12, 41],
+  popupAnchor: [1, -34],
+  shadowSize: [41, 41]
+});
+
+L.Marker.prototype.options.icon = defaultIcon;
+
+const DEFAULT_CENTER = [20.5937, 78.9629];
+
+const ChangeMapView = ({ center }) => {
+  const map = useMap();
+
+  useEffect(() => {
+    if (!center) {
+      return;
+    }
+
+    const nextCenter = Array.isArray(center) ? center : DEFAULT_CENTER;
+    map.flyTo(nextCenter, Math.max(map.getZoom(), 5), {
+      animate: true,
+      duration: 0.75
+    });
+  }, [center, map]);
+
+  return null;
+};
+
+ChangeMapView.propTypes = {
+  center: PropTypes.arrayOf(PropTypes.number)
+};
 
 const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
   const [userLocation, setUserLocation] = useState('');
-  const [nearbyWarehouses, setNearbyWarehouses] = useState(warehouses);
+  const [nearbyWarehouses, setNearbyWarehouses] = useState(warehouseOptions);
+  const [isMapReady, setIsMapReady] = useState(false);
+
+  useEffect(() => {
+    setIsMapReady(true);
+  }, []);
 
   const handleLocationSearch = () => {
     const searchTerm = userLocation.toLowerCase();
 
-    if (searchTerm.includes('delhi')) {
-      setNearbyWarehouses(
-        warehouses.filter(w => w.address.includes('Delhi') || w.address.includes('Noida'))
-      );
-    } else if (searchTerm.includes('mumbai')) {
-      setNearbyWarehouses(
-        warehouses.filter(w => w.address.includes('Mumbai') || w.address.includes('Pune'))
-      );
-    } else if (searchTerm.includes('bangalore')) {
-      setNearbyWarehouses(warehouses.filter(w => w.address.includes('Bangalore')));
-    } else {
-      setNearbyWarehouses(warehouses);
+    if (!searchTerm) {
+      setNearbyWarehouses(warehouseOptions);
+      return;
     }
+
+    const filtered = warehouseOptions.filter((warehouse) => {
+      const haystack = `${warehouse.name} ${warehouse.address}`.toLowerCase();
+      return haystack.includes(searchTerm);
+    });
+
+    setNearbyWarehouses(filtered.length > 0 ? filtered : warehouseOptions);
   };
+
+  const selectedWarehouse = useMemo(
+    () => warehouseOptions.find((warehouse) => warehouse.id === selectedWarehouseId),
+    [selectedWarehouseId]
+  );
+
+  const mapCenter = useMemo(() => {
+    if (selectedWarehouse?.coordinates) {
+      return selectedWarehouse.coordinates;
+    }
+
+    if (nearbyWarehouses.length > 0 && nearbyWarehouses[0].coordinates) {
+      return nearbyWarehouses[0].coordinates;
+    }
+
+    return DEFAULT_CENTER;
+  }, [nearbyWarehouses, selectedWarehouse]);
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
@@ -50,12 +113,45 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
         </div>
       </div>
 
-      <div className="bg-gray-100 rounded-lg h-64 mb-6 flex items-center justify-center">
-        <div className="text-center text-gray-500">
-          <MapPin className="h-12 w-12 mx-auto mb-2" />
-          <p>Interactive Map View</p>
-          <p className="text-sm">(Map integration with Leaflet/Google Maps)</p>
-        </div>
+      <div className="bg-gray-100 rounded-lg h-64 mb-6 overflow-hidden">
+        {isMapReady ? (
+          <MapContainer
+            center={mapCenter}
+            zoom={5}
+            scrollWheelZoom
+            className="h-full w-full"
+          >
+            <ChangeMapView center={mapCenter} />
+            <TileLayer
+              attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
+              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            />
+            {nearbyWarehouses.map((warehouse) => (
+              <Marker
+                key={warehouse.id}
+                position={warehouse.coordinates}
+                eventHandlers={{
+                  click: () => onWarehouseSelect?.(warehouse)
+                }}
+              >
+                <Popup>
+                  <div className="text-sm">
+                    <p className="font-semibold text-gray-900">{warehouse.name}</p>
+                    <p className="text-gray-600 mt-1">{warehouse.address}</p>
+                    <p className="text-gray-500 mt-1 text-xs">
+                      Capacity: {warehouse.capacity} · Hours: {warehouse.operatingHours}
+                    </p>
+                  </div>
+                </Popup>
+              </Marker>
+            ))}
+          </MapContainer>
+        ) : (
+          <div className="h-full flex items-center justify-center text-gray-500">
+            <MapPin className="h-12 w-12 mx-auto mb-2" />
+            <p>Loading map...</p>
+          </div>
+        )}
       </div>
 
       <div className="space-y-3">
