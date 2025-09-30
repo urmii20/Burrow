@@ -7,13 +7,16 @@ export const DEMO_USERS = [
     name: 'Demo Customer',
     email: 'user@test.com',
     password: 'UserDemo1',
-
+    role: 'consumer',
+    privileges: ['consumer']
   },
   {
     name: 'Burrow Admin',
     email: 'admin@burrow.com',
     password: 'AdminDemo1',
-    role: 'admin'
+    role: 'operator',
+    privileges: ['operator']
+
   }
 ];
 
@@ -30,6 +33,7 @@ async function upsertUser(usersCollection, userConfig) {
       email,
       passwordHash,
       role: userConfig.role,
+      privileges: userConfig.privileges,
       isActive: true,
       createdAt: now,
       updatedAt: now
@@ -51,6 +55,21 @@ async function upsertUser(usersCollection, userConfig) {
   if (existingUser.role !== userConfig.role) {
     updates.role = userConfig.role;
   }
+
+
+  if (userConfig.privileges?.length) {
+    const existingPrivileges = existingUser.privileges ?? [];
+    const targetPrivileges = userConfig.privileges;
+
+    const privilegesChanged =
+      existingPrivileges.length !== targetPrivileges.length ||
+      existingPrivileges.some((value, index) => value !== targetPrivileges[index]);
+
+    if (privilegesChanged) {
+      updates.privileges = targetPrivileges;
+    }
+  }
+
 
   if (existingUser.isActive === false) {
     updates.isActive = true;
@@ -92,6 +111,7 @@ export function isDemoUserEmail(email) {
 
 export async function seedDemoUsers(db) {
 
+
   if (!db) {
     throw new Error('Cannot seed demo users without an active database connection.');
   }
@@ -105,7 +125,9 @@ export async function seedDemoUsers(db) {
 
 
 
+
   for (const userConfig of DEMO_USERS) {
+
 
 
     await upsertUser(usersCollection, userConfig);
