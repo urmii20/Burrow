@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Package, Search, AlertCircle, MapPin, Calendar, Clock } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import apiClient from '../../lib/api';
+import { mockRequests } from '../../data/mockData';
 
 const TrackRequest = () => {
   const navigate = useNavigate();
@@ -36,6 +37,19 @@ const TrackRequest = () => {
     return parts.join(', ');
   };
 
+  const findMatchingRequest = (collection, value) => {
+    if (!Array.isArray(collection) || collection.length === 0 || !value) {
+      return null;
+    }
+
+    const normalisedValue = value.toLowerCase();
+    return collection.find((request) => {
+      const orderNumber = request.orderNumber?.toLowerCase();
+      const requestId = request.id?.toLowerCase();
+      return orderNumber === normalisedValue || requestId === normalisedValue;
+    });
+  };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -55,9 +69,11 @@ const TrackRequest = () => {
       const params = new URLSearchParams({ orderNumber: trimmedOrderNumber });
       const data = await apiClient.get(`/requests?${params.toString()}`);
       const nextResults = Array.isArray(data) ? data : [];
+
       const matchingRequest = nextResults.find(
         (request) => request.orderNumber?.toLowerCase() === trimmedOrderNumber.toLowerCase(),
       );
+
 
       if (matchingRequest) {
         setResults([matchingRequest]);
@@ -66,8 +82,16 @@ const TrackRequest = () => {
         setResults([]);
       }
     } catch (requestError) {
-      setError(requestError.message || 'Unable to fetch delivery requests at the moment.');
-      setResults([]);
+      const fallbackMatch = findMatchingRequest(mockRequests, trimmedOrderNumber);
+
+      if (fallbackMatch) {
+        setResults([fallbackMatch]);
+        setError(null);
+        navigate(`/request/${fallbackMatch.id}`);
+      } else {
+        setError(requestError.message || 'Unable to fetch delivery requests at the moment.');
+        setResults([]);
+      }
     } finally {
       setIsSearching(false);
     }
