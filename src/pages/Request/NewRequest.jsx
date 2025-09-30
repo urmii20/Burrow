@@ -1,114 +1,94 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Upload, Calendar, MapPin, CreditCard } from 'lucide-react';
+import { Upload, Calendar, CreditCard } from 'lucide-react';
 import WarehouseMap from '../../components/Map/WarehouseMap';
-import { Warehouse } from '../../types';
 import { ecommercePlatforms, timeSlots } from '../../data/mockData';
 
-interface FormData {
-  orderNumber: string;
-  platform: string;
-  productDescription: string;
-  originalETA: string;
-  warehouse: Warehouse | null;
-  scheduledDeliveryDate: string;
-  deliveryTimeSlot: string;
+const initialFormData = {
+  orderNumber: '',
+  platform: '',
+  productDescription: '',
+  originalETA: '',
+  warehouse: null,
+  scheduledDeliveryDate: '',
+  deliveryTimeSlot: '',
   destinationAddress: {
-    line1: string;
-    line2: string;
-    city: string;
-    state: string;
-    pincode: string;
-    landmark: string;
-    contactNumber: string;
-  };
-}
+    line1: '',
+    line2: '',
+    city: '',
+    state: '',
+    pincode: '',
+    landmark: '',
+    contactNumber: ''
+  }
+};
 
-const NewRequest: React.FC = () => {
+const NewRequest = () => {
   const navigate = useNavigate();
   const [currentStep, setCurrentStep] = useState(1);
-  const [formData, setFormData] = useState<FormData>({
-    orderNumber: '',
-    platform: '',
-    productDescription: '',
-    originalETA: '',
-    warehouse: null,
-    scheduledDeliveryDate: '',
-    deliveryTimeSlot: '',
-    destinationAddress: {
-      line1: '',
-      line2: '',
-      city: '',
-      state: '',
-      pincode: '',
-      landmark: '',
-      contactNumber: ''
-    }
-  });
-  
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  const [formData, setFormData] = useState(initialFormData);
+  const [selectedFile, setSelectedFile] = useState(null);
+  const [errors, setErrors] = useState({});
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    
+  const handleInputChange = (event) => {
+    const { name, value } = event.target;
+
     if (name.startsWith('address.')) {
       const addressField = name.split('.')[1];
-      setFormData({
-        ...formData,
+      setFormData((prev) => ({
+        ...prev,
         destinationAddress: {
-          ...formData.destinationAddress,
+          ...prev.destinationAddress,
           [addressField]: value
         }
-      });
+      }));
     } else {
-      setFormData({
-        ...formData,
+      setFormData((prev) => ({
+        ...prev,
         [name]: value
-      });
+      }));
     }
-    
-    // Clear error when user starts typing
+
     if (errors[name]) {
-      setErrors({
-        ...errors,
+      setErrors((prev) => ({
+        ...prev,
         [name]: ''
-      });
+      }));
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
+  const handleFileChange = (event) => {
+    const file = event.target.files?.[0];
     if (file) {
       if (file.type !== 'application/pdf') {
-        setErrors({ ...errors, file: 'Only PDF files are allowed' });
+        setErrors((prev) => ({ ...prev, file: 'Only PDF files are allowed' }));
         return;
       }
       if (file.size > 5 * 1024 * 1024) {
-        setErrors({ ...errors, file: 'File size must be less than 5MB' });
+        setErrors((prev) => ({ ...prev, file: 'File size must be less than 5MB' }));
         return;
       }
       setSelectedFile(file);
-      setErrors({ ...errors, file: '' });
+      setErrors((prev) => ({ ...prev, file: '' }));
     }
   };
 
   const validateStep1 = () => {
-    const newErrors: Record<string, string> = {};
-    
+    const newErrors = {};
+
     if (!formData.orderNumber.trim()) newErrors.orderNumber = 'Order number is required';
     if (!formData.platform) newErrors.platform = 'Platform selection is required';
     if (!formData.productDescription.trim()) newErrors.productDescription = 'Product description is required';
     if (!formData.originalETA) newErrors.originalETA = 'Original ETA is required';
     if (!formData.warehouse) newErrors.warehouse = 'Warehouse selection is required';
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
 
   const validateStep2 = () => {
-    const newErrors: Record<string, string> = {};
-    
+    const newErrors = {};
+
     if (!formData.scheduledDeliveryDate) newErrors.scheduledDeliveryDate = 'Delivery date is required';
     if (!formData.deliveryTimeSlot) newErrors.deliveryTimeSlot = 'Time slot is required';
     if (!formData.destinationAddress.line1.trim()) newErrors['address.line1'] = 'Address line 1 is required';
@@ -116,7 +96,7 @@ const NewRequest: React.FC = () => {
     if (!formData.destinationAddress.state.trim()) newErrors['address.state'] = 'State is required';
     if (!formData.destinationAddress.pincode.trim()) newErrors['address.pincode'] = 'Pincode is required';
     if (!formData.destinationAddress.contactNumber.trim()) newErrors['address.contactNumber'] = 'Contact number is required';
-    
+
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
   };
@@ -130,7 +110,6 @@ const NewRequest: React.FC = () => {
   };
 
   const handleSubmit = () => {
-    // Simulate request submission
     setTimeout(() => {
       navigate('/dashboard');
     }, 1000);
@@ -138,12 +117,12 @@ const NewRequest: React.FC = () => {
 
   const calculateCharges = () => {
     const baseHandlingFee = 49;
-    const storageFee = 20; // Assuming 2 extra days
-    const deliveryCharge = 60; // Based on distance
+    const storageFee = 20;
+    const deliveryCharge = 60;
     const subtotal = baseHandlingFee + storageFee + deliveryCharge;
     const gst = subtotal * 0.18;
     const total = subtotal + gst;
-    
+
     return {
       baseHandlingFee,
       storageFee,
@@ -159,34 +138,32 @@ const NewRequest: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Progress Bar */}
         <div className="mb-8">
           <div className="flex items-center justify-between">
             {[1, 2, 3].map((step) => (
               <div key={step} className="flex items-center">
-                <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                  step <= currentStep 
-                    ? 'bg-blue-500 text-white' 
-                    : 'bg-gray-300 text-gray-600'
-                }`}>
+                <div
+                  className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
+                    step <= currentStep ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'
+                  }`}
+                >
                   {step}
                 </div>
-                <span className={`ml-2 text-sm font-medium ${
-                  step <= currentStep ? 'text-blue-500' : 'text-gray-500'
-                }`}>
+                <span
+                  className={`ml-2 text-sm font-medium ${
+                    step <= currentStep ? 'text-blue-500' : 'text-gray-500'
+                  }`}
+                >
                   {step === 1 ? 'Order Details' : step === 2 ? 'Schedule Delivery' : 'Payment'}
                 </span>
                 {step < 3 && (
-                  <div className={`w-16 h-1 ml-4 ${
-                    step < currentStep ? 'bg-blue-500' : 'bg-gray-300'
-                  }`} />
+                  <div className={`w-16 h-1 ml-4 ${step < currentStep ? 'bg-blue-500' : 'bg-gray-300'}`} />
                 )}
               </div>
             ))}
           </div>
         </div>
 
-        {/* Step 1: Order Details */}
         {currentStep === 1 && (
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center mb-6">
@@ -226,8 +203,10 @@ const NewRequest: React.FC = () => {
                     }`}
                   >
                     <option value="">Select Platform</option>
-                    {ecommercePlatforms.map(platform => (
-                      <option key={platform} value={platform}>{platform}</option>
+                    {ecommercePlatforms.map((platform) => (
+                      <option key={platform} value={platform}>
+                        {platform}
+                      </option>
                     ))}
                   </select>
                   {errors.platform && <p className="text-red-600 text-xs mt-1">{errors.platform}</p>}
@@ -247,7 +226,9 @@ const NewRequest: React.FC = () => {
                     }`}
                     placeholder="Brief description of the product"
                   />
-                  {errors.productDescription && <p className="text-red-600 text-xs mt-1">{errors.productDescription}</p>}
+                  {errors.productDescription && (
+                    <p className="text-red-600 text-xs mt-1">{errors.productDescription}</p>
+                  )}
                 </div>
 
                 <div>
@@ -277,9 +258,7 @@ const NewRequest: React.FC = () => {
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                   {selectedFile && (
-                    <p className="text-green-600 text-sm mt-1">
-                      ✓ {selectedFile.name} selected
-                    </p>
+                    <p className="text-green-600 text-sm mt-1">✓ {selectedFile.name} selected</p>
                   )}
                   {errors.file && <p className="text-red-600 text-xs mt-1">{errors.file}</p>}
                 </div>
@@ -287,8 +266,8 @@ const NewRequest: React.FC = () => {
 
               <div>
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Select Warehouse</h3>
-                <WarehouseMap 
-                  onWarehouseSelect={(warehouse) => setFormData({ ...formData, warehouse })}
+                <WarehouseMap
+                  onWarehouseSelect={(warehouse) => setFormData((prev) => ({ ...prev, warehouse }))}
                   selectedWarehouseId={formData.warehouse?.id}
                 />
                 {errors.warehouse && <p className="text-red-600 text-xs mt-1">{errors.warehouse}</p>}
@@ -306,7 +285,6 @@ const NewRequest: React.FC = () => {
           </div>
         )}
 
-        {/* Step 2: Schedule Delivery */}
         {currentStep === 2 && (
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center mb-6">
@@ -330,7 +308,9 @@ const NewRequest: React.FC = () => {
                       errors.scheduledDeliveryDate ? 'border-red-300' : 'border-gray-300'
                     }`}
                   />
-                  {errors.scheduledDeliveryDate && <p className="text-red-600 text-xs mt-1">{errors.scheduledDeliveryDate}</p>}
+                  {errors.scheduledDeliveryDate && (
+                    <p className="text-red-600 text-xs mt-1">{errors.scheduledDeliveryDate}</p>
+                  )}
                 </div>
 
                 <div>
@@ -346,17 +326,21 @@ const NewRequest: React.FC = () => {
                     }`}
                   >
                     <option value="">Select Time Slot</option>
-                    {timeSlots.map(slot => (
-                      <option key={slot} value={slot}>{slot}</option>
+                    {timeSlots.map((slot) => (
+                      <option key={slot} value={slot}>
+                        {slot}
+                      </option>
                     ))}
                   </select>
-                  {errors.deliveryTimeSlot && <p className="text-red-600 text-xs mt-1">{errors.deliveryTimeSlot}</p>}
+                  {errors.deliveryTimeSlot && (
+                    <p className="text-red-600 text-xs mt-1">{errors.deliveryTimeSlot}</p>
+                  )}
                 </div>
               </div>
 
               <div className="space-y-6">
                 <h3 className="text-lg font-medium text-gray-900">Destination Address</h3>
-                
+
                 <div className="grid grid-cols-1 gap-4">
                   <input
                     type="text"
@@ -390,8 +374,6 @@ const NewRequest: React.FC = () => {
                         errors['address.city'] ? 'border-red-300' : 'border-gray-300'
                       }`}
                     />
-                    {errors['address.city'] && <p className="text-red-600 text-xs">{errors['address.city']}</p>}
-
                     <input
                       type="text"
                       name="address.state"
@@ -402,8 +384,9 @@ const NewRequest: React.FC = () => {
                         errors['address.state'] ? 'border-red-300' : 'border-gray-300'
                       }`}
                     />
-                    {errors['address.state'] && <p className="text-red-600 text-xs">{errors['address.state']}</p>}
                   </div>
+                  {errors['address.city'] && <p className="text-red-600 text-xs">{errors['address.city']}</p>}
+                  {errors['address.state'] && <p className="text-red-600 text-xs">{errors['address.state']}</p>}
 
                   <input
                     type="text"
@@ -415,7 +398,9 @@ const NewRequest: React.FC = () => {
                       errors['address.pincode'] ? 'border-red-300' : 'border-gray-300'
                     }`}
                   />
-                  {errors['address.pincode'] && <p className="text-red-600 text-xs">{errors['address.pincode']}</p>}
+                  {errors['address.pincode'] && (
+                    <p className="text-red-600 text-xs">{errors['address.pincode']}</p>
+                  )}
 
                   <input
                     type="text"
@@ -436,7 +421,9 @@ const NewRequest: React.FC = () => {
                       errors['address.contactNumber'] ? 'border-red-300' : 'border-gray-300'
                     }`}
                   />
-                  {errors['address.contactNumber'] && <p className="text-red-600 text-xs">{errors['address.contactNumber']}</p>}
+                  {errors['address.contactNumber'] && (
+                    <p className="text-red-600 text-xs">{errors['address.contactNumber']}</p>
+                  )}
                 </div>
               </div>
             </div>
@@ -458,7 +445,6 @@ const NewRequest: React.FC = () => {
           </div>
         )}
 
-        {/* Step 3: Payment */}
         {currentStep === 3 && (
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center mb-6">
@@ -510,7 +496,7 @@ const NewRequest: React.FC = () => {
                       <span className="ml-2">Credit/Debit Card</span>
                     </label>
                   </div>
-                  
+
                   <div className="border border-gray-300 rounded-lg p-4">
                     <label className="flex items-center">
                       <input type="radio" name="payment" className="text-blue-600" />

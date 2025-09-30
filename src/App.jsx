@@ -1,4 +1,5 @@
 import React from 'react';
+import PropTypes from 'prop-types';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import Header from './components/Layout/Header';
@@ -11,11 +12,7 @@ import NewRequest from './pages/Request/NewRequest';
 import RequestStatus from './pages/Request/RequestStatus';
 import OperatorDashboard from './pages/Operator/OperatorDashboard';
 
-const ProtectedRoute: React.FC<{ 
-  children: React.ReactNode; 
-  requireAuth?: boolean;
-  allowedRoles?: string[];
-}> = ({ children, requireAuth = true, allowedRoles = [] }) => {
+const ProtectedRoute = ({ children, requireAuth = true, allowedRoles = [] }) => {
   const { state } = useAuth();
 
   if (requireAuth && !state.user) {
@@ -29,28 +26,30 @@ const ProtectedRoute: React.FC<{
   return <>{children}</>;
 };
 
-const AppContent: React.FC = () => {
+ProtectedRoute.propTypes = {
+  children: PropTypes.node.isRequired,
+  requireAuth: PropTypes.bool,
+  allowedRoles: PropTypes.arrayOf(PropTypes.string)
+};
+
+const AppContent = () => {
   const { state } = useAuth();
-  
+
   return (
     <div className="min-h-screen bg-white flex flex-col">
       <Header />
       <main className="flex-grow">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route 
-            path="/login" 
-            element={
-              state.user ? <Navigate to="/dashboard" replace /> : <Login />
-            } 
+          <Route
+            path="/login"
+            element={state.user ? <Navigate to="/dashboard" replace /> : <Login />}
           />
-          <Route 
-            path="/register" 
-            element={
-              state.user ? <Navigate to="/dashboard" replace /> : <Register />
-            } 
+          <Route
+            path="/register"
+            element={state.user ? <Navigate to="/dashboard" replace /> : <Register />}
           />
-          
+
           <Route
             path="/dashboard"
             element={
@@ -63,7 +62,7 @@ const AppContent: React.FC = () => {
               </ProtectedRoute>
             }
           />
-          
+
           <Route
             path="/new-request"
             element={
@@ -72,7 +71,7 @@ const AppContent: React.FC = () => {
               </ProtectedRoute>
             }
           />
-          
+
           <Route
             path="/request/:id"
             element={
@@ -81,7 +80,7 @@ const AppContent: React.FC = () => {
               </ProtectedRoute>
             }
           />
-          
+
           <Route
             path="/operator/dashboard"
             element={
@@ -90,7 +89,7 @@ const AppContent: React.FC = () => {
               </ProtectedRoute>
             }
           />
-          
+
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>
@@ -99,7 +98,7 @@ const AppContent: React.FC = () => {
   );
 };
 
-function App() {
+const App = () => {
   return (
     <AuthProvider>
       <Router>
@@ -107,6 +106,6 @@ function App() {
       </Router>
     </AuthProvider>
   );
-}
+};
 
 export default App;
