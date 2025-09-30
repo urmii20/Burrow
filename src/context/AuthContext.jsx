@@ -2,6 +2,8 @@
 import React, { createContext, useContext, useReducer, useEffect } from 'react';
 import PropTypes from 'prop-types';
 
+import apiClient from '../lib/api';
+
 const AuthContext = createContext(null);
 
 const initialState = {
@@ -27,80 +29,70 @@ const authReducer = (state, action) => {
   }
 };
 
+const STORAGE_KEY = 'burrow_user';
+
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
   const login = async (email, password) => {
     dispatch({ type: 'LOGIN_START' });
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      const user = await apiClient.post('/auth/login', { email, password });
 
-    if (email === 'admin@burrow.com' && password === 'admin123') {
-      const user = {
-        id: '1',
-        name: 'Admin User',
-        email,
-        phone: '9876543210',
-        role: 'operator',
-        addresses: [],
-        createdAt: new Date().toISOString()
-      };
-      localStorage.setItem('burrow_token', 'mock_admin_token');
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
       dispatch({ type: 'LOGIN_SUCCESS', payload: user });
-    } else if (email === 'user@test.com' && password === 'user123') {
-      const user = {
-        id: '2',
-        name: 'Test User',
-        email,
-        phone: '9876543210',
-        role: 'consumer',
-        addresses: [],
-        createdAt: new Date().toISOString()
-      };
-      localStorage.setItem('burrow_token', 'mock_user_token');
-      dispatch({ type: 'LOGIN_SUCCESS', payload: user });
-    } else {
-      dispatch({ type: 'LOGIN_FAILURE', payload: 'Invalid email or password' });
+      return user;
+    } catch (error) {
+      dispatch({
+        type: 'LOGIN_FAILURE',
+        payload: error?.message || 'Unable to login. Please try again.'
+      });
+      throw error;
     }
   };
 
   const register = async (userData) => {
     dispatch({ type: 'LOGIN_START' });
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    try {
+      const user = await apiClient.post('/auth/register', userData);
 
-    const user = {
-      id: Date.now().toString(),
-      name: userData.name,
-      email: userData.email,
-      phone: userData.phone,
-      role: 'consumer',
-      addresses: [],
-      createdAt: new Date().toISOString()
-    };
-
-    localStorage.setItem('burrow_token', 'mock_token_' + user.id);
-    dispatch({ type: 'LOGIN_SUCCESS', payload: user });
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(user));
+      dispatch({ type: 'LOGIN_SUCCESS', payload: user });
+      return user;
+    } catch (error) {
+      dispatch({
+        type: 'LOGIN_FAILURE',
+        payload: error?.message || 'Unable to register. Please try again.'
+      });
+      throw error;
+    }
   };
 
-  const logout = () => {
-    localStorage.removeItem('burrow_token');
-    dispatch({ type: 'LOGOUT' });
+  const logout = async () => {
+    try {
+      await apiClient.post('/auth/logout');
+    } catch (error) {
+      console.error('Failed to logout', error);
+    } finally {
+      localStorage.removeItem(STORAGE_KEY);
+      dispatch({ type: 'LOGOUT' });
+    }
   };
 
   useEffect(() => {
-    const token = localStorage.getItem('burrow_token');
-    if (token) {
-      const user = {
-        id: '2',
-        name: 'Test User',
-        email: 'user@test.com',
-        phone: '9876543210',
-        role: token.includes('admin') ? 'operator' : 'consumer',
-        addresses: [],
-        createdAt: new Date().toISOString()
-      };
-      dispatch({ type: 'LOGIN_SUCCESS', payload: user });
+    const storedUser = localStorage.getItem(STORAGE_KEY);
+    if (storedUser) {
+      try {
+        const parsedUser = JSON.parse(storedUser);
+        if (parsedUser) {
+          dispatch({ type: 'LOGIN_SUCCESS', payload: parsedUser });
+        }
+      } catch (error) {
+        console.error('Failed to parse stored user data', error);
+        localStorage.removeItem(STORAGE_KEY);
+      }
     }
   }, []);
 

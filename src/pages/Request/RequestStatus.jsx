@@ -1,14 +1,78 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { ArrowLeft, Download, MessageCircle, Calendar } from 'lucide-react';
 import StatusTracker from '../../components/StatusTracker/StatusTracker';
-import { mockRequests, warehouses } from '../../data/mockData';
+
+import apiClient from '../../lib/api';
 
 const RequestStatus = () => {
   const { id } = useParams();
-  const request = mockRequests.find((req) => req.id === id);
+  const [request, setRequest] = useState(null);
+  const [warehouses, setWarehouses] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [notFound, setNotFound] = useState(false);
 
-  if (!request) {
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchData = async () => {
+      if (!id) {
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+      setNotFound(false);
+
+      try {
+        const [requestResponse, warehousesResponse] = await Promise.all([
+          apiClient.get(`/requests/${id}`),
+          apiClient.get('/warehouses').catch(() => [])
+        ]);
+
+        if (isMounted) {
+          setRequest(requestResponse ?? null);
+          setWarehouses(Array.isArray(warehousesResponse) ? warehousesResponse : []);
+        }
+      } catch (fetchError) {
+        if (!isMounted) {
+          return;
+        }
+
+        if (fetchError?.status === 404) {
+          setNotFound(true);
+        } else {
+          setError(fetchError?.message || 'Unable to load request details.');
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchData();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [id]);
+
+  const warehouse = useMemo(
+    () => warehouses.find((w) => w.id === request?.warehouseId),
+    [warehouses, request?.warehouseId]
+  );
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <p className="text-gray-600">Loading request details...</p>
+      </div>
+    );
+  }
+
+  if (notFound) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
@@ -22,7 +86,25 @@ const RequestStatus = () => {
     );
   }
 
-  const warehouse = warehouses.find((w) => w.id === request.warehouseId);
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-gray-900">Something went wrong</h2>
+          <p className="text-gray-600 mt-2">{error}</p>
+          <Link to="/dashboard" className="text-blue-600 hover:text-blue-500 mt-4 inline-block">
+            Back to Dashboard
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  if (!request) {
+    return null;
+  }
+
+  const paymentStatus = request.paymentDetails?.paymentStatus ?? 'pending';
 
   return (
     <div className="min-h-screen bg-gray-50 py-8">
@@ -56,7 +138,7 @@ const RequestStatus = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2">
-            <StatusTracker currentStatus={request.status} statusHistory={request.statusHistory} />
+            <StatusTracker currentStatus={request.status} statusHistory={request.statusHistory ?? []} />
           </div>
 
           <div className="space-y-6">
@@ -82,7 +164,7 @@ const RequestStatus = () => {
                 <div>
                   <span className="text-gray-600">Original ETA:</span>
                   <p className="font-medium text-gray-900">
-                    {new Date(request.originalETA).toLocaleDateString()}
+                    {request.originalETA ? new Date(request.originalETA).toLocaleDateString() : 'Not available'}
                   </p>
                 </div>
               </div>
@@ -95,23 +177,33 @@ const RequestStatus = () => {
                 <div>
                   <span className="text-gray-600">Scheduled Date:</span>
                   <p className="font-medium text-gray-900">
-                    {new Date(request.scheduledDeliveryDate).toLocaleDateString()}
+                    {request.scheduledDeliveryDate
+                      ? new Date(request.scheduledDeliveryDate).toLocaleDateString()
+                      : 'Not scheduled'}
                   </p>
                 </div>
 
                 <div>
                   <span className="text-gray-600">Time Slot:</span>
-                  <p className="font-medium text-gray-900">{request.deliveryTimeSlot}</p>
+                  <p className="font-medium text-gray-900">{request.deliveryTimeSlot || 'Not assigned'}</p>
                 </div>
 
                 <div>
                   <span className="text-gray-600">Destination:</span>
                   <p className="font-medium text-gray-900">
-                    {request.destinationAddress.line1}
-                    {request.destinationAddress.line2 && `, ${request.destinationAddress.line2}`}
-                    <br />
-                    {request.destinationAddress.city}, {request.destinationAddress.state}{' '}
-                    {request.destinationAddress.pincode}
+                    {request.destinationAddress ? (
+                      <>
+                        {request.destinationAddress.line1}
+                        {request.destinationAddress.line2 ? `, ${request.destinationAddress.line2}` : ''}
+                        <br />
+                        {[request.destinationAddress.city, request.destinationAddress.state]
+                          .filter(Boolean)
+                          .join(', ')}
+                        {request.destinationAddress.pincode ? ` ${request.destinationAddress.pincode}` : ''}
+                      </>
+                    ) : (
+                      'Not provided'
+                    )}
                   </p>
                 </div>
               </div>
@@ -151,38 +243,37 @@ const RequestStatus = () => {
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
                   <span className="text-gray-600">Base Handling Fee</span>
-                  <span className="font-medium">₹{request.paymentDetails.baseHandlingFee}</span>
+                  <span className="font-medium">₹{request.paymentDetails?.baseHandlingFee ?? 0}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Storage Fee</span>
-                  <span className="font-medium">₹{request.paymentDetails.storageFee}</span>
+                  <span className="font-medium">₹{request.paymentDetails?.storageFee ?? 0}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">Delivery Charge</span>
-                  <span className="font-medium">₹{request.paymentDetails.deliveryCharge}</span>
+                  <span className="font-medium">₹{request.paymentDetails?.deliveryCharge ?? 0}</span>
                 </div>
                 <div className="flex justify-between">
                   <span className="text-gray-600">GST</span>
-                  <span className="font-medium">₹{request.paymentDetails.gst}</span>
+                  <span className="font-medium">₹{request.paymentDetails?.gst ?? 0}</span>
                 </div>
                 <div className="border-t pt-2 flex justify-between font-semibold">
                   <span>Total Amount</span>
-                  <span className="text-blue-600">₹{request.paymentDetails.totalAmount}</span>
+                  <span className="text-blue-600">₹{request.paymentDetails?.totalAmount ?? 0}</span>
                 </div>
               </div>
 
               <div className="mt-3 pt-3 border-t">
                 <span
                   className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    request.paymentDetails.paymentStatus === 'completed'
+                    paymentStatus === 'completed'
                       ? 'bg-green-100 text-green-800'
-                      : request.paymentDetails.paymentStatus === 'pending'
+                      : paymentStatus === 'pending'
                       ? 'bg-yellow-100 text-yellow-800'
                       : 'bg-red-100 text-red-800'
                   }`}
                 >
-                  {request.paymentDetails.paymentStatus.charAt(0).toUpperCase() +
-                    request.paymentDetails.paymentStatus.slice(1)}
+                  {paymentStatus.charAt(0).toUpperCase() + paymentStatus.slice(1)}
                 </span>
               </div>
             </div>

@@ -1,19 +1,67 @@
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Package, Plus, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
-import { mockRequests } from '../../data/mockData';
 import { useAuth } from '../../context/AuthContext';
+
+import apiClient from '../../lib/api';
 
 const ConsumerDashboard = () => {
   const { state } = useAuth();
 
-  const userRequests = mockRequests.filter(req => req.userId === state.user?.id);
+  const [requests, setRequests] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
 
-  const stats = {
-    active: userRequests.filter(req => !['delivered', 'rejected'].includes(req.status)).length,
-    pending: userRequests.filter(req => ['submitted', 'approval_pending', 'payment_pending'].includes(req.status)).length,
-    completed: userRequests.filter(req => req.status === 'delivered').length
-  };
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchRequests = async () => {
+      if (!state.user?.id) {
+        setRequests([]);
+        return;
+      }
+
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const params = new URLSearchParams({ userId: state.user.id });
+        const response = await apiClient.get(`/requests?${params.toString()}`);
+
+        if (isMounted) {
+          setRequests(response ?? []);
+        }
+      } catch (fetchError) {
+        if (isMounted) {
+          setError(fetchError?.message || 'Unable to load your requests.');
+        }
+      } finally {
+        if (isMounted) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    fetchRequests();
+
+    return () => {
+      isMounted = false;
+    };
+  }, [state.user?.id]);
+
+  const userRequests = useMemo(
+    () => requests.filter(req => req.userId === state.user?.id),
+    [requests, state.user?.id]
+  );
+
+  const stats = useMemo(
+    () => ({
+      active: userRequests.filter(req => !['delivered', 'rejected'].includes(req.status)).length,
+      pending: userRequests.filter(req => ['submitted', 'approval_pending', 'payment_pending'].includes(req.status)).length,
+      completed: userRequests.filter(req => req.status === 'delivered').length
+    }),
+    [userRequests]
+  );
 
   const getStatusBadge = (status) => {
     switch (status) {
@@ -133,43 +181,45 @@ const ConsumerDashboard = () => {
           </div>
 
           <div className="divide-y divide-gray-200">
-            {userRequests.length > 0 ? (
+            {error && (
+              <div className="px-6 py-4 text-sm text-red-600 bg-red-50 border-b border-red-100">{error}</div>
+            )}
+
+            {isLoading && (
+              <div className="px-6 py-4 text-sm text-gray-500">Loading your recent requests...</div>
+            )}
+
+            {!isLoading && !error && userRequests.length > 0 ? (
               userRequests.slice(0, 5).map((request) => (
                 <div key={request.id} className="px-6 py-4">
                   <div className="flex items-center justify-between">
                     <div className="flex-1">
                       <div className="flex items-center space-x-3">
-                        <h3 className="text-sm font-medium text-gray-900">
-                          {request.orderNumber}
-                        </h3>
+                        <h3 className="text-sm font-medium text-gray-900">{request.orderNumber}</h3>
                         {getStatusBadge(request.status)}
                       </div>
-                      <p className="text-sm text-gray-600 mt-1">
-                        {request.productDescription}
-                      </p>
+                      <p className="text-sm text-gray-600 mt-1">{request.productDescription}</p>
                       <p className="text-xs text-gray-500 mt-1">
-                        Scheduled: {new Date(request.scheduledDeliveryDate).toLocaleDateString()} at {request.deliveryTimeSlot}
+                        Scheduled: {request.scheduledDeliveryDate ? new Date(request.scheduledDeliveryDate).toLocaleDateString() : 'TBC'}
+                        {request.deliveryTimeSlot ? ` at ${request.deliveryTimeSlot}` : ''}
                       </p>
                     </div>
 
                     <div className="flex items-center space-x-2">
-                      <Link
-                        to={`/request/${request.id}`}
-                        className="text-blue-600 hover:text-blue-500 text-sm font-medium"
-                      >
+                      <Link to={`/request/${request.id}`} className="text-blue-600 hover:text-blue-500 text-sm font-medium">
                         View Details
                       </Link>
                     </div>
                   </div>
                 </div>
               ))
-            ) : (
+            ) : null}
+
+            {!isLoading && !error && userRequests.length === 0 && (
               <div className="px-6 py-8 text-center">
                 <Package className="h-12 w-12 text-gray-400 mx-auto mb-4" />
                 <p className="text-gray-600">No requests yet</p>
-                <p className="text-gray-500 text-sm mt-1">
-                  Create your first delivery request to get started
-                </p>
+                <p className="text-gray-500 text-sm mt-1">Create your first delivery request to get started</p>
                 <Link
                   to="/new-request"
                   className="inline-flex items-center px-4 py-2 mt-4 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
@@ -181,12 +231,9 @@ const ConsumerDashboard = () => {
             )}
           </div>
 
-          {userRequests.length > 5 && (
+          {!isLoading && !error && userRequests.length > 5 && (
             <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-              <Link
-                to="/orders"
-                className="text-blue-600 hover:text-blue-500 text-sm font-medium"
-              >
+              <Link to="/orders" className="text-blue-600 hover:text-blue-500 text-sm font-medium">
                 View all requests →
               </Link>
             </div>

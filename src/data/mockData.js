@@ -1,4 +1,33 @@
-export const warehouses = [
+const resolveMockFlag = () => {
+  if (typeof import.meta !== 'undefined') {
+    const explicitFlag = import.meta.env?.VITE_ENABLE_MOCK_DATA;
+    if (explicitFlag !== undefined) {
+      return explicitFlag !== 'false' && explicitFlag !== '0';
+    }
+    return Boolean(import.meta.env?.DEV);
+  }
+
+  const globalProcess = typeof globalThis !== 'undefined' ? globalThis.process : undefined;
+
+  if (globalProcess) {
+    const explicitFlag =
+      globalProcess.env?.VITE_ENABLE_MOCK_DATA ?? globalProcess.env?.ENABLE_MOCK_DATA;
+    if (explicitFlag !== undefined) {
+      return explicitFlag !== 'false' && explicitFlag !== '0';
+    }
+    return globalProcess.env?.NODE_ENV !== 'production';
+  }
+
+  return false;
+};
+
+export const MOCK_DATA_ENABLED = resolveMockFlag();
+
+if (!MOCK_DATA_ENABLED && typeof console !== 'undefined') {
+  console.warn('Mock data is disabled. Ensure your API and database are configured.');
+}
+
+const warehouseData = [
   {
     id: '1',
     name: 'Burrow Delhi Hub',
@@ -55,7 +84,7 @@ export const warehouses = [
   }
 ];
 
-export const mockRequests = [
+const mockRequestsData = [
   {
     id: 'REQ001',
     userId: '2',
@@ -99,7 +128,7 @@ export const mockRequests = [
   }
 ];
 
-export const ecommercePlatforms = [
+const ecommercePlatformsData = [
   'Amazon',
   'Flipkart',
   'Myntra',
@@ -109,10 +138,15 @@ export const ecommercePlatforms = [
   'Other'
 ];
 
-export const timeSlots = [
+const timeSlotsData = [
   '9:00 AM - 11:00 AM',
   '11:00 AM - 1:00 PM',
   '1:00 PM - 3:00 PM',
   '3:00 PM - 5:00 PM',
   '5:00 PM - 7:00 PM'
 ];
+
+export const warehouses = MOCK_DATA_ENABLED ? warehouseData : [];
+export const mockRequests = MOCK_DATA_ENABLED ? mockRequestsData : [];
+export const ecommercePlatforms = MOCK_DATA_ENABLED ? ecommercePlatformsData : [];
+export const timeSlots = MOCK_DATA_ENABLED ? timeSlotsData : [];
