@@ -1,3 +1,5 @@
+import.meta.env.VITE_API_BASE_URL;
+
 const DEFAULT_HEADERS = {
   Accept: 'application/json'
 };
