@@ -1,17 +1,9 @@
+
 const DEFAULT_HEADERS = {
   Accept: 'application/json'
 };
 
-const nodeProcess = typeof globalThis !== 'undefined' ? globalThis.process : undefined;
-
-const API_BASE_URL = (() => {
-  if (typeof import.meta !== 'undefined') {
-    const baseUrl = import.meta.env?.VITE_API_BASE_URL ?? '';
-    return baseUrl?.replace(/\/$/, '') ?? '';
-  }
-  const envBaseUrl = nodeProcess?.env?.VITE_API_BASE_URL ?? '';
-  return envBaseUrl?.replace(/\/$/, '') ?? '';
-})();
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || '';
 
 let authToken = null;
 
