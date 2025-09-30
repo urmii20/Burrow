@@ -2,6 +2,7 @@ import bcrypt from 'bcryptjs';
 import { Router } from 'express';
 
 import { serialiseDocument, toObjectId } from '../utils/formatters.js';
+import { isDemoUserEmail, seedDemoUsers } from '../lib/seedDemoData.js';
 
 const router = Router();
 
@@ -75,7 +76,12 @@ router.post('/login', async (req, res) => {
   const normalisedEmail = email.trim().toLowerCase();
   const usersCollection = db.collection('users');
 
-  const user = await usersCollection.findOne({ email: normalisedEmail, isActive: { $ne: false } });
+  let user = await usersCollection.findOne({ email: normalisedEmail, isActive: { $ne: false } });
+
+  if (!user && isDemoUserEmail(normalisedEmail)) {
+    await seedDemoUsers(db, { emails: [normalisedEmail] });
+    user = await usersCollection.findOne({ email: normalisedEmail, isActive: { $ne: false } });
+  }
 
   if (!user) {
     return res.status(401).json({ message: 'Invalid email or password.' });
