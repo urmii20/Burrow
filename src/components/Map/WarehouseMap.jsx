@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
-import { MapPin, Navigation } from 'lucide-react';
+import { CheckCircle, MapPin } from 'lucide-react';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -47,29 +47,11 @@ ChangeMapView.propTypes = {
 };
 
 const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
-  const [userLocation, setUserLocation] = useState('');
-  const [nearbyWarehouses, setNearbyWarehouses] = useState(warehouseOptions);
   const [isMapReady, setIsMapReady] = useState(false);
 
   useEffect(() => {
     setIsMapReady(true);
   }, []);
-
-  const handleLocationSearch = () => {
-    const searchTerm = userLocation.toLowerCase();
-
-    if (!searchTerm) {
-      setNearbyWarehouses(warehouseOptions);
-      return;
-    }
-
-    const filtered = warehouseOptions.filter((warehouse) => {
-      const haystack = `${warehouse.name} ${warehouse.address}`.toLowerCase();
-      return haystack.includes(searchTerm);
-    });
-
-    setNearbyWarehouses(filtered.length > 0 ? filtered : warehouseOptions);
-  };
 
   const selectedWarehouse = useMemo(
     () => warehouseOptions.find((warehouse) => warehouse.id === selectedWarehouseId),
@@ -81,37 +63,16 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
       return selectedWarehouse.coordinates;
     }
 
-    if (nearbyWarehouses.length > 0 && nearbyWarehouses[0].coordinates) {
-      return nearbyWarehouses[0].coordinates;
+    if (warehouseOptions.length > 0 && warehouseOptions[0].coordinates) {
+      return warehouseOptions[0].coordinates;
     }
 
     return DEFAULT_CENTER;
-  }, [nearbyWarehouses, selectedWarehouse]);
+  }, [selectedWarehouse]);
 
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
-      <div className="mb-6">
-        <h3 className="text-xl font-semibold text-burrow-text-primary mb-4">Find Nearby Warehouses</h3>
-
-        <div className="flex gap-3">
-          <div className="flex-1">
-            <input
-              type="text"
-              placeholder="Enter your location (city, pincode, area)"
-              value={userLocation}
-              onChange={(e) => setUserLocation(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burrow-primary focus:border-transparent transition-shadow"
-            />
-          </div>
-          <button
-            onClick={handleLocationSearch}
-            className="px-6 py-2 bg-burrow-primary text-white rounded-lg hover:bg-burrow-accent transition-colors flex items-center gap-2 shadow-sm"
-          >
-            <Navigation className="h-4 w-4" />
-            Search
-          </button>
-        </div>
-      </div>
+      <h3 className="text-xl font-semibold text-burrow-text-primary mb-4">Find Nearby Warehouses</h3>
 
       <div className="bg-burrow-background rounded-lg h-64 mb-6 overflow-hidden">
         {isMapReady ? (
@@ -126,7 +87,7 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
               attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
               url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
             />
-            {nearbyWarehouses.map((warehouse) => (
+            {warehouseOptions.map((warehouse) => (
               <Marker
                 key={warehouse.id}
                 position={warehouse.coordinates}
@@ -154,35 +115,21 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
         )}
       </div>
 
-      <div className="space-y-3">
-        <h4 className="font-medium text-burrow-text-primary">Nearby Warehouses</h4>
-
-        {nearbyWarehouses.map((warehouse) => (
-          <div
-            key={warehouse.id}
-            className={`p-4 border-2 rounded-lg cursor-pointer transition-all shadow-sm ${
-              selectedWarehouseId === warehouse.id
-                ? 'border-burrow-primary bg-burrow-primary/10 shadow-md'
-                : 'border-gray-200 hover:border-burrow-primary/40 hover:shadow-md'
-            }`}
-            onClick={() => onWarehouseSelect?.(warehouse)}
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h5 className="font-medium text-burrow-text-primary">{warehouse.name}</h5>
-                <p className="text-sm text-burrow-text-secondary mt-1">{warehouse.address}</p>
-                <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                  <span>Capacity: {warehouse.capacity}</span>
-                  <span>Hours: {warehouse.operatingHours}</span>
-                </div>
-              </div>
-              <div className="flex items-center text-burrow-primary">
-                <MapPin className="h-4 w-4" />
-              </div>
+      <div className="bg-burrow-background rounded-lg border border-burrow-primary/30 p-4 min-h-[112px] flex flex-col justify-center">
+        {selectedWarehouse ? (
+          <div className="space-y-1">
+            <div className="flex items-center gap-2">
+              <CheckCircle className="h-5 w-5 text-green-500" />
+              <span className="font-medium text-burrow-text-primary">Warehouse Selected</span>
             </div>
+            <p className="text-burrow-text-primary font-semibold">{selectedWarehouse.name}</p>
+            <p className="text-burrow-text-secondary text-sm">{selectedWarehouse.address}</p>
           </div>
-        ))}
+        ) : (
+          <p className="text-burrow-text-secondary text-sm text-center">Select a warehouse to view its details here.</p>
+        )}
       </div>
+
     </div>
   );
 };
@@ -191,5 +138,5 @@ export default WarehouseMap;
 
 WarehouseMap.propTypes = {
   onWarehouseSelect: PropTypes.func,
-  selectedWarehouseId: PropTypes.string,
+  selectedWarehouseId: PropTypes.string
 };

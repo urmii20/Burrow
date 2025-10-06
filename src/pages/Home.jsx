@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Clock, Shield, MapPin, Calendar, ArrowRight, CheckCircle } from 'lucide-react';
+import { Clock, Shield, MapPin, Calendar, ArrowRight } from 'lucide-react';
 import WarehouseMap from '../components/Map/WarehouseMap';
 import { warehouses } from '../data/mockData';
 
@@ -143,17 +143,6 @@ const Home = () => {
                   </div>
                 </div>
               ))}
-
-              {selectedWarehouse && (
-                <div className="bg-green-50 border border-green-200 rounded-lg p-4 mt-4">
-                  <div className="flex items-center space-x-2">
-                    <CheckCircle className="h-5 w-5 text-green-500" />
-                    <span className="font-medium text-green-800">Warehouse Selected</span>
-                  </div>
-                  <p className="text-green-700 mt-1">{selectedWarehouse.name}</p>
-                  <p className="text-green-600 text-sm">{selectedWarehouse.address}</p>
-                </div>
-              )}
             </div>
           </div>
         </div>
