@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Search, Filter, Eye, CheckCircle, XCircle, Clock } from 'lucide-react';
 
 import apiClient from '../../lib/api';
@@ -14,36 +14,37 @@ const OperatorDashboard = () => {
   const [updateError, setUpdateError] = useState(null);
   const [modalStatus, setModalStatus] = useState('');
   const [modalNotes, setModalNotes] = useState('');
+  const isMountedRef = useRef(true);
+
+  const fetchRequests = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await apiClient.get('/requests');
+
+      if (isMountedRef.current) {
+        setRequests(Array.isArray(response) ? response : []);
+      }
+    } catch (fetchError) {
+      if (isMountedRef.current) {
+        setError(fetchError?.message || 'Unable to fetch requests');
+      }
+    } finally {
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
+    }
+  }, []);
 
   useEffect(() => {
-    let isMounted = true;
-
-    const fetchRequests = async () => {
-      setIsLoading(true);
-      setError(null);
-
-      try {
-        const response = await apiClient.get('/requests');
-        if (isMounted) {
-          setRequests(response ?? []);
-        }
-      } catch (fetchError) {
-        if (isMounted) {
-          setError(fetchError?.message || 'Unable to fetch requests');
-        }
-      } finally {
-        if (isMounted) {
-          setIsLoading(false);
-        }
-      }
-    };
-
+    isMountedRef.current = true;
     fetchRequests();
 
     return () => {
-      isMounted = false;
+      isMountedRef.current = false;
     };
-  }, []);
+  }, [fetchRequests]);
 
   const filteredRequests = requests.filter(request => {
     const lowerSearch = searchTerm.toLowerCase();
@@ -93,6 +94,7 @@ const OperatorDashboard = () => {
         ...(note?.trim() ? { note: note.trim() } : {})
       });
 
+      setUpdateError(null);
       setRequests((prevRequests) =>
         prevRequests.map((request) => (request.id === requestId ? updatedRequest : request))
       );
@@ -101,6 +103,8 @@ const OperatorDashboard = () => {
         setSelectedRequest(updatedRequest);
         setModalStatus(updatedRequest.status);
       }
+
+      await fetchRequests();
 
       return updatedRequest;
     } catch (updateError_) {
