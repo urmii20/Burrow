@@ -91,7 +91,7 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
   return (
     <div className="bg-white rounded-lg shadow-md p-6">
       <div className="mb-6">
-        <h3 className="text-xl font-semibold text-gray-900 mb-4">Find Nearby Warehouses</h3>
+        <h3 className="text-xl font-semibold text-burrow-text-primary mb-4">Find Nearby Warehouses</h3>
 
         <div className="flex gap-3">
           <div className="flex-1">
@@ -100,12 +100,12 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
               placeholder="Enter your location (city, pincode, area)"
               value={userLocation}
               onChange={(e) => setUserLocation(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burrow-primary focus:border-transparent transition-shadow"
             />
           </div>
           <button
             onClick={handleLocationSearch}
-            className="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors flex items-center gap-2"
+            className="px-6 py-2 bg-burrow-primary text-white rounded-lg hover:bg-burrow-accent transition-colors flex items-center gap-2 shadow-sm"
           >
             <Navigation className="h-4 w-4" />
             Search
@@ -113,7 +113,7 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
         </div>
       </div>
 
-      <div className="bg-gray-100 rounded-lg h-64 mb-6 overflow-hidden">
+      <div className="bg-burrow-background rounded-lg h-64 mb-6 overflow-hidden">
         {isMapReady ? (
           <MapContainer
             center={mapCenter}
@@ -136,8 +136,8 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
               >
                 <Popup>
                   <div className="text-sm">
-                    <p className="font-semibold text-gray-900">{warehouse.name}</p>
-                    <p className="text-gray-600 mt-1">{warehouse.address}</p>
+                    <p className="font-semibold text-burrow-text-primary">{warehouse.name}</p>
+                    <p className="text-burrow-text-secondary mt-1">{warehouse.address}</p>
                     <p className="text-gray-500 mt-1 text-xs">
                       Capacity: {warehouse.capacity} · Hours: {warehouse.operatingHours}
                     </p>
@@ -147,37 +147,37 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
             ))}
           </MapContainer>
         ) : (
-          <div className="h-full flex items-center justify-center text-gray-500">
-            <MapPin className="h-12 w-12 mx-auto mb-2" />
+          <div className="h-full flex flex-col items-center justify-center text-burrow-text-secondary">
+            <MapPin className="h-10 w-10 mb-2 text-burrow-primary" />
             <p>Loading map...</p>
           </div>
         )}
       </div>
 
       <div className="space-y-3">
-        <h4 className="font-medium text-gray-900">Nearby Warehouses</h4>
+        <h4 className="font-medium text-burrow-text-primary">Nearby Warehouses</h4>
 
         {nearbyWarehouses.map((warehouse) => (
           <div
             key={warehouse.id}
-            className={`p-4 border-2 rounded-lg cursor-pointer transition-all ${
+            className={`p-4 border-2 rounded-lg cursor-pointer transition-all shadow-sm ${
               selectedWarehouseId === warehouse.id
-                ? 'border-blue-500 bg-blue-50'
-                : 'border-gray-200 hover:border-gray-300'
+                ? 'border-burrow-primary bg-burrow-primary/10 shadow-md'
+                : 'border-gray-200 hover:border-burrow-primary/40 hover:shadow-md'
             }`}
             onClick={() => onWarehouseSelect?.(warehouse)}
           >
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <h5 className="font-medium text-gray-900">{warehouse.name}</h5>
-                <p className="text-sm text-gray-600 mt-1">{warehouse.address}</p>
+                <h5 className="font-medium text-burrow-text-primary">{warehouse.name}</h5>
+                <p className="text-sm text-burrow-text-secondary mt-1">{warehouse.address}</p>
                 <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
                   <span>Capacity: {warehouse.capacity}</span>
                   <span>Hours: {warehouse.operatingHours}</span>
                 </div>
               </div>
-              <div className="flex items-center">
-                <MapPin className="h-4 w-4 text-gray-400" />
+              <div className="flex items-center text-burrow-primary">
+                <MapPin className="h-4 w-4" />
               </div>
             </div>
           </div>
