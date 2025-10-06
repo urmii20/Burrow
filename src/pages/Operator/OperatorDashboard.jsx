@@ -63,19 +63,29 @@ const OperatorDashboard = () => {
     delivered: requests.filter(req => req.status === 'delivered').length
   };
 
+  const formatStatusLabel = (status) =>
+    status
+      ?.split('_')
+      .filter(Boolean)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ') || '';
+
   const getStatusBadge = (status) => {
     const config = {
       submitted: { color: 'bg-blue-100 text-blue-800', label: 'Submitted' },
       approval_pending: { color: 'bg-yellow-100 text-yellow-800', label: 'Pending Approval' },
       approved: { color: 'bg-green-100 text-green-800', label: 'Approved' },
       rejected: { color: 'bg-red-100 text-red-800', label: 'Rejected' },
-      parcel_arrived: { color: 'bg-blue-100 text-blue-800', label: 'Arrived' },
+      parcel_expected: { color: 'bg-blue-100 text-blue-800', label: 'Parcel Expected' },
+      parcel_arrived: { color: 'bg-blue-100 text-blue-800', label: 'Parcel Arrived' },
       in_storage: { color: 'bg-purple-100 text-purple-800', label: 'In Storage' },
+      preparing_dispatch: { color: 'bg-indigo-100 text-indigo-800', label: 'Preparing Dispatch' },
       out_for_delivery: { color: 'bg-orange-100 text-orange-800', label: 'Out for Delivery' },
       delivered: { color: 'bg-green-100 text-green-800', label: 'Delivered' }
     };
 
-    const statusConfig = config[status] || { color: 'bg-gray-100 text-gray-800', label: status };
+    const statusConfig =
+      config[status] || { color: 'bg-gray-100 text-gray-800', label: formatStatusLabel(status) };
 
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig.color}`}>
