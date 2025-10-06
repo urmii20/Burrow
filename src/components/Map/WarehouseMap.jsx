@@ -154,35 +154,6 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
         )}
       </div>
 
-      <div className="space-y-3">
-        <h4 className="font-medium text-burrow-text-primary">Nearby Warehouses</h4>
-
-        {nearbyWarehouses.map((warehouse) => (
-          <div
-            key={warehouse.id}
-            className={`p-4 border-2 rounded-lg cursor-pointer transition-all shadow-sm ${
-              selectedWarehouseId === warehouse.id
-                ? 'border-burrow-primary bg-burrow-primary/10 shadow-md'
-                : 'border-gray-200 hover:border-burrow-primary/40 hover:shadow-md'
-            }`}
-            onClick={() => onWarehouseSelect?.(warehouse)}
-          >
-            <div className="flex items-start justify-between">
-              <div className="flex-1">
-                <h5 className="font-medium text-burrow-text-primary">{warehouse.name}</h5>
-                <p className="text-sm text-burrow-text-secondary mt-1">{warehouse.address}</p>
-                <div className="flex items-center gap-4 mt-2 text-xs text-gray-500">
-                  <span>Capacity: {warehouse.capacity}</span>
-                  <span>Hours: {warehouse.operatingHours}</span>
-                </div>
-              </div>
-              <div className="flex items-center text-burrow-primary">
-                <MapPin className="h-4 w-4" />
-              </div>
-            </div>
-          </div>
-        ))}
-      </div>
     </div>
   );
 };
