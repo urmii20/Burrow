@@ -74,18 +74,12 @@ async function resolveUpdatedRequest(collection, idQuery, updateResult) {
       return updateResult.value;
     }
 
-    const lastErrorObject = updateResult.lastErrorObject;
-
-    if (lastErrorObject?.n > 0 || lastErrorObject?.updatedExisting) {
+    if (updateResult.lastErrorObject?.updatedExisting) {
       return collection.findOne(idQuery);
     }
   }
 
-  if (!updateResult) {
-    return null;
-  }
-
-  return collection.findOne(idQuery);
+  return updateResult;
 }
 
 router.get('/', async (req, res) => {
