@@ -98,6 +98,20 @@ const NewRequest = () => {
     }
   };
 
+  const clearPaymentError = () => {
+    setErrors((prev) => {
+      if (!prev.paymentMethod) return prev;
+      const rest = { ...prev };
+      delete rest.paymentMethod;
+      return rest;
+    });
+  };
+
+  const handlePaymentMethodChange = (method) => {
+    setSelectedPaymentMethod(method);
+    clearPaymentError();
+  };
+
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
     if (file) {
@@ -154,16 +168,38 @@ const NewRequest = () => {
 
   const charges = useMemo(() => calculateCharges(), []);
 
+  const validateStep3 = () => {
+    if (!selectedPaymentMethod) {
+      setErrors((prev) => ({
+        ...prev,
+        paymentMethod: 'Please select a payment method'
+      }));
+      return false;
+    }
+
+    clearPaymentError();
+    return true;
+  };
+
   const handleSubmit = async () => {
     if (isSubmitting) return;
+
+    const isScheduleValid = validateStep2();
+    if (!isScheduleValid) {
+      setCurrentStep(2);
+      return;
+    }
+
+    const isPaymentValid = validateStep3();
+    if (!isPaymentValid) {
+      setCurrentStep(3);
+      return;
+    }
 
     if (!state.user?.id) {
       setSubmitError('You need to be logged in to create a delivery request.');
       return;
     }
-
-    setIsSubmitting(true);
-    setSubmitError(null);
 
     const normalisedAddress = {
       line1: formData.destinationAddress.line1.trim(),
@@ -195,6 +231,9 @@ const NewRequest = () => {
         paymentMethod: selectedPaymentMethod
       }
     };
+
+    setIsSubmitting(true);
+    setSubmitError(null);
 
     try {
       const createdRequest = await apiClient.post('/requests', payload);
@@ -594,12 +633,15 @@ const NewRequest = () => {
                       name="payment"
                       value={option.id}
                       checked={selectedPaymentMethod === option.id}
-                      onChange={() => setSelectedPaymentMethod(option.id)}
+                      onChange={() => handlePaymentMethodChange(option.id)}
                       className="text-blue-600"
                     />
                     <span className="ml-2">{option.label}</span>
                   </label>
                 ))}
+                {errors.paymentMethod && (
+                  <p className="text-red-600 text-xs mt-2">{errors.paymentMethod}</p>
+                )}
               </div>
             </div>
 
