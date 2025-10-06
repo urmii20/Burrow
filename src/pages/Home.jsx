@@ -58,8 +58,8 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-burrow-background page-fade">
-      <section className="bg-gradient-to-br from-burrow-background to-burrow-primary/10 py-24">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <section className="section-hero">
+        <div className="layout-container">
           <div className="text-center">
             <h1 className="text-5xl font-bold text-burrow-text-primary mb-6">
               Take Control <span className="text-burrow-primary">of Your Deliveries</span>
@@ -69,7 +69,7 @@ const Home = () => {
             </p>
             <button
               onClick={handleGetStarted}
-              className="bg-burrow-primary text-white px-10 py-4 rounded-lg text-lg font-semibold hover:bg-burrow-accent transition-all inline-flex items-center space-x-3"
+              className="btn-primary btn-lg"
             >
               <span>Get Started</span>
               <ArrowRight className="h-5 w-5" />
@@ -78,11 +78,11 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-20 bg-gray-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-16">
-            <h2 className="text-3xl font-bold text-burrow-text-primary mb-4">Why Choose Burrow?</h2>
-            <p className="text-lg text-burrow-text-secondary max-w-2xl mx-auto">
+      <section className="section-muted">
+        <div className="layout-container">
+          <div className="section-heading">
+            <h2 className="section-heading-title mb-4">Why Choose Burrow?</h2>
+            <p className="section-heading-subtitle max-w-2xl mx-auto">
               Trusted storage and flexible delivery options at your fingertips
             </p>
           </div>
@@ -91,7 +91,7 @@ const Home = () => {
             {benefits.map((benefit, idx) => (
               <div
                 key={idx}
-                className={`p-8 rounded-lg shadow-lg transition-transform transform hover:-translate-y-2 ${
+                className={`feature-card ${
                   idx % 3 === 0
                     ? 'bg-burrow-accent/20'
                     : idx % 3 === 1
@@ -100,7 +100,7 @@ const Home = () => {
                 }`}
               >
                 <div
-                  className={`text-4xl mb-4 flex items-center justify-center ${
+                  className={`feature-icon ${
                     idx % 3 === 0
                       ? 'text-burrow-accent'
                       : idx % 3 === 1
@@ -117,21 +117,21 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            <div className="h-fit rounded-lg shadow-md overflow-hidden">
+            <div className="card overflow-hidden">
               <WarehouseMap
                 onWarehouseSelect={setSelectedWarehouse}
                 selectedWarehouseId={selectedWarehouse?.id}
               />
             </div>
 
-            <div className="flex flex-col space-y-4 max-h-[650px] overflow-y-auto fade-stagger">
+            <div className="list-panel fade-stagger">
               {warehouses.map((warehouse) => (
                 <div
                   key={warehouse.id}
-                  className={`p-6 border-2 rounded-lg cursor-pointer transition-all ${
+                  className={`list-card ${
                     selectedWarehouse?.id === warehouse.id
-                      ? 'border-burrow-primary bg-burrow-primary/10 shadow-md'
-                      : 'border-gray-200 hover:border-gray-300 hover:shadow-sm'
+                      ? 'list-card-active'
+                      : 'list-card-inactive'
                   }`}
                   onClick={() => setSelectedWarehouse(warehouse)}
                 >
@@ -148,11 +148,11 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-20 bg-white">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-burrow-text-primary mb-4">How It Works</h2>
-            <p className="text-lg text-burrow-text-secondary">Three simple steps to take control of your deliveries</p>
+      <section className="section-white">
+        <div className="layout-container">
+          <div className="section-heading">
+            <h2 className="section-heading-title mb-4">How It Works</h2>
+            <p className="section-heading-subtitle">Three simple steps to take control of your deliveries</p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 fade-stagger">
@@ -169,8 +169,8 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="py-20 bg-burrow-primary">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
+      <section className="section-primary">
+        <div className="layout-container text-center">
           <h2 className="text-3xl font-bold text-white mb-4">
             Ready to Take Control of Your Deliveries?
           </h2>
@@ -179,7 +179,7 @@ const Home = () => {
           </p>
           <button
             onClick={handleGetStarted}
-            className="bg-white text-burrow-primary px-10 py-4 rounded-lg text-lg font-semibold hover:bg-gray-100 transition-all inline-flex items-center space-x-3"
+            className="btn-secondary btn-lg"
           >
             <span>Get Started Today</span>
             <ArrowRight className="h-5 w-5" />

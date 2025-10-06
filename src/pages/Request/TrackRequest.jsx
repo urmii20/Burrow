@@ -153,8 +153,8 @@ const TrackRequest = () => {
 
   return (
     <div className="bg-gray-50 min-h-full py-12 page-fade">
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow-md rounded-lg p-8 page-fade">
+      <div className="layout-container-narrow">
+        <div className="card-panel page-fade">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Track your delivery request</h1>
           <p className="text-sm text-gray-600 mb-6">
             Enter your order number to view the current status, scheduled date, and destination details of your request.
@@ -162,18 +162,18 @@ const TrackRequest = () => {
 
           <form onSubmit={handleSubmit} className="space-y-4 fade-stagger">
             <div>
-              <label htmlFor="orderNumber" className="block text-sm font-medium text-gray-700">
+              <label htmlFor="orderNumber" className="form-label">
                 Order number
               </label>
               <div className="mt-2 flex flex-col gap-3 sm:grid sm:grid-cols-[1fr_auto] sm:items-center">
-                <div className="relative sm:max-w-none">
-                  <div className="pointer-events-none absolute inset-y-0 left-0 pl-3 flex items-center">
+                <div className="input-group sm:max-w-none">
+                  <div className="input-icon">
                     <Search className="h-5 w-5 text-gray-400" />
                   </div>
                   <input
                     id="orderNumber"
                     type="text"
-                    className="block w-full rounded-lg border border-gray-300 bg-white py-3 pl-11 pr-4 text-sm text-gray-900 shadow-sm focus:border-blue-500 focus:ring-blue-500"
+                    className="input-field"
                     placeholder="e.g. BRW-2458"
                     value={orderNumber}
                     onChange={(event) => setOrderNumber(event.target.value)}
@@ -181,7 +181,7 @@ const TrackRequest = () => {
                 </div>
                 <button
                   type="submit"
-                  className="inline-flex h-12 w-full items-center justify-center rounded-lg border border-transparent bg-blue-600 px-6 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-60 disabled:hover:bg-blue-600 sm:h-full sm:w-auto"
+                  className="btn-blue btn-md sm:h-full sm:w-auto"
                   disabled={isSearching}
                 >
                   {isSearching ? 'Searching...' : 'Track'}
@@ -191,7 +191,7 @@ const TrackRequest = () => {
           </form>
 
           {error && (
-            <div className="mt-6 flex items-center rounded-md bg-red-50 px-4 py-3 text-sm text-red-700">
+            <div className="alert-error mt-6">
               <AlertCircle className="h-5 w-5 mr-2" />
               <span>{error}</span>
             </div>

@@ -121,14 +121,14 @@ const ConsumerDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 py-8 page-fade">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="layout-container">
         <div className="mb-8 page-fade">
           <h1 className="text-3xl font-bold text-gray-900">Welcome back, {state.user?.name}!</h1>
           <p className="text-gray-600 mt-1">Manage your deliveries and schedule new requests</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 fade-stagger">
-          <div className="bg-white rounded-lg shadow-md p-6">
+        <div className="stats-grid mb-8 fade-stagger">
+          <div className="stat-card">
             <div className="flex items-center">
               <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
                 <Clock className="h-6 w-6 text-blue-500" />
@@ -140,7 +140,7 @@ const ConsumerDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="stat-card">
             <div className="flex items-center">
               <div className="flex-shrink-0 w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
                 <AlertTriangle className="h-6 w-6 text-yellow-500" />
@@ -152,7 +152,7 @@ const ConsumerDashboard = () => {
             </div>
           </div>
 
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="stat-card">
             <div className="flex items-center">
               <div className="flex-shrink-0 w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
                 <CheckCircle className="h-6 w-6 text-green-500" />
@@ -165,12 +165,12 @@ const ConsumerDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8 page-fade">
+        <div className="card-padded mb-8 page-fade">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Link
               to="/new-request"
-              className="flex items-center justify-center px-4 py-3 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 transition-colors"
+              className="btn-blue btn-md"
             >
               <Plus className="h-5 w-5 mr-2" />
               New Request
@@ -178,7 +178,7 @@ const ConsumerDashboard = () => {
 
             <Link
               to="/track"
-              className="flex items-center justify-center px-4 py-3 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+              className="btn-neutral btn-md"
             >
               <Package className="h-5 w-5 mr-2" />
               Track Parcel
@@ -186,7 +186,7 @@ const ConsumerDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md page-fade">
+        <div className="card page-fade">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900">Recent Requests</h2>
           </div>
@@ -217,7 +217,7 @@ const ConsumerDashboard = () => {
                     </div>
 
                     <div className="flex items-center space-x-2">
-                      <Link to={`/request/${request.id}`} className="text-blue-600 hover:text-blue-500 text-sm font-medium">
+                      <Link to={`/request/${request.id}`} className="nav-link font-medium text-sm">
                         View Details
                       </Link>
                     </div>
@@ -233,7 +233,7 @@ const ConsumerDashboard = () => {
                 <p className="text-gray-500 text-sm mt-1">Create your first delivery request to get started</p>
                 <Link
                   to="/new-request"
-                  className="inline-flex items-center px-4 py-2 mt-4 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700"
+                  className="btn-blue btn-md mt-4"
                 >
                   <Plus className="h-4 w-4 mr-2" />
                   Create Request
@@ -244,7 +244,7 @@ const ConsumerDashboard = () => {
 
           {!isLoading && !error && userRequests.length > 5 && (
             <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
-              <Link to="/orders" className="text-blue-600 hover:text-blue-500 text-sm font-medium">
+              <Link to="/orders" className="nav-link font-medium text-sm">
                 View all requests →
               </Link>
             </div>
