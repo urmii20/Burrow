@@ -95,16 +95,9 @@ const OperatorDashboard = () => {
       });
 
       setUpdateError(null);
-      setRequests((prevRequests) =>
-        prevRequests.map((request) => (request.id === requestId ? updatedRequest : request))
-      );
-
-      if (selectedRequest?.id === requestId) {
-        setSelectedRequest(updatedRequest);
-        setModalStatus(updatedRequest.status);
+      if (typeof window !== 'undefined') {
+        window.location.reload();
       }
-
-      await fetchRequests();
 
       return updatedRequest;
     } catch (updateError_) {
