@@ -16,7 +16,20 @@ export const DEMO_USERS = [
     password: 'AdminDemo1',
     role: 'operator',
     privileges: ['operator']
-
+  },
+  {
+    name: 'Logistics Operator One',
+    email: 'operator.one@burrow.com',
+    password: 'OperatorDemo1',
+    role: 'operator',
+    privileges: ['operator']
+  },
+  {
+    name: 'Logistics Operator Two',
+    email: 'operator.two@burrow.com',
+    password: 'OperatorDemo2',
+    role: 'operator',
+    privileges: ['operator']
   }
 ];
 

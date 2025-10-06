@@ -26,6 +26,28 @@ const DEMO_ACCOUNTS = {
       privileges: ['operator'],
       isActive: true
     }
+  },
+  'operator.one@burrow.com': {
+    password: 'OperatorDemo1',
+    user: {
+      id: 'demo-operator-one',
+      name: 'Logistics Operator One',
+      email: 'operator.one@burrow.com',
+      role: 'operator',
+      privileges: ['operator'],
+      isActive: true
+    }
+  },
+  'operator.two@burrow.com': {
+    password: 'OperatorDemo2',
+    user: {
+      id: 'demo-operator-two',
+      name: 'Logistics Operator Two',
+      email: 'operator.two@burrow.com',
+      role: 'operator',
+      privileges: ['operator'],
+      isActive: true
+    }
   }
 };
 
