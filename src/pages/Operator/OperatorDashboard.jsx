@@ -254,8 +254,11 @@ const OperatorDashboard = () => {
                   <option value="submitted">Submitted</option>
                   <option value="approval_pending">Pending Approval</option>
                   <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="parcel_expected">Parcel Expected</option>
                   <option value="parcel_arrived">Parcel Arrived</option>
                   <option value="in_storage">In Storage</option>
+                  <option value="preparing_dispatch">Preparing Dispatch</option>
                   <option value="out_for_delivery">Out for Delivery</option>
                   <option value="delivered">Delivered</option>
                 </select>
