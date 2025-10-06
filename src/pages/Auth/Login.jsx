@@ -46,10 +46,9 @@ const Login = () => {
           </div>
         )}
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 page-fade">
-          <p className="text-blue-800 text-sm font-medium mb-2">Demo Credentials:</p>
-          <p className="text-blue-700 text-xs">Customer: user@test.com / UserDemo1</p>
-          <p className="text-blue-700 text-xs">Admin: admin@burrow.com / AdminDemo1</p>
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+          <p className="text-blue-800 text-sm font-medium mb-2">Demo Credentials For An Operator View:</p>
+
           <p className="text-blue-700 text-xs">Operator 1: operator.one@burrow.com / OperatorDemo1</p>
           <p className="text-blue-700 text-xs">Operator 2: operator.two@burrow.com / OperatorDemo2</p>
         </div>
