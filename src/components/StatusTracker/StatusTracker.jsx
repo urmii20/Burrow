@@ -155,8 +155,10 @@ const StatusTracker = ({ currentStatus, statusHistory }) => {
                   )}
                 </div>
 
-                {statusEntry?.notes && (
-                  <p className="text-sm text-gray-600 mt-1">{statusEntry.notes}</p>
+                {statusEntry && (statusEntry.notes || statusEntry.note) && (
+                  <p className="text-sm text-gray-600 mt-1">
+                    {statusEntry.notes ?? statusEntry.note}
+                  </p>
                 )}
 
                 {index < statusOrder.length - 1 && (

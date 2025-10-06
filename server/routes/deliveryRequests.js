@@ -7,12 +7,19 @@ const router = Router();
 const DEFAULT_STATUS = 'submitted';
 const STATUS_FLOW = [
   'submitted',
+  'payment_pending',
   'approval_pending',
   'approved',
+  'rejected',
   'scheduled',
+  'parcel_expected',
+  'parcel_arrived',
+  'in_storage',
+  'preparing_dispatch',
   'reschedule_requested',
   'out_for_delivery',
   'delivered',
+  'issue_reported',
   'cancelled'
 ];
 
@@ -20,7 +27,7 @@ function buildStatusHistoryEntry(status, note) {
   return {
     status,
     timestamp: new Date(),
-    ...(note ? { note } : {})
+    ...(note ? { note, notes: note } : {})
   };
 }
 
