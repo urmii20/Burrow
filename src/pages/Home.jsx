@@ -57,7 +57,7 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-burrow-background">
+    <div className="min-h-screen bg-burrow-background page-fade">
       <section className="bg-gradient-to-br from-burrow-background to-burrow-primary/10 py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
@@ -87,7 +87,7 @@ const Home = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-16">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-16 fade-stagger">
             {benefits.map((benefit, idx) => (
               <div
                 key={idx}
@@ -124,7 +124,7 @@ const Home = () => {
               />
             </div>
 
-            <div className="flex flex-col space-y-4 max-h-[650px] overflow-y-auto">
+            <div className="flex flex-col space-y-4 max-h-[650px] overflow-y-auto fade-stagger">
               {warehouses.map((warehouse) => (
                 <div
                   key={warehouse.id}
@@ -155,7 +155,7 @@ const Home = () => {
             <p className="text-lg text-burrow-text-secondary">Three simple steps to take control of your deliveries</p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8 fade-stagger">
             {howItWorks.map((step, index) => (
               <div key={index} className="text-center">
                 <div className="w-20 h-20 bg-burrow-primary text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">

@@ -120,14 +120,14 @@ const ConsumerDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8 page-fade">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
+        <div className="mb-8 page-fade">
           <h1 className="text-3xl font-bold text-gray-900">Welcome back, {state.user?.name}!</h1>
           <p className="text-gray-600 mt-1">Manage your deliveries and schedule new requests</p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 fade-stagger">
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -165,7 +165,7 @@ const ConsumerDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8 page-fade">
           <h2 className="text-xl font-semibold text-gray-900 mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Link
@@ -186,7 +186,7 @@ const ConsumerDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md">
+        <div className="bg-white rounded-lg shadow-md page-fade">
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-xl font-semibold text-gray-900">Recent Requests</h2>
           </div>
