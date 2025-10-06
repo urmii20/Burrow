@@ -1,13 +1,52 @@
-import React, { useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Search, Filter, Eye, CheckCircle, XCircle, Clock } from 'lucide-react';
-import { mockRequests } from '../../data/mockData';
+
+import apiClient from '../../lib/api';
 
 const OperatorDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [requests, setRequests] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [updatingRequestId, setUpdatingRequestId] = useState(null);
+  const [updateError, setUpdateError] = useState(null);
+  const [modalStatus, setModalStatus] = useState('');
+  const [modalNotes, setModalNotes] = useState('');
+  const isMountedRef = useRef(true);
 
-  const filteredRequests = mockRequests.filter(request => {
+  const fetchRequests = useCallback(async () => {
+    setIsLoading(true);
+    setError(null);
+
+    try {
+      const response = await apiClient.get('/requests');
+
+      if (isMountedRef.current) {
+        setRequests(Array.isArray(response) ? response : []);
+      }
+    } catch (fetchError) {
+      if (isMountedRef.current) {
+        setError(fetchError?.message || 'Unable to fetch requests');
+      }
+    } finally {
+      if (isMountedRef.current) {
+        setIsLoading(false);
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+    fetchRequests();
+
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, [fetchRequests]);
+
+  const filteredRequests = requests.filter(request => {
     const lowerSearch = searchTerm.toLowerCase();
     const matchesSearch =
       request.orderNumber.toLowerCase().includes(lowerSearch) ||
@@ -18,11 +57,18 @@ const OperatorDashboard = () => {
   });
 
   const stats = {
-    total: mockRequests.length,
-    pending: mockRequests.filter(req => req.status === 'approval_pending').length,
-    approved: mockRequests.filter(req => req.status === 'approved').length,
-    delivered: mockRequests.filter(req => req.status === 'delivered').length
+    total: requests.length,
+    pending: requests.filter(req => req.status === 'approval_pending').length,
+    approved: requests.filter(req => req.status === 'approved').length,
+    delivered: requests.filter(req => req.status === 'delivered').length
   };
+
+  const formatStatusLabel = (status) =>
+    status
+      ?.split('_')
+      .filter(Boolean)
+      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+      .join(' ') || '';
 
   const getStatusBadge = (status) => {
     const config = {
@@ -30,13 +76,16 @@ const OperatorDashboard = () => {
       approval_pending: { color: 'bg-yellow-100 text-yellow-800', label: 'Pending Approval' },
       approved: { color: 'bg-green-100 text-green-800', label: 'Approved' },
       rejected: { color: 'bg-red-100 text-red-800', label: 'Rejected' },
-      parcel_arrived: { color: 'bg-blue-100 text-blue-800', label: 'Arrived' },
+      parcel_expected: { color: 'bg-blue-100 text-blue-800', label: 'Parcel Expected' },
+      parcel_arrived: { color: 'bg-blue-100 text-blue-800', label: 'Parcel Arrived' },
       in_storage: { color: 'bg-purple-100 text-purple-800', label: 'In Storage' },
+      preparing_dispatch: { color: 'bg-indigo-100 text-indigo-800', label: 'Preparing Dispatch' },
       out_for_delivery: { color: 'bg-orange-100 text-orange-800', label: 'Out for Delivery' },
       delivered: { color: 'bg-green-100 text-green-800', label: 'Delivered' }
     };
 
-    const statusConfig = config[status] || { color: 'bg-gray-100 text-gray-800', label: status };
+    const statusConfig =
+      config[status] || { color: 'bg-gray-100 text-gray-800', label: formatStatusLabel(status) };
 
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig.color}`}>
@@ -45,20 +94,78 @@ const OperatorDashboard = () => {
     );
   };
 
-  const handleStatusUpdate = (requestId, newStatus) => {
-    console.log(`Updating request ${requestId} to status ${newStatus}`);
+  const handleStatusUpdate = async (requestId, newStatus, note) => {
+    setUpdateError(null);
+    setUpdatingRequestId(requestId);
+
+    try {
+      const updatedRequest = await apiClient.patch(`/requests/${requestId}/status`, {
+        status: newStatus,
+        ...(note?.trim() ? { note: note.trim() } : {})
+      });
+
+      setUpdateError(null);
+      setRequests((previousRequests) =>
+        previousRequests.map((request) =>
+          request.id === updatedRequest?.id ? { ...request, ...updatedRequest } : request
+        )
+      );
+
+      if (selectedRequest?.id === updatedRequest?.id) {
+        setSelectedRequest((current) => ({ ...current, ...updatedRequest }));
+      }
+
+      return updatedRequest;
+    } catch (updateError_) {
+      const errorMessage =
+        updateError_?.status === 404
+          ? 'Request not found'
+          : updateError_?.message || 'Unable to update request status.';
+
+      setUpdateError(errorMessage);
+      throw updateError_;
+    } finally {
+      setUpdatingRequestId(null);
+    }
   };
 
   const handleModalStatusChange = (newStatus) => {
-    if (!selectedRequest) return;
+    setModalStatus(newStatus);
+  };
 
-    setSelectedRequest({ ...selectedRequest, status: newStatus });
-    handleStatusUpdate(selectedRequest.id, newStatus);
+  const handleModalSubmit = async () => {
+    if (!selectedRequest) {
+      return;
+    }
+
+    const previousStatus = selectedRequest.status;
+
+    try {
+      const updatedRequest = await handleStatusUpdate(selectedRequest.id, modalStatus, modalNotes);
+      setModalNotes('');
+
+      if (updatedRequest && typeof window !== 'undefined') {
+        window.location.reload();
+      }
+    } catch {
+      setModalStatus(previousStatus);
+    }
+  };
+
+  const handleQuickStatusChange = (requestId, newStatus) => {
+    handleStatusUpdate(requestId, newStatus).catch(() => {});
+  };
+
+  const handleOpenRequest = (request) => {
+    setSelectedRequest(request);
+    setModalStatus(request.status);
+    setModalNotes('');
+    setUpdateError(null);
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="bg-white shadow-sm border-b border-gray-200">
+    <div className="min-h-screen bg-gray-50 page-fade">
+      <div className="bg-white shadow-sm border-b border-gray-200 page-fade">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <h1 className="text-2xl font-bold text-gray-900">Operator Dashboard</h1>
@@ -70,7 +177,7 @@ const OperatorDashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 fade-stagger">
           <div className="bg-white rounded-lg shadow-md p-6">
             <div className="flex items-center">
               <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -120,7 +227,7 @@ const OperatorDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div className="bg-white rounded-lg shadow-md p-6 mb-8 page-fade">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
@@ -147,8 +254,11 @@ const OperatorDashboard = () => {
                   <option value="submitted">Submitted</option>
                   <option value="approval_pending">Pending Approval</option>
                   <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                  <option value="parcel_expected">Parcel Expected</option>
                   <option value="parcel_arrived">Parcel Arrived</option>
                   <option value="in_storage">In Storage</option>
+                  <option value="preparing_dispatch">Preparing Dispatch</option>
                   <option value="out_for_delivery">Out for Delivery</option>
                   <option value="delivered">Delivered</option>
                 </select>
@@ -161,6 +271,18 @@ const OperatorDashboard = () => {
           <div className="px-6 py-4 border-b border-gray-200">
             <h2 className="text-lg font-semibold text-gray-900">Delivery Requests</h2>
           </div>
+
+          {error && (
+            <div className="px-6 py-4 bg-red-50 border-b border-red-100 text-sm text-red-600">
+              {error}
+            </div>
+          )}
+
+          {updateError && !selectedRequest && (
+            <div className="px-6 py-4 bg-red-50 border-b border-red-100 text-sm text-red-600">
+              {updateError}
+            </div>
+          )}
 
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
@@ -184,7 +306,23 @@ const OperatorDashboard = () => {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {filteredRequests.map((request) => (
+                {isLoading && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-6 text-center text-sm text-gray-500">
+                      Loading requests...
+                    </td>
+                  </tr>
+                )}
+
+                {!isLoading && !filteredRequests.length && !error && (
+                  <tr>
+                    <td colSpan={5} className="px-6 py-6 text-center text-sm text-gray-500">
+                      No requests found matching your criteria.
+                    </td>
+                  </tr>
+                )}
+
+                {!isLoading && filteredRequests.map((request) => (
                   <tr key={request.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-gray-900">{request.id}</div>
@@ -211,7 +349,7 @@ const OperatorDashboard = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
                         <button
-                          onClick={() => setSelectedRequest(request)}
+                          onClick={() => handleOpenRequest(request)}
                           className="text-blue-600 hover:text-blue-900"
                         >
                           <Eye className="h-4 w-4" />
@@ -220,14 +358,20 @@ const OperatorDashboard = () => {
                         {request.status === 'approval_pending' && (
                           <>
                             <button
-                              onClick={() => handleStatusUpdate(request.id, 'approved')}
-                              className="text-green-600 hover:text-green-900"
+                              onClick={() => handleQuickStatusChange(request.id, 'approved')}
+                              disabled={updatingRequestId === request.id}
+                              className={`text-green-600 hover:text-green-900 ${
+                                updatingRequestId === request.id ? 'opacity-50 cursor-not-allowed' : ''
+                              }`}
                             >
                               <CheckCircle className="h-4 w-4" />
                             </button>
                             <button
-                              onClick={() => handleStatusUpdate(request.id, 'rejected')}
-                              className="text-red-600 hover:text-red-900"
+                              onClick={() => handleQuickStatusChange(request.id, 'rejected')}
+                              disabled={updatingRequestId === request.id}
+                              className={`text-red-600 hover:text-red-900 ${
+                                updatingRequestId === request.id ? 'opacity-50 cursor-not-allowed' : ''
+                              }`}
                             >
                               <XCircle className="h-4 w-4" />
                             </button>
@@ -240,12 +384,6 @@ const OperatorDashboard = () => {
               </tbody>
             </table>
           </div>
-
-          {filteredRequests.length === 0 && (
-            <div className="px-6 py-8 text-center">
-              <p className="text-gray-600">No requests found matching your criteria.</p>
-            </div>
-          )}
         </div>
 
         {selectedRequest && (
@@ -256,7 +394,11 @@ const OperatorDashboard = () => {
                   Request Details - {selectedRequest.id}
                 </h3>
                 <button
-                  onClick={() => setSelectedRequest(null)}
+                  onClick={() => {
+                    setSelectedRequest(null);
+                    setModalStatus('');
+                    setModalNotes('');
+                  }}
                   className="text-gray-400 hover:text-gray-600"
                 >
                   <XCircle className="h-6 w-6" />
@@ -311,7 +453,7 @@ const OperatorDashboard = () => {
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">Update Status</h4>
                   <select
-                    value={selectedRequest.status}
+                    value={modalStatus}
                     onChange={(event) => handleModalStatusChange(event.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
@@ -333,6 +475,8 @@ const OperatorDashboard = () => {
                   <textarea
                     rows={3}
                     placeholder="Add any notes or comments..."
+                    value={modalNotes}
+                    onChange={(event) => setModalNotes(event.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -340,12 +484,29 @@ const OperatorDashboard = () => {
 
               <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
                 <button
-                  onClick={() => setSelectedRequest(null)}
+                  onClick={() => {
+                    setSelectedRequest(null);
+                    setModalStatus('');
+                    setModalNotes('');
+                  }}
                   className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   Close
                 </button>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                {updateError && (
+                  <div className="flex items-center text-sm text-red-600 mr-auto">
+                    {updateError}
+                  </div>
+                )}
+                <button
+                  onClick={handleModalSubmit}
+                  disabled={updatingRequestId === selectedRequest.id}
+                  className={`px-4 py-2 bg-blue-600 text-white rounded-lg transition-colors ${
+                    updatingRequestId === selectedRequest.id
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:bg-blue-700'
+                  }`}
+                >
                   Update Request
                 </button>
               </div>

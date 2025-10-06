@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Upload, Calendar, CreditCard } from 'lucide-react';
 import WarehouseMap from '../../components/Map/WarehouseMap';
 import { ecommercePlatforms, timeSlots } from '../../data/mockData';
+import apiClient from '../../lib/api';
+import { useAuth } from '../../context/AuthContext';
 
 const initialFormData = {
   orderNumber: '',
@@ -23,12 +25,51 @@ const initialFormData = {
   }
 };
 
+const calculateCharges = () => {
+  const baseHandlingFee = 49;
+  const storageFee = 20;
+  const deliveryCharge = 60;
+  const subtotal = baseHandlingFee + storageFee + deliveryCharge;
+  const gst = subtotal * 0.18;
+  const total = subtotal + gst;
+
+  return {
+    baseHandlingFee,
+    storageFee,
+    deliveryCharge,
+    subtotal,
+    gst,
+    total
+  };
+};
+
 const NewRequest = () => {
   const navigate = useNavigate();
-  const [currentStep, setCurrentStep] = useState(1);
+  const [searchParams] = useSearchParams();
+  const { state } = useAuth();
+
+  // derive initial step from query ?step=schedule|payment|1..3
+  const initialStep = useMemo(() => {
+    const stepParam = searchParams.get('step');
+    if (stepParam === 'schedule') return 2;
+    if (stepParam === 'payment') return 3;
+
+    const numeric = Number.parseInt(stepParam ?? '1', 10);
+    if (Number.isFinite(numeric) && numeric >= 1 && numeric <= 3) return numeric;
+    return 1;
+  }, [searchParams]);
+
+  const [currentStep, setCurrentStep] = useState(initialStep);
   const [formData, setFormData] = useState(initialFormData);
   const [selectedFile, setSelectedFile] = useState(null);
   const [errors, setErrors] = useState({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submitError, setSubmitError] = useState(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('card');
+
+  useEffect(() => {
+    setCurrentStep(initialStep);
+  }, [initialStep]);
 
   const handleInputChange = (event) => {
     const { name, value } = event.target;
@@ -55,6 +96,20 @@ const NewRequest = () => {
         [name]: ''
       }));
     }
+  };
+
+  const clearPaymentError = () => {
+    setErrors((prev) => {
+      if (!prev.paymentMethod) return prev;
+      const rest = { ...prev };
+      delete rest.paymentMethod;
+      return rest;
+    });
+  };
+
+  const handlePaymentMethodChange = (method) => {
+    setSelectedPaymentMethod(method);
+    clearPaymentError();
   };
 
   const handleFileChange = (event) => {
@@ -103,43 +158,109 @@ const NewRequest = () => {
 
   const handleNext = () => {
     if (currentStep === 1 && validateStep1()) {
+      setSubmitError(null);
       setCurrentStep(2);
     } else if (currentStep === 2 && validateStep2()) {
+      setSubmitError(null);
       setCurrentStep(3);
     }
   };
 
-  const handleSubmit = () => {
-    setTimeout(() => {
-      navigate('/dashboard');
-    }, 1000);
+  const charges = useMemo(() => calculateCharges(), []);
+
+  const validateStep3 = () => {
+    if (!selectedPaymentMethod) {
+      setErrors((prev) => ({
+        ...prev,
+        paymentMethod: 'Please select a payment method'
+      }));
+      return false;
+    }
+
+    clearPaymentError();
+    return true;
   };
 
-  const calculateCharges = () => {
-    const baseHandlingFee = 49;
-    const storageFee = 20;
-    const deliveryCharge = 60;
-    const subtotal = baseHandlingFee + storageFee + deliveryCharge;
-    const gst = subtotal * 0.18;
-    const total = subtotal + gst;
+  const handleSubmit = async () => {
+    if (isSubmitting) return;
 
-    return {
-      baseHandlingFee,
-      storageFee,
-      deliveryCharge,
-      subtotal,
-      gst,
-      total
+    const isScheduleValid = validateStep2();
+    if (!isScheduleValid) {
+      setCurrentStep(2);
+      return;
+    }
+
+    const isPaymentValid = validateStep3();
+    if (!isPaymentValid) {
+      setCurrentStep(3);
+      return;
+    }
+
+    if (!state.user?.id) {
+      setSubmitError('You need to be logged in to create a delivery request.');
+      return;
+    }
+
+    const normalisedAddress = {
+      line1: formData.destinationAddress.line1.trim(),
+      line2: formData.destinationAddress.line2.trim(),
+      city: formData.destinationAddress.city.trim(),
+      state: formData.destinationAddress.state.trim(),
+      pincode: formData.destinationAddress.pincode.trim(),
+      landmark: formData.destinationAddress.landmark.trim(),
+      contactNumber: formData.destinationAddress.contactNumber.trim()
     };
+
+    const payload = {
+      userId: state.user.id,
+      orderNumber: formData.orderNumber.trim(),
+      platform: formData.platform,
+      productDescription: formData.productDescription.trim(),
+      warehouseId: formData.warehouse?.id ?? null,
+      originalETA: formData.originalETA,
+      scheduledDeliveryDate: formData.scheduledDeliveryDate,
+      deliveryTimeSlot: formData.deliveryTimeSlot,
+      destinationAddress: normalisedAddress,
+      paymentDetails: {
+        baseHandlingFee: charges.baseHandlingFee,
+        storageFee: charges.storageFee,
+        deliveryCharge: charges.deliveryCharge,
+        gst: Number(charges.gst.toFixed(2)),
+        totalAmount: Number(charges.total.toFixed(2)),
+        paymentStatus: 'paid',
+        paymentMethod: selectedPaymentMethod
+      }
+    };
+
+    setIsSubmitting(true);
+    setSubmitError(null);
+
+    try {
+      const createdRequest = await apiClient.post('/requests', payload);
+      if (createdRequest?.id) {
+        navigate(`/request/${createdRequest.id}`);
+      } else {
+        navigate('/dashboard');
+      }
+    } catch (error) {
+      setSubmitError(error?.message || 'Unable to submit your request. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
-  const charges = calculateCharges();
+  const paymentOptions = [
+    { id: 'card', label: 'Credit/Debit Card' },
+    { id: 'upi', label: 'UPI' },
+    { id: 'netbanking', label: 'Net Banking' },
+    { id: 'wallet', label: 'Wallet' }
+  ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8 page-fade">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+        <div className="mb-8 page-fade">
+          <div className="flex items-center justify-between fade-stagger">
             {[1, 2, 3].map((step) => (
               <div key={step} className="flex items-center">
                 <div
@@ -165,14 +286,15 @@ const NewRequest = () => {
         </div>
 
         {currentStep === 1 && (
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-md p-6 page-fade">
             <div className="flex items-center mb-6">
               <Upload className="h-6 w-6 text-blue-500 mr-2" />
               <h2 className="text-2xl font-bold text-gray-900">Order Details</h2>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 fade-stagger">
+              <div className="space-y-6 fade-stagger">
+                {/* Order number */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Order Number *
@@ -190,6 +312,7 @@ const NewRequest = () => {
                   {errors.orderNumber && <p className="text-red-600 text-xs mt-1">{errors.orderNumber}</p>}
                 </div>
 
+                {/* Platform */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     E-commerce Platform *
@@ -212,6 +335,7 @@ const NewRequest = () => {
                   {errors.platform && <p className="text-red-600 text-xs mt-1">{errors.platform}</p>}
                 </div>
 
+                {/* Description */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Product Description *
@@ -231,6 +355,7 @@ const NewRequest = () => {
                   )}
                 </div>
 
+                {/* Original ETA */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Original Delivery Date *
@@ -247,6 +372,7 @@ const NewRequest = () => {
                   {errors.originalETA && <p className="text-red-600 text-xs mt-1">{errors.originalETA}</p>}
                 </div>
 
+                {/* Receipt */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Upload Receipt (PDF only, max 5MB)
@@ -257,14 +383,13 @@ const NewRequest = () => {
                     onChange={handleFileChange}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
-                  {selectedFile && (
-                    <p className="text-green-600 text-sm mt-1">✓ {selectedFile.name} selected</p>
-                  )}
+                  {selectedFile && <p className="text-green-600 text-sm mt-1">✓ {selectedFile.name} selected</p>}
                   {errors.file && <p className="text-red-600 text-xs mt-1">{errors.file}</p>}
                 </div>
               </div>
 
-              <div>
+              {/* Map */}
+              <div className="page-fade">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Select Warehouse</h3>
                 <WarehouseMap
                   onWarehouseSelect={(warehouse) => setFormData((prev) => ({ ...prev, warehouse }))}
@@ -286,14 +411,15 @@ const NewRequest = () => {
         )}
 
         {currentStep === 2 && (
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-md p-6 page-fade">
             <div className="flex items-center mb-6">
               <Calendar className="h-6 w-6 text-blue-500 mr-2" />
               <h2 className="text-2xl font-bold text-gray-900">Schedule Delivery</h2>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 fade-stagger">
+              {/* Left */}
+              <div className="space-y-6 fade-stagger">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Preferred Delivery Date *
@@ -338,7 +464,8 @@ const NewRequest = () => {
                 </div>
               </div>
 
-              <div className="space-y-6">
+              {/* Right */}
+              <div className="space-y-6 fade-stagger">
                 <h3 className="text-lg font-medium text-gray-900">Destination Address</h3>
 
                 <div className="grid grid-cols-1 gap-4">
@@ -430,7 +557,10 @@ const NewRequest = () => {
 
             <div className="flex justify-between mt-8">
               <button
-                onClick={() => setCurrentStep(1)}
+                onClick={() => {
+                  setSubmitError(null);
+                  setCurrentStep(1);
+                }}
                 className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Previous
@@ -446,16 +576,16 @@ const NewRequest = () => {
         )}
 
         {currentStep === 3 && (
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-md p-6 page-fade">
             <div className="flex items-center mb-6">
               <CreditCard className="h-6 w-6 text-blue-500 mr-2" />
               <h2 className="text-2xl font-bold text-gray-900">Payment Details</h2>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 fade-stagger">
+              <div className="page-fade">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Service Charges</h3>
-                <div className="bg-gray-50 rounded-lg p-4 space-y-3">
+                <div className="bg-gray-50 rounded-lg p-4 space-y-3 fade-stagger">
                   <div className="flex justify-between">
                     <span className="text-gray-600">Base Handling Fee</span>
                     <span className="font-medium">₹{charges.baseHandlingFee}</span>
@@ -487,59 +617,74 @@ const NewRequest = () => {
                 </div>
               </div>
 
-              <div>
+              <div className="space-y-4 fade-stagger">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Payment Method</h3>
-                <div className="space-y-4">
-                  <div className="border border-gray-300 rounded-lg p-4">
-                    <label className="flex items-center">
-                      <input type="radio" name="payment" className="text-blue-600" defaultChecked />
-                      <span className="ml-2">Credit/Debit Card</span>
-                    </label>
-                  </div>
-
-                  <div className="border border-gray-300 rounded-lg p-4">
-                    <label className="flex items-center">
-                      <input type="radio" name="payment" className="text-blue-600" />
-                      <span className="ml-2">UPI</span>
-                    </label>
-                  </div>
-
-                  <div className="border border-gray-300 rounded-lg p-4">
-                    <label className="flex items-center">
-                      <input type="radio" name="payment" className="text-blue-600" />
-                      <span className="ml-2">Net Banking</span>
-                    </label>
-                  </div>
-
-                  <div className="border border-gray-300 rounded-lg p-4">
-                    <label className="flex items-center">
-                      <input type="radio" name="payment" className="text-blue-600" />
-                      <span className="ml-2">Wallet</span>
-                    </label>
-                  </div>
-                </div>
+                {paymentOptions.map((option) => (
+                  <label
+                    key={option.id}
+                    className={`flex items-center border rounded-lg p-4 cursor-pointer transition-colors ${
+                      selectedPaymentMethod === option.id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="payment"
+                      value={option.id}
+                      checked={selectedPaymentMethod === option.id}
+                      onChange={() => handlePaymentMethodChange(option.id)}
+                      className="text-blue-600"
+                    />
+                    <span className="ml-2">{option.label}</span>
+                  </label>
+                ))}
+                {errors.paymentMethod && (
+                  <p className="text-red-600 text-xs mt-2">{errors.paymentMethod}</p>
+                )}
               </div>
             </div>
 
+            {submitError && (
+              <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 page-fade">
+                {submitError}
+              </div>
+            )}
+
             <div className="flex justify-between mt-8">
               <button
-                onClick={() => setCurrentStep(2)}
+                onClick={() => {
+                  setSubmitError(null);
+                  setCurrentStep(2);
+                }}
                 className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 Previous
               </button>
               <button
                 onClick={handleSubmit}
-                className="px-8 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                disabled={isSubmitting}
+                className={`px-8 py-2 rounded-lg transition-colors ${
+                  isSubmitting
+                    ? 'bg-green-400 text-white cursor-not-allowed'
+                    : 'bg-green-600 text-white hover:bg-green-700'
+                }`}
               >
-                Proceed to Pay ₹{charges.total.toFixed(2)}
+                {isSubmitting ? 'Processing...' : `Proceed to Pay ₹${charges.total.toFixed(2)}`}
               </button>
             </div>
           </div>
         )}
-      </div>
-    </div>
-  );
+
+</div>  
+</div>   
+);
 };
 
+
 export default NewRequest;
+
+           
+
+
+

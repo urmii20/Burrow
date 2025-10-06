@@ -86,25 +86,25 @@ const Register = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8">
+    <div className="auth-wrapper page-fade">
+      <div className="auth-container">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">Create your account</h2>
-          <p className="mt-2 text-gray-600">Join Burrow and take control of your deliveries</p>
+          <h2 className="auth-title">Create your account</h2>
+          <p className="auth-subtitle">Join Burrow and take control of your deliveries</p>
         </div>
 
         {state.error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-600 text-sm">{state.error}</p>
+          <div className="alert-error">
+            <p>{state.error}</p>
           </div>
         )}
 
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="space-y-4">
+        <form className="mt-8 space-y-6 fade-stagger" onSubmit={handleSubmit}>
+          <div className="space-y-4 fade-stagger">
             <div>
               <label htmlFor="name" className="sr-only">Full Name</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className="input-group">
+                <div className="input-icon">
                   <User className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
@@ -114,8 +114,8 @@ const Register = () => {
                   required
                   value={formData.name}
                   onChange={handleChange}
-                  className={`pl-10 w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.name ? 'border-red-300' : 'border-gray-300'
+                  className={`input-field ${
+                    errors.name ? 'border-red-300 focus:border-red-400 focus:ring-red-400' : ''
                   }`}
                   placeholder="Full Name"
                 />
@@ -125,8 +125,8 @@ const Register = () => {
 
             <div>
               <label htmlFor="email" className="sr-only">Email address</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className="input-group">
+                <div className="input-icon">
                   <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
@@ -136,8 +136,8 @@ const Register = () => {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className={`pl-10 w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.email ? 'border-red-300' : 'border-gray-300'
+                  className={`input-field ${
+                    errors.email ? 'border-red-300 focus:border-red-400 focus:ring-red-400' : ''
                   }`}
                   placeholder="Email address"
                 />
@@ -147,8 +147,8 @@ const Register = () => {
 
             <div>
               <label htmlFor="phone" className="sr-only">Phone Number</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className="input-group">
+                <div className="input-icon">
                   <Phone className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
@@ -158,8 +158,8 @@ const Register = () => {
                   required
                   value={formData.phone}
                   onChange={handleChange}
-                  className={`pl-10 w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.phone ? 'border-red-300' : 'border-gray-300'
+                  className={`input-field ${
+                    errors.phone ? 'border-red-300 focus:border-red-400 focus:ring-red-400' : ''
                   }`}
                   placeholder="Phone Number"
                 />
@@ -169,8 +169,8 @@ const Register = () => {
 
             <div>
               <label htmlFor="password" className="sr-only">Password</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className="input-group">
+                <div className="input-icon">
                   <Lock className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
@@ -180,14 +180,14 @@ const Register = () => {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className={`pl-10 pr-10 w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.password ? 'border-red-300' : 'border-gray-300'
+                  className={`input-field pr-10 ${
+                    errors.password ? 'border-red-300 focus:border-red-400 focus:ring-red-400' : ''
                   }`}
                   placeholder="Password"
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="btn-text-muted absolute inset-y-0 right-0 pr-3"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
@@ -202,8 +202,8 @@ const Register = () => {
 
             <div>
               <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className="input-group">
+                <div className="input-icon">
                   <Lock className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
@@ -213,14 +213,14 @@ const Register = () => {
                   required
                   value={formData.confirmPassword}
                   onChange={handleChange}
-                  className={`pl-10 pr-10 w-full px-3 py-3 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                    errors.confirmPassword ? 'border-red-300' : 'border-gray-300'
+                  className={`input-field pr-10 ${
+                    errors.confirmPassword ? 'border-red-300 focus:border-red-400 focus:ring-red-400' : ''
                   }`}
                   placeholder="Confirm Password"
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="btn-text-muted absolute inset-y-0 right-0 pr-3"
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? (
@@ -259,15 +259,15 @@ const Register = () => {
           <button
             type="submit"
             disabled={state.isLoading}
-            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-blue btn-block btn-md"
           >
             {state.isLoading ? 'Creating account...' : 'Create account'}
           </button>
 
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
+          <div className="auth-cta">
+            <p>
               Already have an account?{' '}
-              <Link to="/login" className="text-blue-600 hover:text-blue-500 font-medium">
+              <Link to="/login" className="nav-link font-medium">
                 Sign in
               </Link>
             </p>

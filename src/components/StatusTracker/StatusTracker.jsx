@@ -1,4 +1,4 @@
-import React from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Check, Clock, Package, Truck, Home } from 'lucide-react';
 
@@ -91,14 +91,61 @@ const statusOrder = [
 ];
 
 const StatusTracker = ({ currentStatus, statusHistory }) => {
-  const getCurrentStatusIndex = () => {
-    return statusOrder.indexOf(currentStatus);
-  };
+  const currentStatusIndex = useMemo(() => statusOrder.indexOf(currentStatus), [currentStatus]);
+  const [animatedIndex, setAnimatedIndex] = useState(-1);
+  const [animationComplete, setAnimationComplete] = useState(false);
 
-  const isStatusCompleted = (status) => {
-    const statusIndex = statusOrder.indexOf(status);
-    const currentIndex = getCurrentStatusIndex();
-    return statusIndex <= currentIndex;
+  useEffect(() => {
+    if (currentStatusIndex < 0) {
+      setAnimatedIndex(-1);
+      setAnimationComplete(true);
+      return undefined;
+    }
+
+    const startDelay = 150;
+    const stepDuration = 260;
+    let intervalId;
+
+    setAnimatedIndex(-1);
+    setAnimationComplete(false);
+
+    const kickoffTimeout = setTimeout(() => {
+      setAnimatedIndex(0);
+
+      if (currentStatusIndex === 0) {
+        setAnimationComplete(true);
+        return;
+      }
+
+      let nextIndex = 1;
+      intervalId = setInterval(() => {
+        if (nextIndex > currentStatusIndex) {
+          setAnimationComplete(true);
+          clearInterval(intervalId);
+          return;
+        }
+
+        setAnimatedIndex(nextIndex);
+        nextIndex += 1;
+      }, stepDuration);
+    }, startDelay);
+
+    return () => {
+      clearTimeout(kickoffTimeout);
+      if (intervalId) {
+        clearInterval(intervalId);
+      }
+    };
+  }, [currentStatusIndex]);
+
+  const shouldAnimate = currentStatusIndex >= 0;
+
+  const isStatusCompleted = (statusIndex) => {
+    if (!shouldAnimate) {
+      return statusIndex <= currentStatusIndex;
+    }
+
+    return statusIndex <= animatedIndex && animatedIndex !== -1;
   };
 
   const formatTimestamp = (timestamp) => {
@@ -112,32 +159,45 @@ const StatusTracker = ({ currentStatus, statusHistory }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="card-padded">
       <h3 className="text-xl font-semibold text-gray-900 mb-6">Order Status</h3>
 
-      <div className="space-y-4">
+      <div className="timeline">
         {statusOrder.map((status, index) => {
           const config = statusConfig[status];
           const Icon = config.icon;
-          const isCompleted = isStatusCompleted(status);
+          const isCompleted = isStatusCompleted(index);
           const isCurrent = status === currentStatus;
           const statusEntry = statusHistory.find(s => s.status === status);
+          const isRevealed = !shouldAnimate || animationComplete || index <= animatedIndex;
+          const lineFilled = !shouldAnimate
+            ? index < currentStatusIndex
+            : animatedIndex > index;
 
           return (
-            <div key={status} className="flex items-start space-x-4">
-              <div className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center ${
-                isCompleted
-                  ? config.bgColor
-                  : 'bg-gray-100'
-              }`}>
-                <Icon className={`h-5 w-5 ${
-                  isCompleted ? config.color : 'text-gray-400'
-                }`} />
+            <div
+              key={status}
+              className={`timeline-item ${
+                isRevealed ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-6'
+              }`}
+            >
+              <div
+                className={`timeline-icon ${
+                  isCompleted
+                    ? `${config.bgColor} shadow-sm`
+                    : 'bg-gray-100'
+                }`}
+              >
+                <Icon
+                  className={`h-5 w-5 transition-colors duration-500 ${
+                    isCompleted ? config.color : 'text-gray-400'
+                  }`}
+                />
               </div>
 
-              <div className="flex-1 min-w-0">
+              <div className="timeline-content">
                 <div className="flex items-center justify-between">
-                  <p className={`text-sm font-medium ${
+                  <p className={`timeline-title ${
                     isCompleted ? 'text-gray-900' : 'text-gray-500'
                   }`}>
                     {config.label}
@@ -149,20 +209,26 @@ const StatusTracker = ({ currentStatus, statusHistory }) => {
                   </p>
 
                   {statusEntry && (
-                    <p className="text-xs text-gray-500">
+                    <p className="timeline-meta">
                       {formatTimestamp(statusEntry.timestamp)}
                     </p>
                   )}
                 </div>
 
-                {statusEntry?.notes && (
-                  <p className="text-sm text-gray-600 mt-1">{statusEntry.notes}</p>
+                {statusEntry && (statusEntry.notes || statusEntry.note) && (
+                  <p className="text-sm text-gray-600 mt-1">
+                    {statusEntry.notes ?? statusEntry.note}
+                  </p>
                 )}
 
                 {index < statusOrder.length - 1 && (
-                  <div className={`w-px h-6 ml-5 mt-2 ${
-                    isCompleted ? 'bg-green-300' : 'bg-gray-200'
-                  }`} />
+                  <div className="relative w-px h-6 ml-5 mt-2 bg-gray-200 overflow-hidden">
+                    <div
+                      className={`absolute inset-0 bg-green-300 transform origin-top transition-transform duration-500 ease-out ${
+                        lineFilled ? 'scale-y-100' : 'scale-y-0'
+                      }`}
+                    />
+                  </div>
                 )}
               </div>
             </div>
