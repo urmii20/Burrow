@@ -29,30 +29,6 @@ const DEMO_ACCOUNTS = {
   }
 };
 
-const DEMO_ACCOUNTS = {
-  'user@test.com': {
-    password: 'UserDemo1',
-    user: {
-      id: 'demo-user',
-      name: 'Demo Customer',
-      email: 'user@test.com',
-      role: 'consumer',
-      privileges: ['consumer'],
-      isActive: true
-    }
-  },
-  'admin@burrow.com': {
-    password: 'AdminDemo1',
-    user: {
-      id: 'demo-operator',
-      name: 'Demo Operator',
-      email: 'admin@burrow.com',
-      role: 'operator',
-      privileges: ['operator'],
-      isActive: true
-    }
-  }
-};
 
 const router = Router();
 

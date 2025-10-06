@@ -109,7 +109,7 @@ export function isDemoUserEmail(email) {
 }
 
 
-export async function seedDemoUsers(db) {
+export async function seedDemoUsers(db, options = {}) {
 
 
   if (!db) {
@@ -126,9 +126,7 @@ export async function seedDemoUsers(db) {
 
 
 
-  for (const userConfig of DEMO_USERS) {
-
-
+  for (const userConfig of usersToSeed) {
 
     await upsertUser(usersCollection, userConfig);
   }
