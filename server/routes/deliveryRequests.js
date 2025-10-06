@@ -68,6 +68,20 @@ function buildRequestIdQuery(rawId) {
   return { _id: rawId };
 }
 
+async function resolveUpdatedRequest(collection, idQuery, updateResult) {
+  if (updateResult && typeof updateResult === 'object') {
+    if ('value' in updateResult && updateResult.value) {
+      return updateResult.value;
+    }
+
+    if (updateResult.lastErrorObject?.updatedExisting) {
+      return collection.findOne(idQuery);
+    }
+  }
+
+  return updateResult;
+}
+
 router.get('/', async (req, res) => {
   const db = ensureDatabase(req, res);
   if (!db) {
@@ -253,8 +267,9 @@ router.put('/:id/reschedule', async (req, res) => {
   }
 
   const now = new Date();
+  const collection = db.collection('deliveryRequests');
 
-  const updateResult = await db.collection('deliveryRequests').findOneAndUpdate(
+  const updateResult = await collection.findOneAndUpdate(
     idQuery,
     {
       $set: {
@@ -268,7 +283,7 @@ router.put('/:id/reschedule', async (req, res) => {
     { returnDocument: 'after' }
   );
 
-  const updatedRequest = updateResult.value;
+  const updatedRequest = await resolveUpdatedRequest(collection, idQuery, updateResult);
 
   if (!updatedRequest) {
     return res.status(404).json({ message: 'Request not found' });
@@ -301,8 +316,9 @@ router.patch('/:id/status', async (req, res) => {
   }
 
   const now = new Date();
+  const collection = db.collection('deliveryRequests');
 
-  const updateResult = await db.collection('deliveryRequests').findOneAndUpdate(
+  const updateResult = await collection.findOneAndUpdate(
     idQuery,
     {
       $set: { status, updatedAt: now },
@@ -311,7 +327,7 @@ router.patch('/:id/status', async (req, res) => {
     { returnDocument: 'after' }
   );
 
-  const updatedRequest = updateResult.value;
+  const updatedRequest = await resolveUpdatedRequest(collection, idQuery, updateResult);
 
   if (!updatedRequest) {
     return res.status(404).json({ message: 'Request not found' });
@@ -370,13 +386,15 @@ router.patch('/:id/payment', async (req, res) => {
     updateSet['paymentDetails.paymentMethod'] = paymentDetails.paymentMethod;
   }
 
-  const updateResult = await db.collection('deliveryRequests').findOneAndUpdate(
+  const collection = db.collection('deliveryRequests');
+
+  const updateResult = await collection.findOneAndUpdate(
     idQuery,
     { $set: updateSet },
     { returnDocument: 'after' }
   );
 
-  const updatedRequest = updateResult.value;
+  const updatedRequest = await resolveUpdatedRequest(collection, idQuery, updateResult);
 
   if (!updatedRequest) {
     return res.status(404).json({ message: 'Request not found' });
