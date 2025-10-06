@@ -95,13 +95,24 @@ const OperatorDashboard = () => {
       });
 
       setUpdateError(null);
-      if (typeof window !== 'undefined') {
-        window.location.reload();
+      setRequests((previousRequests) =>
+        previousRequests.map((request) =>
+          request.id === updatedRequest?.id ? { ...request, ...updatedRequest } : request
+        )
+      );
+
+      if (selectedRequest?.id === updatedRequest?.id) {
+        setSelectedRequest((current) => ({ ...current, ...updatedRequest }));
       }
 
       return updatedRequest;
     } catch (updateError_) {
-      setUpdateError(updateError_?.message || 'Unable to update request status.');
+      const errorMessage =
+        updateError_?.status === 404
+          ? 'Request not found'
+          : updateError_?.message || 'Unable to update request status.';
+
+      setUpdateError(errorMessage);
       throw updateError_;
     } finally {
       setUpdatingRequestId(null);
@@ -120,8 +131,14 @@ const OperatorDashboard = () => {
     const previousStatus = selectedRequest.status;
 
     try {
-      await handleStatusUpdate(selectedRequest.id, modalStatus, modalNotes);
+      const updatedRequest = await handleStatusUpdate(selectedRequest.id, modalStatus, modalNotes);
       setModalNotes('');
+
+      if (updatedRequest && typeof window !== 'undefined') {
+        setSelectedRequest(null);
+        setModalStatus('');
+        window.location.reload();
+      }
     } catch {
       setModalStatus(previousStatus);
     }
