@@ -115,7 +115,11 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
         )}
       </div>
 
-      <div className="bg-burrow-background rounded-lg border border-burrow-primary/30 p-4 min-h-[112px] flex flex-col justify-center">
+      <div
+        className={`rounded-lg border p-4 flex flex-col gap-2 transition-colors duration-200 ${
+          selectedWarehouse ? 'bg-green-50 border-green-400' : 'bg-burrow-background border-burrow-primary/30'
+        }`}
+      >
         {selectedWarehouse ? (
           <div className="space-y-1">
             <div className="flex items-center gap-2">
