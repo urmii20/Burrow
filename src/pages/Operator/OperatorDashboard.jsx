@@ -135,8 +135,6 @@ const OperatorDashboard = () => {
       setModalNotes('');
 
       if (updatedRequest && typeof window !== 'undefined') {
-        setSelectedRequest(null);
-        setModalStatus('');
         window.location.reload();
       }
     } catch {
