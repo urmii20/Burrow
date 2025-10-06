@@ -33,7 +33,7 @@ const ChangeMapView = ({ center }) => {
     }
 
     const nextCenter = Array.isArray(center) ? center : DEFAULT_CENTER;
-    map.flyTo(nextCenter, Math.max(map.getZoom(), 5), {
+    map.flyTo(nextCenter, Math.max(map.getZoom(), 4), {
       animate: true,
       duration: 0.75
     });
@@ -78,7 +78,7 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
         {isMapReady ? (
           <MapContainer
             center={mapCenter}
-            zoom={5}
+            zoom={4}
             scrollWheelZoom
             className="h-full w-full"
           >
