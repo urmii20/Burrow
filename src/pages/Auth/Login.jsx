@@ -33,32 +33,32 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 flex items-center justify-center py-12 px-4 sm:px-6 lg:px-8 page-fade">
-      <div className="max-w-md w-full space-y-8">
+    <div className="auth-wrapper page-fade">
+      <div className="auth-container">
         <div className="text-center">
-          <h2 className="text-3xl font-bold text-gray-900">Welcome back</h2>
-          <p className="mt-2 text-gray-600">Sign in to your Burrow account</p>
+          <h2 className="auth-title">Welcome back</h2>
+          <p className="auth-subtitle">Sign in to your Burrow account</p>
         </div>
 
         {state.error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4">
-            <p className="text-red-600 text-sm">{state.error}</p>
+          <div className="alert-error">
+            <p>{state.error}</p>
           </div>
         )}
 
-        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-          <p className="text-blue-800 text-sm font-medium mb-2">Demo Credentials For An Operator View:</p>
+        <div className="alert-info">
+          <p className="font-medium mb-2">Demo Credentials For An Operator View:</p>
 
-          <p className="text-blue-700 text-xs">Operator 1: operator.one@burrow.com / OperatorDemo1</p>
-          <p className="text-blue-700 text-xs">Operator 2: operator.two@burrow.com / OperatorDemo2</p>
+          <p className="text-xs text-blue-700">Operator 1: operator.one@burrow.com / OperatorDemo1</p>
+          <p className="text-xs text-blue-700">Operator 2: operator.two@burrow.com / OperatorDemo2</p>
         </div>
 
         <form className="mt-8 space-y-6 fade-stagger" onSubmit={handleSubmit}>
           <div className="space-y-4 fade-stagger">
             <div>
               <label htmlFor="email" className="sr-only">Email address</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className="input-group">
+                <div className="input-icon">
                   <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
@@ -68,7 +68,7 @@ const Login = () => {
                   required
                   value={formData.email}
                   onChange={handleChange}
-                  className="pl-10 w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="input-field"
                   placeholder="Email address"
                 />
               </div>
@@ -76,8 +76,8 @@ const Login = () => {
 
             <div>
               <label htmlFor="password" className="sr-only">Password</label>
-              <div className="relative">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <div className="input-group">
+                <div className="input-icon">
                   <Lock className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
@@ -87,12 +87,12 @@ const Login = () => {
                   required
                   value={formData.password}
                   onChange={handleChange}
-                  className="pl-10 pr-10 w-full px-3 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="input-field pr-10"
                   placeholder="Password"
                 />
                 <button
                   type="button"
-                  className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                  className="btn-text-muted absolute inset-y-0 right-0 pr-3"
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
@@ -121,7 +121,7 @@ const Login = () => {
             </div>
 
             <div className="text-sm">
-              <Link to="/forgot-password" className="text-blue-600 hover:text-blue-500">
+              <Link to="/forgot-password" className="nav-link">
                 Forgot password?
               </Link>
             </div>
@@ -130,15 +130,15 @@ const Login = () => {
           <button
             type="submit"
             disabled={state.isLoading}
-            className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:opacity-50 disabled:cursor-not-allowed"
+            className="btn-blue btn-block btn-md"
           >
             {state.isLoading ? 'Signing in...' : 'Sign in'}
           </button>
 
-          <div className="text-center">
-            <p className="text-sm text-gray-600">
+          <div className="auth-cta">
+            <p>
               Don&apos;t have an account?{' '}
-              <Link to="/register" className="text-blue-600 hover:text-blue-500 font-medium">
+              <Link to="/register" className="nav-link font-medium">
                 Sign up
               </Link>
             </p>

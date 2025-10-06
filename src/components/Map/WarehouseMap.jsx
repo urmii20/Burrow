@@ -71,10 +71,10 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
   }, [selectedWarehouse]);
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="map-card">
       <h3 className="text-xl font-semibold text-burrow-text-primary mb-4">Find Nearby Warehouses</h3>
 
-      <div className="bg-burrow-background rounded-lg h-64 mb-6 overflow-hidden">
+      <div className="map-shell mb-6">
         {isMapReady ? (
           <MapContainer
             center={mapCenter}
@@ -108,7 +108,7 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
             ))}
           </MapContainer>
         ) : (
-          <div className="h-full flex flex-col items-center justify-center text-burrow-text-secondary">
+          <div className="map-placeholder">
             <MapPin className="h-10 w-10 mb-2 text-burrow-primary" />
             <p>Loading map...</p>
           </div>
@@ -116,7 +116,7 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
       </div>
 
       <div
-        className={`rounded-lg border p-4 flex flex-col gap-2 transition-colors duration-200 ${
+        className={`card-bordered p-4 flex flex-col gap-2 transition-colors duration-200 ${
           selectedWarehouse ? 'bg-green-50 border-green-400' : 'bg-burrow-background border-burrow-primary/30'
         }`}
       >

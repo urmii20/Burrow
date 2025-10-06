@@ -159,10 +159,10 @@ const StatusTracker = ({ currentStatus, statusHistory }) => {
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-6">
+    <div className="card-padded">
       <h3 className="text-xl font-semibold text-gray-900 mb-6">Order Status</h3>
 
-      <div className="space-y-4">
+      <div className="timeline">
         {statusOrder.map((status, index) => {
           const config = statusConfig[status];
           const Icon = config.icon;
@@ -177,12 +177,12 @@ const StatusTracker = ({ currentStatus, statusHistory }) => {
           return (
             <div
               key={status}
-              className={`flex items-start space-x-4 transition-all duration-500 ease-out ${
+              className={`timeline-item ${
                 isRevealed ? 'opacity-100 translate-x-0' : 'opacity-0 -translate-x-6'
               }`}
             >
               <div
-                className={`flex-shrink-0 w-10 h-10 rounded-full flex items-center justify-center transition-all duration-500 ease-out ${
+                className={`timeline-icon ${
                   isCompleted
                     ? `${config.bgColor} shadow-sm`
                     : 'bg-gray-100'
@@ -195,9 +195,9 @@ const StatusTracker = ({ currentStatus, statusHistory }) => {
                 />
               </div>
 
-              <div className="flex-1 min-w-0">
+              <div className="timeline-content">
                 <div className="flex items-center justify-between">
-                  <p className={`text-sm font-medium ${
+                  <p className={`timeline-title ${
                     isCompleted ? 'text-gray-900' : 'text-gray-500'
                   }`}>
                     {config.label}
@@ -209,7 +209,7 @@ const StatusTracker = ({ currentStatus, statusHistory }) => {
                   </p>
 
                   {statusEntry && (
-                    <p className="text-xs text-gray-500">
+                    <p className="timeline-meta">
                       {formatTimestamp(statusEntry.timestamp)}
                     </p>
                   )}
