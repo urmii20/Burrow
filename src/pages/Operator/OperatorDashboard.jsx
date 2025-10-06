@@ -10,6 +10,10 @@ const OperatorDashboard = () => {
   const [requests, setRequests] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [updatingRequestId, setUpdatingRequestId] = useState(null);
+  const [updateError, setUpdateError] = useState(null);
+  const [modalStatus, setModalStatus] = useState('');
+  const [modalNotes, setModalNotes] = useState('');
 
   useEffect(() => {
     let isMounted = true;
@@ -79,15 +83,62 @@ const OperatorDashboard = () => {
     );
   };
 
-  const handleStatusUpdate = (requestId, newStatus) => {
-    console.log(`Updating request ${requestId} to status ${newStatus}`);
+  const handleStatusUpdate = async (requestId, newStatus, note) => {
+    setUpdateError(null);
+    setUpdatingRequestId(requestId);
+
+    try {
+      const updatedRequest = await apiClient.patch(`/requests/${requestId}/status`, {
+        status: newStatus,
+        ...(note?.trim() ? { note: note.trim() } : {})
+      });
+
+      setRequests((prevRequests) =>
+        prevRequests.map((request) => (request.id === requestId ? updatedRequest : request))
+      );
+
+      if (selectedRequest?.id === requestId) {
+        setSelectedRequest(updatedRequest);
+        setModalStatus(updatedRequest.status);
+      }
+
+      return updatedRequest;
+    } catch (updateError_) {
+      setUpdateError(updateError_?.message || 'Unable to update request status.');
+      throw updateError_;
+    } finally {
+      setUpdatingRequestId(null);
+    }
   };
 
   const handleModalStatusChange = (newStatus) => {
-    if (!selectedRequest) return;
+    setModalStatus(newStatus);
+  };
 
-    setSelectedRequest({ ...selectedRequest, status: newStatus });
-    handleStatusUpdate(selectedRequest.id, newStatus);
+  const handleModalSubmit = async () => {
+    if (!selectedRequest) {
+      return;
+    }
+
+    const previousStatus = selectedRequest.status;
+
+    try {
+      await handleStatusUpdate(selectedRequest.id, modalStatus, modalNotes);
+      setModalNotes('');
+    } catch {
+      setModalStatus(previousStatus);
+    }
+  };
+
+  const handleQuickStatusChange = (requestId, newStatus) => {
+    handleStatusUpdate(requestId, newStatus).catch(() => {});
+  };
+
+  const handleOpenRequest = (request) => {
+    setSelectedRequest(request);
+    setModalStatus(request.status);
+    setModalNotes('');
+    setUpdateError(null);
   };
 
   return (
@@ -202,6 +253,12 @@ const OperatorDashboard = () => {
             </div>
           )}
 
+          {updateError && !selectedRequest && (
+            <div className="px-6 py-4 bg-red-50 border-b border-red-100 text-sm text-red-600">
+              {updateError}
+            </div>
+          )}
+
           <div className="overflow-x-auto">
             <table className="min-w-full divide-y divide-gray-200">
               <thead className="bg-gray-50">
@@ -267,7 +324,7 @@ const OperatorDashboard = () => {
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
                         <button
-                          onClick={() => setSelectedRequest(request)}
+                          onClick={() => handleOpenRequest(request)}
                           className="text-blue-600 hover:text-blue-900"
                         >
                           <Eye className="h-4 w-4" />
@@ -276,14 +333,20 @@ const OperatorDashboard = () => {
                         {request.status === 'approval_pending' && (
                           <>
                             <button
-                              onClick={() => handleStatusUpdate(request.id, 'approved')}
-                              className="text-green-600 hover:text-green-900"
+                              onClick={() => handleQuickStatusChange(request.id, 'approved')}
+                              disabled={updatingRequestId === request.id}
+                              className={`text-green-600 hover:text-green-900 ${
+                                updatingRequestId === request.id ? 'opacity-50 cursor-not-allowed' : ''
+                              }`}
                             >
                               <CheckCircle className="h-4 w-4" />
                             </button>
                             <button
-                              onClick={() => handleStatusUpdate(request.id, 'rejected')}
-                              className="text-red-600 hover:text-red-900"
+                              onClick={() => handleQuickStatusChange(request.id, 'rejected')}
+                              disabled={updatingRequestId === request.id}
+                              className={`text-red-600 hover:text-red-900 ${
+                                updatingRequestId === request.id ? 'opacity-50 cursor-not-allowed' : ''
+                              }`}
                             >
                               <XCircle className="h-4 w-4" />
                             </button>
@@ -306,7 +369,11 @@ const OperatorDashboard = () => {
                   Request Details - {selectedRequest.id}
                 </h3>
                 <button
-                  onClick={() => setSelectedRequest(null)}
+                  onClick={() => {
+                    setSelectedRequest(null);
+                    setModalStatus('');
+                    setModalNotes('');
+                  }}
                   className="text-gray-400 hover:text-gray-600"
                 >
                   <XCircle className="h-6 w-6" />
@@ -361,7 +428,7 @@ const OperatorDashboard = () => {
                 <div>
                   <h4 className="font-medium text-gray-900 mb-2">Update Status</h4>
                   <select
-                    value={selectedRequest.status}
+                    value={modalStatus}
                     onChange={(event) => handleModalStatusChange(event.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   >
@@ -383,6 +450,8 @@ const OperatorDashboard = () => {
                   <textarea
                     rows={3}
                     placeholder="Add any notes or comments..."
+                    value={modalNotes}
+                    onChange={(event) => setModalNotes(event.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                   />
                 </div>
@@ -390,12 +459,29 @@ const OperatorDashboard = () => {
 
               <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
                 <button
-                  onClick={() => setSelectedRequest(null)}
+                  onClick={() => {
+                    setSelectedRequest(null);
+                    setModalStatus('');
+                    setModalNotes('');
+                  }}
                   className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
                 >
                   Close
                 </button>
-                <button className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                {updateError && (
+                  <div className="flex items-center text-sm text-red-600 mr-auto">
+                    {updateError}
+                  </div>
+                )}
+                <button
+                  onClick={handleModalSubmit}
+                  disabled={updatingRequestId === selectedRequest.id}
+                  className={`px-4 py-2 bg-blue-600 text-white rounded-lg transition-colors ${
+                    updatingRequestId === selectedRequest.id
+                      ? 'opacity-50 cursor-not-allowed'
+                      : 'hover:bg-blue-700'
+                  }`}
+                >
                   Update Request
                 </button>
               </div>

@@ -109,9 +109,7 @@ export function isDemoUserEmail(email) {
 }
 
 
-export async function seedDemoUsers(db) {
-
-
+export async function seedDemoUsers(db, options = {}) {
   if (!db) {
     throw new Error('Cannot seed demo users without an active database connection.');
   }
@@ -123,13 +121,7 @@ export async function seedDemoUsers(db) {
     ? DEMO_USERS.filter((user) => requestedEmails.includes(user.email))
     : DEMO_USERS;
 
-
-
-
-  for (const userConfig of DEMO_USERS) {
-
-
-
+  for (const userConfig of usersToSeed) {
     await upsertUser(usersCollection, userConfig);
   }
 }
