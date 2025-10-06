@@ -283,7 +283,10 @@ router.put('/:id/reschedule', async (req, res) => {
     { returnDocument: 'after' }
   );
 
-  const updatedRequest = await resolveUpdatedRequest(collection, idQuery, updateResult);
+  const updatedRequest =
+    updateResult && typeof updateResult === 'object' && 'value' in updateResult
+      ? updateResult.value
+      : updateResult;
 
   if (!updatedRequest) {
     return res.status(404).json({ message: 'Request not found' });
@@ -327,7 +330,10 @@ router.patch('/:id/status', async (req, res) => {
     { returnDocument: 'after' }
   );
 
-  const updatedRequest = await resolveUpdatedRequest(collection, idQuery, updateResult);
+  const updatedRequest =
+    updateResult && typeof updateResult === 'object' && 'value' in updateResult
+      ? updateResult.value
+      : updateResult;
 
   if (!updatedRequest) {
     return res.status(404).json({ message: 'Request not found' });
@@ -394,7 +400,10 @@ router.patch('/:id/payment', async (req, res) => {
     { returnDocument: 'after' }
   );
 
-  const updatedRequest = await resolveUpdatedRequest(collection, idQuery, updateResult);
+  const updatedRequest =
+    updateResult && typeof updateResult === 'object' && 'value' in updateResult
+      ? updateResult.value
+      : updateResult;
 
   if (!updatedRequest) {
     return res.status(404).json({ message: 'Request not found' });
