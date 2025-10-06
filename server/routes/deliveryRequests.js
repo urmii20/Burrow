@@ -1,4 +1,5 @@
 import { Router } from 'express';
+import { ObjectId } from 'mongodb';
 
 import { serialiseDocument, toObjectId } from '../utils/formatters.js';
 
@@ -54,6 +55,19 @@ function serialiseRequests(requests) {
   return requests.map((request) => serialiseDocument(request));
 }
 
+function buildRequestIdQuery(rawId) {
+  if (!rawId) {
+    throw new Error('request id is required.');
+  }
+
+  if (ObjectId.isValid(rawId)) {
+    const objectId = new ObjectId(rawId);
+    return { $or: [{ _id: objectId }, { _id: rawId }] };
+  }
+
+  return { _id: rawId };
+}
+
 router.get('/', async (req, res) => {
   const db = ensureDatabase(req, res);
   if (!db) {
@@ -95,14 +109,14 @@ router.get('/:id', async (req, res) => {
     return;
   }
 
-  let requestId;
+  let idQuery;
   try {
-    requestId = toObjectId(req.params.id, 'request id');
+    idQuery = buildRequestIdQuery(req.params.id);
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
 
-  const request = await db.collection('deliveryRequests').findOne({ _id: requestId });
+  const request = await db.collection('deliveryRequests').findOne(idQuery);
 
   if (!request) {
     return res.status(404).json({ message: 'Request not found' });
@@ -224,9 +238,9 @@ router.put('/:id/reschedule', async (req, res) => {
     return res.status(400).json({ message: 'scheduledDeliveryDate and deliveryTimeSlot are required.' });
   }
 
-  let requestId;
+  let idQuery;
   try {
-    requestId = toObjectId(req.params.id, 'request id');
+    idQuery = buildRequestIdQuery(req.params.id);
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
@@ -241,7 +255,7 @@ router.put('/:id/reschedule', async (req, res) => {
   const now = new Date();
 
   const updateResult = await db.collection('deliveryRequests').findOneAndUpdate(
-    { _id: requestId },
+    idQuery,
     {
       $set: {
         scheduledDeliveryDate: parsedScheduledDeliveryDate,
@@ -279,9 +293,9 @@ router.patch('/:id/status', async (req, res) => {
     return res.status(400).json({ message: `status must be one of: ${STATUS_FLOW.join(', ')}` });
   }
 
-  let requestId;
+  let idQuery;
   try {
-    requestId = toObjectId(req.params.id, 'request id');
+    idQuery = buildRequestIdQuery(req.params.id);
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
@@ -289,7 +303,7 @@ router.patch('/:id/status', async (req, res) => {
   const now = new Date();
 
   const updateResult = await db.collection('deliveryRequests').findOneAndUpdate(
-    { _id: requestId },
+    idQuery,
     {
       $set: { status, updatedAt: now },
       $push: { statusHistory: buildStatusHistoryEntry(status, note) }
@@ -318,9 +332,9 @@ router.patch('/:id/payment', async (req, res) => {
     return res.status(400).json({ message: 'paymentStatus is required.' });
   }
 
-  let requestId;
+  let idQuery;
   try {
-    requestId = toObjectId(req.params.id, 'request id');
+    idQuery = buildRequestIdQuery(req.params.id);
   } catch (error) {
     return res.status(400).json({ message: error.message });
   }
@@ -357,7 +371,7 @@ router.patch('/:id/payment', async (req, res) => {
   }
 
   const updateResult = await db.collection('deliveryRequests').findOneAndUpdate(
-    { _id: requestId },
+    idQuery,
     { $set: updateSet },
     { returnDocument: 'after' }
   );
