@@ -117,7 +117,7 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
-            <div className="h-full rounded-lg shadow-md overflow-hidden">
+            <div className="h-fit rounded-lg shadow-md overflow-hidden">
               <WarehouseMap
                 onWarehouseSelect={setSelectedWarehouse}
                 selectedWarehouseId={selectedWarehouse?.id}
