@@ -152,15 +152,15 @@ const TrackRequest = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-full py-12">
+    <div className="bg-gray-50 min-h-full py-12 page-fade">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="bg-white shadow-md rounded-lg p-8">
+        <div className="bg-white shadow-md rounded-lg p-8 page-fade">
           <h1 className="text-2xl font-bold text-gray-900 mb-2">Track your delivery request</h1>
           <p className="text-sm text-gray-600 mb-6">
             Enter your order number to view the current status, scheduled date, and destination details of your request.
           </p>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 fade-stagger">
             <div>
               <label htmlFor="orderNumber" className="block text-sm font-medium text-gray-700">
                 Order number
@@ -198,7 +198,7 @@ const TrackRequest = () => {
           )}
 
           {hasSearched && !error && (
-            <div className="mt-8 space-y-4">
+            <div className="mt-8 space-y-4 fade-stagger">
               {results.length > 0 ? (
                 results.map((request) => renderResult(request))
               ) : (

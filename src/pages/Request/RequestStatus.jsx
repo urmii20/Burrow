@@ -80,7 +80,7 @@ const RequestStatus = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center page-fade">
         <p className="text-gray-600">Loading request details...</p>
       </div>
     );
@@ -88,7 +88,7 @@ const RequestStatus = () => {
 
   if (notFound) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center page-fade">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900">Request not found</h2>
           <p className="text-gray-600 mt-2">The request you&apos;re looking for doesn&apos;t exist.</p>
@@ -102,7 +102,7 @@ const RequestStatus = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center page-fade">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-gray-900">Something went wrong</h2>
           <p className="text-gray-600 mt-2">{error}</p>
@@ -121,9 +121,9 @@ const RequestStatus = () => {
   const paymentStatus = request.paymentDetails?.paymentStatus ?? 'pending';
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8 page-fade">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
+        <div className="mb-8 page-fade">
           <div className="flex items-center space-x-4 mb-4">
             <Link to="/dashboard" className="flex items-center text-gray-600 hover:text-gray-800 transition-colors">
               <ArrowLeft className="h-5 w-5 mr-1" />
@@ -195,13 +195,13 @@ const RequestStatus = () => {
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          <div className="lg:col-span-2">
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 fade-stagger">
+          <div className="lg:col-span-2 page-fade">
             <StatusTracker currentStatus={request.status} statusHistory={request.statusHistory ?? []} />
           </div>
 
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-lg shadow-md p-6 page-fade">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Information</h3>
 
               <div className="space-y-3 text-sm">
@@ -229,7 +229,7 @@ const RequestStatus = () => {
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-lg shadow-md p-6 page-fade">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Delivery Details</h3>
 
               <div className="space-y-3 text-sm">
@@ -270,7 +270,7 @@ const RequestStatus = () => {
             </div>
 
             {warehouse && (
-              <div className="bg-white rounded-lg shadow-md p-6">
+              <div className="bg-white rounded-lg shadow-md p-6 page-fade">
                 <h3 className="text-lg font-semibold text-gray-900 mb-4">Warehouse Details</h3>
 
                 <div className="space-y-3 text-sm">
@@ -292,7 +292,7 @@ const RequestStatus = () => {
               </div>
             )}
 
-            <div className="bg-white rounded-lg shadow-md p-6">
+            <div className="bg-white rounded-lg shadow-md p-6 page-fade">
               <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Details</h3>
 
               <div className="space-y-2 text-sm">

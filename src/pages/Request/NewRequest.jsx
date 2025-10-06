@@ -218,10 +218,10 @@ const NewRequest = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
+    <div className="min-h-screen bg-gray-50 py-8 page-fade">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <div className="flex items-center justify-between">
+        <div className="mb-8 page-fade">
+          <div className="flex items-center justify-between fade-stagger">
             {[1, 2, 3].map((step) => (
               <div key={step} className="flex items-center">
                 <div
@@ -247,14 +247,14 @@ const NewRequest = () => {
         </div>
 
         {currentStep === 1 && (
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-md p-6 page-fade">
             <div className="flex items-center mb-6">
               <Upload className="h-6 w-6 text-blue-500 mr-2" />
               <h2 className="text-2xl font-bold text-gray-900">Order Details</h2>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-              <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 fade-stagger">
+              <div className="space-y-6 fade-stagger">
                 {/* Order number */}
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -350,7 +350,7 @@ const NewRequest = () => {
               </div>
 
               {/* Map */}
-              <div>
+              <div className="page-fade">
                 <h3 className="text-lg font-medium text-gray-900 mb-4">Select Warehouse</h3>
                 <WarehouseMap
                   onWarehouseSelect={(warehouse) => setFormData((prev) => ({ ...prev, warehouse }))}
@@ -372,15 +372,15 @@ const NewRequest = () => {
         )}
 
         {currentStep === 2 && (
-          <div className="bg-white rounded-lg shadow-md p-6">
+          <div className="bg-white rounded-lg shadow-md p-6 page-fade">
             <div className="flex items-center mb-6">
               <Calendar className="h-6 w-6 text-blue-500 mr-2" />
               <h2 className="text-2xl font-bold text-gray-900">Schedule Delivery</h2>
             </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 fade-stagger">
               {/* Left */}
-              <div className="space-y-6">
+              <div className="space-y-6 fade-stagger">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Preferred Delivery Date *
@@ -426,7 +426,7 @@ const NewRequest = () => {
               </div>
 
               {/* Right */}
-              <div className="space-y-6">
+              <div className="space-y-6 fade-stagger">
                 <h3 className="text-lg font-medium text-gray-900">Destination Address</h3>
 
                 <div className="grid grid-cols-1 gap-4">
@@ -537,104 +537,102 @@ const NewRequest = () => {
         )}
 
         {currentStep === 3 && (
-  <div className="bg-white rounded-lg shadow-md p-6">
-    <div className="flex items-center mb-6">
-      <CreditCard className="h-6 w-6 text-blue-500 mr-2" />
-      <h2 className="text-2xl font-bold text-gray-900">Payment Details</h2>
-    </div>
-
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-      <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Service Charges</h3>
-        <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-          <div className="flex justify-between">
-            <span className="text-gray-600">Base Handling Fee</span>
-            <span className="font-medium">₹{charges.baseHandlingFee}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Storage Fee (2 extra days)</span>
-            <span className="font-medium">₹{charges.storageFee}</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-gray-600">Delivery Charge</span>
-            <span className="font-medium">₹{charges.deliveryCharge}</span>
-          </div>
-          <div className="border-t pt-3">
-            <div className="flex justify-between">
-              <span className="text-gray-600">Subtotal</span>
-              <span className="font-medium">₹{charges.subtotal}</span>
+          <div className="bg-white rounded-lg shadow-md p-6 page-fade">
+            <div className="flex items-center mb-6">
+              <CreditCard className="h-6 w-6 text-blue-500 mr-2" />
+              <h2 className="text-2xl font-bold text-gray-900">Payment Details</h2>
             </div>
-            <div className="flex justify-between">
-              <span className="text-gray-600">GST (18%)</span>
-              <span className="font-medium">₹{charges.gst.toFixed(2)}</span>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 fade-stagger">
+              <div className="page-fade">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Service Charges</h3>
+                <div className="bg-gray-50 rounded-lg p-4 space-y-3 fade-stagger">
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Base Handling Fee</span>
+                    <span className="font-medium">₹{charges.baseHandlingFee}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Storage Fee (2 extra days)</span>
+                    <span className="font-medium">₹{charges.storageFee}</span>
+                  </div>
+                  <div className="flex justify-between">
+                    <span className="text-gray-600">Delivery Charge</span>
+                    <span className="font-medium">₹{charges.deliveryCharge}</span>
+                  </div>
+                  <div className="border-t pt-3">
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">Subtotal</span>
+                      <span className="font-medium">₹{charges.subtotal}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-gray-600">GST (18%)</span>
+                      <span className="font-medium">₹{charges.gst.toFixed(2)}</span>
+                    </div>
+                  </div>
+                  <div className="border-t pt-3">
+                    <div className="flex justify-between text-lg font-bold">
+                      <span>Total Amount</span>
+                      <span className="text-blue-600">₹{charges.total.toFixed(2)}</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4 fade-stagger">
+                <h3 className="text-lg font-medium text-gray-900 mb-4">Payment Method</h3>
+                {paymentOptions.map((option) => (
+                  <label
+                    key={option.id}
+                    className={`flex items-center border rounded-lg p-4 cursor-pointer transition-colors ${
+                      selectedPaymentMethod === option.id
+                        ? 'border-blue-500 bg-blue-50'
+                        : 'border-gray-300 hover:border-gray-400'
+                    }`}
+                  >
+                    <input
+                      type="radio"
+                      name="payment"
+                      value={option.id}
+                      checked={selectedPaymentMethod === option.id}
+                      onChange={() => setSelectedPaymentMethod(option.id)}
+                      className="text-blue-600"
+                    />
+                    <span className="ml-2">{option.label}</span>
+                  </label>
+                ))}
+              </div>
+            </div>
+
+            {submitError && (
+              <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600 page-fade">
+                {submitError}
+              </div>
+            )}
+
+            <div className="flex justify-between mt-8">
+              <button
+                onClick={() => {
+                  setSubmitError(null);
+                  setCurrentStep(2);
+                }}
+                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                Previous
+              </button>
+              <button
+                onClick={handleSubmit}
+                disabled={isSubmitting}
+                className={`px-8 py-2 rounded-lg transition-colors ${
+                  isSubmitting
+                    ? 'bg-green-400 text-white cursor-not-allowed'
+                    : 'bg-green-600 text-white hover:bg-green-700'
+                }`}
+              >
+                {isSubmitting ? 'Processing...' : `Proceed to Pay ₹${charges.total.toFixed(2)}`}
+              </button>
             </div>
           </div>
-          <div className="border-t pt-3">
-            <div className="flex justify-between text-lg font-bold">
-              <span>Total Amount</span>
-              <span className="text-blue-600">₹{charges.total.toFixed(2)}</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div>
-        <h3 className="text-lg font-medium text-gray-900 mb-4">Payment Method</h3>
-        <div className="space-y-4">
-          {paymentOptions.map((option) => (
-            <label
-              key={option.id}
-              className={`flex items-center border rounded-lg p-4 cursor-pointer transition-colors ${
-                selectedPaymentMethod === option.id
-                  ? 'border-blue-500 bg-blue-50'
-                  : 'border-gray-300 hover:border-gray-400'
-              }`}
-            >
-              <input
-                type="radio"
-                name="payment"
-                value={option.id}
-                checked={selectedPaymentMethod === option.id}
-                onChange={() => setSelectedPaymentMethod(option.id)}
-                className="text-blue-600"
-              />
-              <span className="ml-2">{option.label}</span>
-            </label>
-          ))}
-        </div>
-      </div>
-    </div>
-
-    {submitError && (
-      <div className="mt-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
-        {submitError}
-      </div>
-    )}
-
-    <div className="flex justify-between mt-8">
-      <button
-        onClick={() => {
-          setSubmitError(null);
-          setCurrentStep(2);
-        }}
-        className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-      >
-        Previous
-      </button>
-      <button
-        onClick={handleSubmit}
-        disabled={isSubmitting}
-        className={`px-8 py-2 rounded-lg transition-colors ${
-          isSubmitting
-            ? 'bg-green-400 text-white cursor-not-allowed'
-            : 'bg-green-600 text-white hover:bg-green-700'
-        }`}
-      >
-        {isSubmitting ? 'Processing...' : `Proceed to Pay ₹${charges.total.toFixed(2)}`}
-      </button>
-    </div>
-  </div>
-)}
+        )}
 
 </div>  
 </div>   
