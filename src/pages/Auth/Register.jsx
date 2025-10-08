@@ -22,37 +22,28 @@ const Register = () => {
   const validateForm = () => {
     const newErrors = {};
 
-    if (!formData.name.trim()) {
-      newErrors.name = 'Full name is required';
-    }
+    if (!formData.name.trim()) newErrors.name = 'Full name is required';
 
-    if (!formData.email.trim()) {
-      newErrors.email = 'Email is required';
-    } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
+    if (!formData.email.trim()) newErrors.email = 'Email is required';
+    else if (!/\S+@\S+\.\S+/.test(formData.email))
       newErrors.email = 'Please enter a valid email address';
-    }
 
-    if (!formData.phone.trim()) {
-      newErrors.phone = 'Phone number is required';
-    } else if (!/^\d{10}$/.test(formData.phone)) {
+    if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
+    else if (!/^\d{10}$/.test(formData.phone))
       newErrors.phone = 'Please enter a valid 10-digit phone number';
-    }
 
-    if (!formData.password) {
+    if (!formData.password)
       newErrors.password = 'Password is required';
-    } else if (formData.password.length < 8) {
+    else if (formData.password.length < 8)
       newErrors.password = 'Password must be at least 8 characters';
-    } else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password)) {
+    else if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(formData.password))
       newErrors.password = 'Password must contain uppercase, lowercase, and number';
-    }
 
-    if (formData.password !== formData.confirmPassword) {
+    if (formData.password !== formData.confirmPassword)
       newErrors.confirmPassword = 'Passwords do not match';
-    }
 
-    if (!acceptTerms) {
+    if (!acceptTerms)
       newErrors.terms = 'You must accept the terms and conditions';
-    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -60,217 +51,167 @@ const Register = () => {
 
   const handleSubmit = async (event) => {
     event.preventDefault();
-
     if (!validateForm()) return;
 
     try {
       await register(formData);
       navigate('/dashboard');
     } catch {
-      // Error handling is managed within AuthContext
+      // Error handled in AuthContext
     }
   };
 
   const handleChange = (event) => {
-    setFormData({
-      ...formData,
-      [event.target.name]: event.target.value
-    });
-
-    if (errors[event.target.name]) {
-      setErrors({
-        ...errors,
-        [event.target.name]: ''
-      });
-    }
+    setFormData({ ...formData, [event.target.name]: event.target.value });
+    if (errors[event.target.name]) setErrors({ ...errors, [event.target.name]: '' });
   };
 
   return (
-    <div className="auth-wrapper page-fade">
-      <div className="auth-container">
-        <div className="text-center">
-          <h2 className="auth-title">Create your account</h2>
-          <p className="auth-subtitle">Join Burrow and take control of your deliveries</p>
+    <div className="auth-wrapper page-fade flex items-center justify-center min-h-screen bg-burrow-background px-4">
+      <div className="auth-container max-w-md w-full bg-white rounded-2xl shadow-md p-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-burrow-text-primary mb-2">Create your account</h2>
+          <p className="text-burrow-text-secondary">Join Burrow and take control of your deliveries</p>
         </div>
 
+        {/* Error Alert */}
         {state.error && (
-          <div className="alert-error">
-            <p>{state.error}</p>
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {state.error}
           </div>
         )}
 
-        <form className="mt-8 space-y-6 fade-stagger" onSubmit={handleSubmit}>
-          <div className="space-y-4 fade-stagger">
-            <div>
-              <label htmlFor="name" className="sr-only">Full Name</label>
-              <div className="input-group">
-                <div className="input-icon">
-                  <User className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="name"
-                  name="name"
-                  type="text"
-                  required
-                  value={formData.name}
-                  onChange={handleChange}
-                  className={`input-field ${
-                    errors.name ? 'border-red-300 focus:border-red-400 focus:ring-red-400' : ''
-                  }`}
-                  placeholder="Full Name"
-                />
-              </div>
-              {errors.name && <p className="text-red-600 text-xs mt-1">{errors.name}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="email" className="sr-only">Email address</label>
-              <div className="input-group">
-                <div className="input-icon">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className={`input-field ${
-                    errors.email ? 'border-red-300 focus:border-red-400 focus:ring-red-400' : ''
-                  }`}
-                  placeholder="Email address"
-                />
-              </div>
-              {errors.email && <p className="text-red-600 text-xs mt-1">{errors.email}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="phone" className="sr-only">Phone Number</label>
-              <div className="input-group">
-                <div className="input-icon">
-                  <Phone className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="phone"
-                  name="phone"
-                  type="tel"
-                  required
-                  value={formData.phone}
-                  onChange={handleChange}
-                  className={`input-field ${
-                    errors.phone ? 'border-red-300 focus:border-red-400 focus:ring-red-400' : ''
-                  }`}
-                  placeholder="Phone Number"
-                />
-              </div>
-              {errors.phone && <p className="text-red-600 text-xs mt-1">{errors.phone}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="password" className="sr-only">Password</label>
-              <div className="input-group">
-                <div className="input-icon">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className={`input-field pr-10 ${
-                    errors.password ? 'border-red-300 focus:border-red-400 focus:ring-red-400' : ''
-                  }`}
-                  placeholder="Password"
-                />
-                <button
-                  type="button"
-                  className="btn-text-muted absolute inset-y-0 right-0 pr-3"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
-                  )}
-                </button>
-              </div>
-              {errors.password && <p className="text-red-600 text-xs mt-1">{errors.password}</p>}
-            </div>
-
-            <div>
-              <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
-              <div className="input-group">
-                <div className="input-icon">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="confirmPassword"
-                  name="confirmPassword"
-                  type={showConfirmPassword ? 'text' : 'password'}
-                  required
-                  value={formData.confirmPassword}
-                  onChange={handleChange}
-                  className={`input-field pr-10 ${
-                    errors.confirmPassword ? 'border-red-300 focus:border-red-400 focus:ring-red-400' : ''
-                  }`}
-                  placeholder="Confirm Password"
-                />
-                <button
-                  type="button"
-                  className="btn-text-muted absolute inset-y-0 right-0 pr-3"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                >
-                  {showConfirmPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
-                  )}
-                </button>
-              </div>
-              {errors.confirmPassword && <p className="text-red-600 text-xs mt-1">{errors.confirmPassword}</p>}
-            </div>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Full Name */}
+          <div className="relative">
+            <User className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <input
+              id="name"
+              name="name"
+              type="text"
+              required
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Full name"
+              className={`input-field pl-10 ${errors.name ? 'border-red-300 focus:ring-red-400' : ''}`}
+            />
+            {errors.name && <p className="text-xs text-red-600 mt-1">{errors.name}</p>}
           </div>
 
-          <div className="flex items-center">
+          {/* Email */}
+          <div className="relative">
+            <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <input
+              id="email"
+              name="email"
+              type="email"
+              required
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="Email address"
+              className={`input-field pl-10 ${errors.email ? 'border-red-300 focus:ring-red-400' : ''}`}
+            />
+            {errors.email && <p className="text-xs text-red-600 mt-1">{errors.email}</p>}
+          </div>
+
+          {/* Phone */}
+          <div className="relative">
+            <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <input
+              id="phone"
+              name="phone"
+              type="tel"
+              required
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="Phone number"
+              className={`input-field pl-10 ${errors.phone ? 'border-red-300 focus:ring-red-400' : ''}`}
+            />
+            {errors.phone && <p className="text-xs text-red-600 mt-1">{errors.phone}</p>}
+          </div>
+
+          {/* Password */}
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <input
+              id="password"
+              name="password"
+              type={showPassword ? 'text' : 'password'}
+              required
+              value={formData.password}
+              onChange={handleChange}
+              placeholder="Password"
+              className={`input-field pl-10 pr-10 ${errors.password ? 'border-red-300 focus:ring-red-400' : ''}`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-burrow-primary"
+            >
+              {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+            {errors.password && <p className="text-xs text-red-600 mt-1">{errors.password}</p>}
+          </div>
+
+          {/* Confirm Password */}
+          <div className="relative">
+            <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+            <input
+              id="confirmPassword"
+              name="confirmPassword"
+              type={showConfirmPassword ? 'text' : 'password'}
+              required
+              value={formData.confirmPassword}
+              onChange={handleChange}
+              placeholder="Confirm password"
+              className={`input-field pl-10 pr-10 ${errors.confirmPassword ? 'border-red-300 focus:ring-red-400' : ''}`}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-burrow-primary"
+            >
+              {showConfirmPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+            </button>
+            {errors.confirmPassword && <p className="text-xs text-red-600 mt-1">{errors.confirmPassword}</p>}
+          </div>
+
+          {/* Terms */}
+          <div className="flex items-start space-x-2 text-sm">
             <input
               id="accept-terms"
               name="accept-terms"
               type="checkbox"
               checked={acceptTerms}
-              onChange={(event) => setAcceptTerms(event.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              onChange={(e) => setAcceptTerms(e.target.checked)}
+              className="h-4 w-4 text-burrow-primary border-gray-300 rounded focus:ring-burrow-primary"
             />
-            <label htmlFor="accept-terms" className="ml-2 block text-sm text-gray-700">
+            <label htmlFor="accept-terms" className="text-gray-700">
               I accept the{' '}
-              <Link to="/terms" className="text-blue-600 hover:text-blue-500">
-                Terms and Conditions
-              </Link>{' '}
+              <Link to="/terms" className="text-burrow-primary hover:underline">Terms of Service</Link>{' '}
               and{' '}
-              <Link to="/privacy" className="text-blue-600 hover:text-blue-500">
-                Privacy Policy
-              </Link>
+              <Link to="/privacy" className="text-burrow-primary hover:underline">Privacy Policy</Link>
             </label>
           </div>
-          {errors.terms && <p className="text-red-600 text-xs">{errors.terms}</p>}
+          {errors.terms && <p className="text-xs text-red-600 mt-1">{errors.terms}</p>}
 
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={state.isLoading}
-            className="btn-blue btn-block btn-md"
+            className="btn-primary btn-lg w-full"
           >
             {state.isLoading ? 'Creating account...' : 'Create account'}
           </button>
 
-          <div className="auth-cta">
-            <p>
-              Already have an account?{' '}
-              <Link to="/login" className="nav-link font-medium">
-                Sign in
-              </Link>
-            </p>
+          {/* Login CTA */}
+          <div className="text-center text-sm text-gray-600 mt-4">
+            Already have an account?{' '}
+            <Link to="/login" className="text-burrow-primary hover:underline font-medium">
+              Sign in
+            </Link>
           </div>
         </form>
       </div>

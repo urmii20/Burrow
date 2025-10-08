@@ -4,8 +4,9 @@ import { Link } from 'react-router-dom';
 
 const Footer = () => {
   return (
-    <footer id="site-footer" className="footer">
+    <footer className="footer">
       <div className="footer-container">
+        {/* Brand / About */}
         <div>
           <div className="flex items-center space-x-2 mb-4">
             <Package className="h-8 w-8 text-burrow-primary" />
@@ -18,6 +19,7 @@ const Footer = () => {
           </p>
         </div>
 
+        {/* Services */}
         <div>
           <h3 className="footer-heading">Services</h3>
           <ul className="space-y-2 text-sm text-burrow-text-secondary">
@@ -28,6 +30,7 @@ const Footer = () => {
           </ul>
         </div>
 
+        {/* Support */}
         <div>
           <h3 className="footer-heading">Support</h3>
           <ul className="space-y-2 text-sm text-burrow-text-secondary">
@@ -38,6 +41,7 @@ const Footer = () => {
           </ul>
         </div>
 
+        {/* Contact */}
         <div>
           <h3 className="footer-heading">Contact</h3>
           <div className="space-y-2 text-sm text-burrow-text-secondary">

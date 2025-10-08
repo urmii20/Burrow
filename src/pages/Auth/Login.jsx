@@ -21,7 +21,7 @@ const Login = () => {
       await login(formData.email, formData.password);
       navigate('/dashboard');
     } catch {
-      // Error handling is managed within AuthContext
+      // Error handled in AuthContext
     }
   };
 
@@ -33,115 +33,105 @@ const Login = () => {
   };
 
   return (
-    <div className="auth-wrapper page-fade">
-      <div className="auth-container">
-        <div className="text-center">
-          <h2 className="auth-title">Welcome back</h2>
-          <p className="auth-subtitle">Sign in to your Burrow account</p>
+    <div className="auth-wrapper page-fade flex items-center justify-center min-h-screen bg-burrow-background px-4">
+      <div className="auth-container max-w-md w-full bg-white rounded-2xl shadow-md p-8">
+        {/* Header */}
+        <div className="text-center mb-8">
+          <h2 className="text-3xl font-bold text-burrow-text-primary mb-2">Welcome back</h2>
+          <p className="text-burrow-text-secondary">Sign in to your Burrow account</p>
         </div>
 
+        {/* Error Message */}
         {state.error && (
-          <div className="alert-error">
-            <p>{state.error}</p>
+          <div className="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+            {state.error}
           </div>
         )}
 
-        <div className="alert-info">
-          <p className="font-medium mb-2">Demo Credentials For An Operator View:</p>
-
-          <p className="text-xs text-blue-700">Operator 1: operator.one@burrow.com / OperatorDemo1</p>
-          <p className="text-xs text-blue-700">Operator 2: operator.two@burrow.com / OperatorDemo2</p>
+        {/* Demo Info */}
+        <div className="mb-6 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3 text-sm text-blue-800">
+          <p className="font-medium mb-1">Demo Credentials (Operator View)</p>
+          <p>operator.one@burrow.com / OperatorDemo1</p>
+          <p>operator.two@burrow.com / OperatorDemo2</p>
         </div>
 
-        <form className="mt-8 space-y-6 fade-stagger" onSubmit={handleSubmit}>
-          <div className="space-y-4 fade-stagger">
-            <div>
-              <label htmlFor="email" className="sr-only">Email address</label>
-              <div className="input-group">
-                <div className="input-icon">
-                  <Mail className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  required
-                  value={formData.email}
-                  onChange={handleChange}
-                  className="input-field"
-                  placeholder="Email address"
-                />
-              </div>
-            </div>
-
-            <div>
-              <label htmlFor="password" className="sr-only">Password</label>
-              <div className="input-group">
-                <div className="input-icon">
-                  <Lock className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  required
-                  value={formData.password}
-                  onChange={handleChange}
-                  className="input-field pr-10"
-                  placeholder="Password"
-                />
-                <button
-                  type="button"
-                  className="btn-text-muted absolute inset-y-0 right-0 pr-3"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
-                  ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
-                  )}
-                </button>
-              </div>
+        {/* Form */}
+        <form onSubmit={handleSubmit} className="space-y-6">
+          {/* Email Field */}
+          <div>
+            <div className="relative">
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <input
+                id="email"
+                name="email"
+                type="email"
+                required
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Email address"
+                className="input-field pl-10"
+              />
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <div className="flex items-center">
+          {/* Password Field */}
+          <div>
+            <div className="relative">
+              <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 h-5 w-5" />
+              <input
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                required
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Password"
+                className="input-field pl-10 pr-10"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-burrow-primary"
+              >
+                {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+              </button>
+            </div>
+          </div>
+
+          {/* Remember me + Forgot password */}
+          <div className="flex items-center justify-between text-sm">
+            <label className="flex items-center space-x-2 text-gray-700">
               <input
                 id="remember-me"
                 name="remember-me"
                 type="checkbox"
                 checked={rememberMe}
-                onChange={(event) => setRememberMe(event.target.checked)}
-                className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+                onChange={(e) => setRememberMe(e.target.checked)}
+                className="h-4 w-4 text-burrow-primary border-gray-300 rounded focus:ring-burrow-primary"
               />
-              <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-700">
-                Remember me
-              </label>
-            </div>
+              <span>Remember me</span>
+            </label>
 
-            <div className="text-sm">
-              <Link to="/forgot-password" className="nav-link">
-                Forgot password?
-              </Link>
-            </div>
+            <Link to="/forgot-password" className="nav-link text-burrow-primary hover:underline">
+              Forgot password?
+            </Link>
           </div>
 
+          {/* Submit Button */}
           <button
             type="submit"
             disabled={state.isLoading}
-            className="btn-blue btn-block btn-md"
+            className="btn-primary btn-lg w-full"
           >
             {state.isLoading ? 'Signing in...' : 'Sign in'}
           </button>
 
-          <div className="auth-cta">
-            <p>
-              Don&apos;t have an account?{' '}
-              <Link to="/register" className="nav-link font-medium">
-                Sign up
-              </Link>
-            </p>
+          {/* Signup CTA */}
+          <div className="text-center text-sm text-gray-600 mt-4">
+            Don’t have an account?{' '}
+            <Link to="/register" className="text-burrow-primary hover:underline font-medium">
+              Sign up
+            </Link>
           </div>
         </form>
       </div>

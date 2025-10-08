@@ -10,6 +10,7 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 import { warehouses as warehouseOptions } from '../../data/mockData';
 
+// Default Leaflet marker
 const defaultIcon = L.icon({
   iconUrl: marker1x,
   iconRetinaUrl: marker2x,
@@ -17,7 +18,7 @@ const defaultIcon = L.icon({
   iconSize: [25, 41],
   iconAnchor: [12, 41],
   popupAnchor: [1, -34],
-  shadowSize: [41, 41]
+  shadowSize: [41, 41],
 });
 
 L.Marker.prototype.options.icon = defaultIcon;
@@ -28,60 +29,41 @@ const ChangeMapView = ({ center }) => {
   const map = useMap();
 
   useEffect(() => {
-    if (!center) {
-      return;
-    }
-
+    if (!center) return;
     const nextCenter = Array.isArray(center) ? center : DEFAULT_CENTER;
-    map.flyTo(nextCenter, Math.max(map.getZoom(), 4), {
-      animate: true,
-      duration: 0.75
-    });
+    map.flyTo(nextCenter, Math.max(map.getZoom(), 4), { animate: true, duration: 0.75 });
   }, [center, map]);
 
   return null;
 };
 
 ChangeMapView.propTypes = {
-  center: PropTypes.arrayOf(PropTypes.number)
+  center: PropTypes.arrayOf(PropTypes.number),
 };
 
 const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
   const [isMapReady, setIsMapReady] = useState(false);
 
-  useEffect(() => {
-    setIsMapReady(true);
-  }, []);
+  useEffect(() => setIsMapReady(true), []);
 
   const selectedWarehouse = useMemo(
-    () => warehouseOptions.find((warehouse) => warehouse.id === selectedWarehouseId),
+    () => warehouseOptions.find((w) => w.id === selectedWarehouseId),
     [selectedWarehouseId]
   );
 
   const mapCenter = useMemo(() => {
-    if (selectedWarehouse?.coordinates) {
-      return selectedWarehouse.coordinates;
-    }
-
-    if (warehouseOptions.length > 0 && warehouseOptions[0].coordinates) {
-      return warehouseOptions[0].coordinates;
-    }
-
+    if (selectedWarehouse?.coordinates) return selectedWarehouse.coordinates;
+    if (warehouseOptions[0]?.coordinates) return warehouseOptions[0].coordinates;
     return DEFAULT_CENTER;
   }, [selectedWarehouse]);
 
   return (
-    <div className="map-card">
-      <h3 className="text-xl font-semibold text-burrow-text-primary mb-4">Find Nearby Warehouses</h3>
+    <div className="space-y-6">
+      <h3 className="text-xl font-semibold text-burrow-text-primary">Find Nearby Warehouses</h3>
 
-      <div className="map-shell mb-6">
+      <div className="h-80 w-full rounded-lg overflow-hidden border border-gray-200">
         {isMapReady ? (
-          <MapContainer
-            center={mapCenter}
-            zoom={4}
-            scrollWheelZoom
-            className="h-full w-full"
-          >
+          <MapContainer center={mapCenter} zoom={4} scrollWheelZoom className="h-full w-full">
             <ChangeMapView center={mapCenter} />
             <TileLayer
               attribution="&copy; <a href='https://www.openstreetmap.org/copyright'>OpenStreetMap</a> contributors"
@@ -91,9 +73,7 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
               <Marker
                 key={warehouse.id}
                 position={warehouse.coordinates}
-                eventHandlers={{
-                  click: () => onWarehouseSelect?.(warehouse)
-                }}
+                eventHandlers={{ click: () => onWarehouseSelect?.(warehouse) }}
               >
                 <Popup>
                   <div className="text-sm">
@@ -108,16 +88,18 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
             ))}
           </MapContainer>
         ) : (
-          <div className="map-placeholder">
-            <MapPin className="h-10 w-10 mb-2 text-burrow-primary" />
+          <div className="flex flex-col items-center justify-center h-full text-burrow-primary">
+            <MapPin className="h-10 w-10 mb-2" />
             <p>Loading map...</p>
           </div>
         )}
       </div>
 
       <div
-        className={`card-bordered p-4 flex flex-col gap-2 transition-colors duration-200 ${
-          selectedWarehouse ? 'bg-green-50 border-green-400' : 'bg-burrow-background border-burrow-primary/30'
+        className={`rounded-lg border p-4 transition-colors duration-200 ${
+          selectedWarehouse
+            ? 'bg-green-50 border-green-400'
+            : 'bg-burrow-background border-burrow-primary/30'
         }`}
       >
         {selectedWarehouse ? (
@@ -126,21 +108,22 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
               <CheckCircle className="h-5 w-5 text-green-500" />
               <span className="font-medium text-burrow-text-primary">Warehouse Selected</span>
             </div>
-            <p className="text-burrow-text-primary font-semibold">{selectedWarehouse.name}</p>
-            <p className="text-burrow-text-secondary text-sm">{selectedWarehouse.address}</p>
+            <p className="font-semibold text-burrow-text-primary">{selectedWarehouse.name}</p>
+            <p className="text-sm text-burrow-text-secondary">{selectedWarehouse.address}</p>
           </div>
         ) : (
-          <p className="text-burrow-text-secondary text-sm text-center">Select a warehouse to view its details here.</p>
+          <p className="text-sm text-burrow-text-secondary text-center">
+            Select a warehouse to view its details here.
+          </p>
         )}
       </div>
-
     </div>
   );
 };
 
-export default WarehouseMap;
-
 WarehouseMap.propTypes = {
   onWarehouseSelect: PropTypes.func,
-  selectedWarehouseId: PropTypes.string
+  selectedWarehouseId: PropTypes.string,
 };
+
+export default WarehouseMap;
