@@ -5,13 +5,17 @@ export default {
     extend: {
       colors: {
         burrow: {
-          primary: '#1E3A8A',
-          secondary: '#059669',
-          accent: '#F59E0B',
-          background: '#F9FAFB',
+          primary: '#d48437',
+          secondary: '#f0ad62',
+          accent: '#f8cfa2',
+          background: '#fffcf3',
+          surface: '#fffef9',
+          border: '#f0e4d4',
           text: {
-            primary: '#111827',
-            secondary: '#4B5563'
+            primary: '#21211f',
+            secondary: '#5a564e',
+            muted: '#7c786f',
+            inverse: '#fffef9'
           }
         }
       }

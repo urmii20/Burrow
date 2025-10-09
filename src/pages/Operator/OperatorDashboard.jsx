@@ -72,20 +72,20 @@ const OperatorDashboard = () => {
 
   const getStatusBadge = (status) => {
     const config = {
-      submitted: { color: 'bg-blue-100 text-blue-800', label: 'Submitted' },
-      approval_pending: { color: 'bg-yellow-100 text-yellow-800', label: 'Pending Approval' },
-      approved: { color: 'bg-green-100 text-green-800', label: 'Approved' },
-      rejected: { color: 'bg-red-100 text-red-800', label: 'Rejected' },
-      parcel_expected: { color: 'bg-blue-100 text-blue-800', label: 'Parcel Expected' },
-      parcel_arrived: { color: 'bg-blue-100 text-blue-800', label: 'Parcel Arrived' },
-      in_storage: { color: 'bg-purple-100 text-purple-800', label: 'In Storage' },
-      preparing_dispatch: { color: 'bg-indigo-100 text-indigo-800', label: 'Preparing Dispatch' },
-      out_for_delivery: { color: 'bg-orange-100 text-orange-800', label: 'Out for Delivery' },
-      delivered: { color: 'bg-green-100 text-green-800', label: 'Delivered' }
+      submitted: { color: 'bg-burrow-primary/10 text-burrow-primary', label: 'Submitted' },
+      approval_pending: { color: 'bg-burrow-secondary/20 text-burrow-primary', label: 'Pending Approval' },
+      approved: { color: 'bg-burrow-primary/15 text-burrow-primary', label: 'Approved' },
+      rejected: { color: 'bg-red-100 text-red-700', label: 'Rejected' },
+      parcel_expected: { color: 'bg-burrow-accent/40 text-burrow-primary', label: 'Parcel Expected' },
+      parcel_arrived: { color: 'bg-burrow-secondary/20 text-burrow-primary', label: 'Parcel Arrived' },
+      in_storage: { color: 'bg-burrow-primary/10 text-burrow-primary', label: 'In Storage' },
+      preparing_dispatch: { color: 'bg-burrow-secondary/25 text-burrow-primary', label: 'Preparing Dispatch' },
+      out_for_delivery: { color: 'bg-burrow-primary/15 text-burrow-primary', label: 'Out for Delivery' },
+      delivered: { color: 'bg-burrow-primary/15 text-burrow-primary', label: 'Delivered' }
     };
 
     const statusConfig =
-      config[status] || { color: 'bg-gray-100 text-gray-800', label: formatStatusLabel(status) };
+      config[status] || { color: 'bg-burrow-primary/10 text-burrow-primary', label: formatStatusLabel(status) };
 
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig.color}`}>
@@ -164,13 +164,13 @@ const OperatorDashboard = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 page-fade">
-      <div className="bg-white shadow-sm border-b border-gray-200 page-fade">
+    <div className="min-h-screen bg-burrow-background page-fade">
+      <div className="bg-burrow-surface/95 backdrop-blur-sm shadow-sm border-b border-burrow-border/80 page-fade">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <h1 className="text-2xl font-bold text-gray-900">Operator Dashboard</h1>
+            <h1 className="text-2xl font-bold text-burrow-text-primary">Operator Dashboard</h1>
             <div className="flex items-center space-x-4">
-              <span className="text-sm text-gray-600">Welcome, Operator</span>
+              <span className="text-sm text-burrow-text-secondary">Welcome, Operator</span>
             </div>
           </div>
         </div>
@@ -178,77 +178,48 @@ const OperatorDashboard = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 fade-stagger">
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 w-12 h-12 bg-blue-100 rounded-lg flex items-center justify-center">
-                <Clock className="h-6 w-6 text-blue-500" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Total Requests</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.total}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 w-12 h-12 bg-yellow-100 rounded-lg flex items-center justify-center">
-                <Clock className="h-6 w-6 text-yellow-500" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Pending Approval</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.pending}</p>
+          {[
+            { label: 'Total Requests', value: stats.total, icon: Clock },
+            { label: 'Pending Approval', value: stats.pending, icon: Clock },
+            { label: 'Approved Today', value: stats.approved, icon: CheckCircle },
+            { label: 'Delivered', value: stats.delivered, icon: CheckCircle }
+          ].map((item) => (
+            <div key={item.label} className="card p-6">
+              <div className="flex items-center">
+                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-burrow-primary/10 text-burrow-primary flex items-center justify-center">
+                  <item.icon className="h-6 w-6" />
+                </div>
+                <div className="ml-4 space-y-1">
+                  <p className="text-sm font-medium text-burrow-text-secondary">{item.label}</p>
+                  <p className="text-2xl font-bold text-burrow-text-primary">{item.value}</p>
+                </div>
               </div>
             </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center">
-                <CheckCircle className="h-6 w-6 text-green-500" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Approved Today</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.approved}</p>
-              </div>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg shadow-md p-6">
-            <div className="flex items-center">
-              <div className="flex-shrink-0 w-12 h-12 bg-purple-100 rounded-lg flex items-center justify-center">
-                <CheckCircle className="h-6 w-6 text-purple-500" />
-              </div>
-              <div className="ml-4">
-                <p className="text-sm font-medium text-gray-600">Delivered</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.delivered}</p>
-              </div>
-            </div>
-          </div>
+          ))}
         </div>
 
-        <div className="bg-white rounded-lg shadow-md p-6 mb-8 page-fade">
+        <div className="card p-6 mb-8 page-fade">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-burrow-text-muted" />
                 <input
                   type="text"
                   placeholder="Search by order number or product..."
                   value={searchTerm}
                   onChange={(event) => setSearchTerm(event.target.value)}
-                  className="pl-10 w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="input-field"
                 />
               </div>
             </div>
 
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
-                <Filter className="h-5 w-5 text-gray-400" />
+                <Filter className="h-5 w-5 text-burrow-text-muted" />
                 <select
                   value={statusFilter}
                   onChange={(event) => setStatusFilter(event.target.value)}
-                  className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                  className="input-field-plain"
                 >
                   <option value="all">All Status</option>
                   <option value="submitted">Submitted</option>
@@ -267,9 +238,9 @@ const OperatorDashboard = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-md overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-900">Delivery Requests</h2>
+        <div className="card overflow-hidden">
+          <div className="px-6 py-4 border-b border-burrow-border/80">
+            <h2 className="text-lg font-semibold text-burrow-text-primary">Delivery Requests</h2>
           </div>
 
           {error && (
@@ -285,30 +256,30 @@ const OperatorDashboard = () => {
           )}
 
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="table">
+              <thead className="table-head">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="table-head-cell">
                     Request ID
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="table-head-cell">
                     Order Details
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="table-head-cell">
                     Status
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="table-head-cell">
                     Delivery Date
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="table-head-cell">
                     Actions
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-burrow-surface divide-y divide-burrow-border">
                 {isLoading && (
                   <tr>
-                    <td colSpan={5} className="px-6 py-6 text-center text-sm text-gray-500">
+                    <td colSpan={5} className="px-6 py-6 text-center text-sm text-burrow-text-muted">
                       Loading requests...
                     </td>
                   </tr>
@@ -316,24 +287,24 @@ const OperatorDashboard = () => {
 
                 {!isLoading && !filteredRequests.length && !error && (
                   <tr>
-                    <td colSpan={5} className="px-6 py-6 text-center text-sm text-gray-500">
+                    <td colSpan={5} className="px-6 py-6 text-center text-sm text-burrow-text-muted">
                       No requests found matching your criteria.
                     </td>
                   </tr>
                 )}
 
                 {!isLoading && filteredRequests.map((request) => (
-                  <tr key={request.id} className="hover:bg-gray-50">
+                  <tr key={request.id} className="hover:bg-burrow-background">
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm font-medium text-gray-900">{request.id}</div>
-                      <div className="text-sm text-gray-500">
+                      <div className="text-sm font-medium text-burrow-text-primary">{request.id}</div>
+                      <div className="text-sm text-burrow-text-muted">
                         {new Date(request.createdAt).toLocaleDateString()}
                       </div>
                     </td>
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-gray-900">{request.orderNumber}</div>
-                      <div className="text-sm text-gray-500">{request.platform}</div>
-                      <div className="text-sm text-gray-500 truncate max-w-xs">
+                      <div className="text-sm font-medium text-burrow-text-primary">{request.orderNumber}</div>
+                      <div className="text-sm text-burrow-text-muted">{request.platform}</div>
+                      <div className="text-sm text-burrow-text-muted truncate max-w-xs">
                         {request.productDescription}
                       </div>
                     </td>
@@ -341,16 +312,16 @@ const OperatorDashboard = () => {
                       {getStatusBadge(request.status)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-gray-900">
+                      <div className="text-sm text-burrow-text-primary">
                         {new Date(request.scheduledDeliveryDate).toLocaleDateString()}
                       </div>
-                      <div className="text-sm text-gray-500">{request.deliveryTimeSlot}</div>
+                      <div className="text-sm text-burrow-text-muted">{request.deliveryTimeSlot}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => handleOpenRequest(request)}
-                          className="text-blue-600 hover:text-blue-900"
+                          className="text-burrow-primary hover:text-burrow-secondary"
                         >
                           <Eye className="h-4 w-4" />
                         </button>
@@ -360,7 +331,7 @@ const OperatorDashboard = () => {
                             <button
                               onClick={() => handleQuickStatusChange(request.id, 'approved')}
                               disabled={updatingRequestId === request.id}
-                              className={`text-green-600 hover:text-green-900 ${
+                              className={`text-burrow-primary hover:text-burrow-secondary ${
                                 updatingRequestId === request.id ? 'opacity-50 cursor-not-allowed' : ''
                               }`}
                             >
@@ -388,9 +359,9 @@ const OperatorDashboard = () => {
 
         {selectedRequest && (
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-screen overflow-y-auto">
-              <div className="px-6 py-4 border-b border-gray-200 flex justify-between items-center">
-                <h3 className="text-lg font-semibold text-gray-900">
+            <div className="card max-w-2xl w-full max-h-screen overflow-y-auto shadow-xl">
+              <div className="px-6 py-4 border-b border-burrow-border/80 flex justify-between items-center">
+                <h3 className="text-lg font-semibold text-burrow-text-primary">
                   Request Details - {selectedRequest.id}
                 </h3>
                 <button
@@ -399,7 +370,7 @@ const OperatorDashboard = () => {
                     setModalStatus('');
                     setModalNotes('');
                   }}
-                  className="text-gray-400 hover:text-gray-600"
+                  className="text-burrow-text-muted hover:text-burrow-text-secondary"
                 >
                   <XCircle className="h-6 w-6" />
                 </button>
@@ -407,39 +378,39 @@ const OperatorDashboard = () => {
 
               <div className="px-6 py-4 space-y-6">
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Order Information</h4>
-                  <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                  <h4 className="font-medium text-burrow-text-primary mb-2">Order Information</h4>
+                  <div className="bg-burrow-background rounded-xl p-4 space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Order Number:</span>
-                      <span className="font-medium">{selectedRequest.orderNumber}</span>
+                      <span className="text-burrow-text-secondary">Order Number:</span>
+                      <span className="font-medium text-burrow-text-primary">{selectedRequest.orderNumber}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Platform:</span>
-                      <span className="font-medium">{selectedRequest.platform}</span>
+                      <span className="text-burrow-text-secondary">Platform:</span>
+                      <span className="font-medium text-burrow-text-primary">{selectedRequest.platform}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Product:</span>
-                      <span className="font-medium">{selectedRequest.productDescription}</span>
+                      <span className="text-burrow-text-secondary">Product:</span>
+                      <span className="font-medium text-burrow-text-primary">{selectedRequest.productDescription}</span>
                     </div>
                   </div>
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Delivery Information</h4>
-                  <div className="bg-gray-50 rounded-lg p-4 space-y-2">
+                  <h4 className="font-medium text-burrow-text-primary mb-2">Delivery Information</h4>
+                  <div className="bg-burrow-background rounded-xl p-4 space-y-2">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Scheduled Date:</span>
-                      <span className="font-medium">
+                      <span className="text-burrow-text-secondary">Scheduled Date:</span>
+                      <span className="font-medium text-burrow-text-primary">
                         {new Date(selectedRequest.scheduledDeliveryDate).toLocaleDateString()}
                       </span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Time Slot:</span>
-                      <span className="font-medium">{selectedRequest.deliveryTimeSlot}</span>
+                      <span className="text-burrow-text-secondary">Time Slot:</span>
+                      <span className="font-medium text-burrow-text-primary">{selectedRequest.deliveryTimeSlot}</span>
                     </div>
                     <div>
-                      <span className="text-gray-600">Destination:</span>
-                      <p className="font-medium mt-1">
+                      <span className="text-burrow-text-secondary">Destination:</span>
+                      <p className="font-medium text-burrow-text-primary mt-1">
                         {selectedRequest.destinationAddress.line1}
                         {selectedRequest.destinationAddress.line2 && `, ${selectedRequest.destinationAddress.line2}`}
                         <br />
@@ -451,11 +422,11 @@ const OperatorDashboard = () => {
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Update Status</h4>
+                  <h4 className="font-medium text-burrow-text-primary mb-2">Update Status</h4>
                   <select
                     value={modalStatus}
                     onChange={(event) => handleModalStatusChange(event.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="input-field-plain"
                   >
                     <option value="submitted">Submitted</option>
                     <option value="approval_pending">Approval Pending</option>
@@ -471,25 +442,25 @@ const OperatorDashboard = () => {
                 </div>
 
                 <div>
-                  <h4 className="font-medium text-gray-900 mb-2">Add Notes</h4>
+                  <h4 className="font-medium text-burrow-text-primary mb-2">Add Notes</h4>
                   <textarea
                     rows={3}
                     placeholder="Add any notes or comments..."
                     value={modalNotes}
                     onChange={(event) => setModalNotes(event.target.value)}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="input-field-plain"
                   />
                 </div>
               </div>
 
-              <div className="px-6 py-4 border-t border-gray-200 flex justify-end space-x-3">
+              <div className="px-6 py-4 border-t border-burrow-border/80 flex justify-end space-x-3">
                 <button
                   onClick={() => {
                     setSelectedRequest(null);
                     setModalStatus('');
                     setModalNotes('');
                   }}
-                  className="px-4 py-2 border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-50 transition-colors"
+                  className="btn-secondary btn-md"
                 >
                   Close
                 </button>
@@ -501,10 +472,10 @@ const OperatorDashboard = () => {
                 <button
                   onClick={handleModalSubmit}
                   disabled={updatingRequestId === selectedRequest.id}
-                  className={`px-4 py-2 bg-blue-600 text-white rounded-lg transition-colors ${
+                  className={`btn-primary btn-md ${
                     updatingRequestId === selectedRequest.id
                       ? 'opacity-50 cursor-not-allowed'
-                      : 'hover:bg-blue-700'
+                      : ''
                   }`}
                 >
                   Update Request

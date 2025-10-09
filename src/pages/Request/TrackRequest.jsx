@@ -104,22 +104,22 @@ const TrackRequest = () => {
 
   const renderResult = (request) => {
     return (
-      <div key={request.id} className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div key={request.id} className="bg-burrow-surface rounded-2xl shadow-sm border border-burrow-border p-6">
         <div className="flex items-start justify-between">
           <div>
             <div className="flex items-center space-x-3">
-              <Package className="h-6 w-6 text-blue-600" />
+              <Package className="h-6 w-6 text-burrow-primary" />
               <div>
-                <p className="text-sm font-medium text-gray-900">Order #{request.orderNumber}</p>
-                <p className="text-sm text-gray-500">Status: {formatStatus(request.status)}</p>
+                <p className="text-sm font-medium text-burrow-text-primary">Order #{request.orderNumber}</p>
+                <p className="text-sm text-burrow-text-muted">Status: {formatStatus(request.status)}</p>
               </div>
             </div>
 
-            <p className="mt-4 text-sm text-gray-600">{request.productDescription || 'No product description provided.'}</p>
+            <p className="mt-4 text-sm text-burrow-text-secondary">{request.productDescription || 'No product description provided.'}</p>
 
-            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-gray-600">
+            <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-burrow-text-secondary">
               <div className="flex items-center">
-                <Calendar className="h-4 w-4 text-gray-400 mr-2" />
+                <Calendar className="h-4 w-4 text-burrow-text-muted mr-2" />
                 <span>
                   Scheduled:{' '}
                   {request.scheduledDeliveryDate
@@ -129,12 +129,12 @@ const TrackRequest = () => {
               </div>
 
               <div className="flex items-center">
-                <Clock className="h-4 w-4 text-gray-400 mr-2" />
+                <Clock className="h-4 w-4 text-burrow-text-muted mr-2" />
                 <span>Time Slot: {request.deliveryTimeSlot || 'To be confirmed'}</span>
               </div>
 
               <div className="flex items-center sm:col-span-2">
-                <MapPin className="h-4 w-4 text-gray-400 mr-2" />
+                <MapPin className="h-4 w-4 text-burrow-text-muted mr-2" />
                 <span>{formatAddress(request.destinationAddress)}</span>
               </div>
             </div>
@@ -142,7 +142,7 @@ const TrackRequest = () => {
 
           <Link
             to={`/request/${request.id}`}
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-500"
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-burrow-primary hover:text-burrow-secondary"
           >
             View details
           </Link>
@@ -152,11 +152,11 @@ const TrackRequest = () => {
   };
 
   return (
-    <div className="bg-gray-50 min-h-full py-12 page-fade">
+    <div className="bg-burrow-background min-h-full py-12 page-fade">
       <div className="layout-container-narrow">
         <div className="card-panel page-fade">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Track your delivery request</h1>
-          <p className="text-sm text-gray-600 mb-6">
+          <h1 className="text-2xl font-bold text-burrow-text-primary mb-2">Track your delivery request</h1>
+          <p className="text-sm text-burrow-text-secondary mb-6">
             Enter your order number to view the current status, scheduled date, and destination details of your request.
           </p>
 
@@ -168,7 +168,7 @@ const TrackRequest = () => {
               <div className="mt-2 flex flex-col gap-3 sm:grid sm:grid-cols-[1fr_auto] sm:items-center">
                 <div className="input-group sm:max-w-none">
                   <div className="input-icon">
-                    <Search className="h-5 w-5 text-gray-400" />
+                    <Search className="h-5 w-5" />
                   </div>
                   <input
                     id="orderNumber"
@@ -181,7 +181,7 @@ const TrackRequest = () => {
                 </div>
                 <button
                   type="submit"
-                  className="btn-blue btn-md sm:h-full sm:w-auto"
+                  className="btn-primary btn-md sm:h-full sm:w-auto"
                   disabled={isSearching}
                 >
                   {isSearching ? 'Searching...' : 'Track'}
@@ -202,15 +202,15 @@ const TrackRequest = () => {
               {results.length > 0 ? (
                 results.map((request) => renderResult(request))
               ) : (
-                <div className="flex flex-col items-center justify-center rounded-lg border border-dashed border-gray-300 p-8 text-center">
-                  <Package className="h-10 w-10 text-gray-400 mb-3" />
-                  <p className="text-sm font-medium text-gray-900">No results found</p>
-                  <p className="mt-1 text-sm text-gray-500">
+                <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-burrow-border p-8 text-center bg-burrow-surface/60">
+                  <Package className="h-10 w-10 text-burrow-primary mb-3" />
+                  <p className="text-sm font-medium text-burrow-text-primary">No results found</p>
+                  <p className="mt-1 text-sm text-burrow-text-muted">
                     Double-check your order number or create a new delivery request if you haven&apos;t scheduled one yet.
                   </p>
                   <Link
                     to="/new-request"
-                    className="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium text-blue-600 hover:text-blue-500"
+                    className="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium text-burrow-primary hover:text-burrow-secondary"
                   >
                     Schedule a delivery
                   </Link>

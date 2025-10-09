@@ -158,7 +158,7 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 fade-stagger">
             {howItWorks.map((step, index) => (
               <div key={index} className="text-center">
-                <div className="w-20 h-20 bg-burrow-primary text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                <div className="w-20 h-20 bg-burrow-primary text-burrow-text-inverse rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4 shadow-md shadow-burrow-border/50">
                   {step.step}
                 </div>
                 <h3 className="text-xl font-semibold text-burrow-text-primary mb-3">{step.title}</h3>
@@ -171,10 +171,10 @@ const Home = () => {
 
       <section className="section-primary">
         <div className="layout-container text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
+          <h2 className="text-3xl font-bold text-burrow-text-inverse mb-4">
             Ready to Take Control of Your Deliveries?
           </h2>
-          <p className="text-xl text-burrow-background mb-8">
+          <p className="text-xl text-burrow-accent/90 mb-8">
             Join thousands of customers who trust Burrow with their packages
           </p>
           <button

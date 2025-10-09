@@ -37,7 +37,7 @@ const AppContent = () => {
   const { state } = useAuth();
 
   return (
-    <div className="min-h-screen bg-white flex flex-col">
+    <div className="min-h-screen bg-burrow-background text-burrow-text-primary flex flex-col">
       <Header />
       <main className="flex-grow">
         <Routes>

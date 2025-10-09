@@ -99,7 +99,7 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
                   <div className="text-sm">
                     <p className="font-semibold text-burrow-text-primary">{warehouse.name}</p>
                     <p className="text-burrow-text-secondary mt-1">{warehouse.address}</p>
-                    <p className="text-gray-500 mt-1 text-xs">
+                    <p className="text-burrow-text-muted mt-1 text-xs">
                       Capacity: {warehouse.capacity} · Hours: {warehouse.operatingHours}
                     </p>
                   </div>
