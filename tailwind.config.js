@@ -6,8 +6,6 @@ export default {
       colors: {
         burrow: {
           primary: '#d48437',
-          secondary: '#f0ad62',
-          accent: '#f8cfa2',
           background: '#fffcf3',
           surface: '#fffef9',
           border: '#f0e4d4',

@@ -70,7 +70,7 @@ const ConsumerDashboard = () => {
       case 'payment_pending':
       case 'reschedule_requested':
         return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border border-burrow-border/60 bg-burrow-secondary/20 text-burrow-primary">
+          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border border-burrow-border/60 bg-burrow-primary/10 text-burrow-primary">
             Pending
           </span>
         );

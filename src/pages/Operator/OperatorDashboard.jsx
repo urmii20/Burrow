@@ -71,21 +71,22 @@ const OperatorDashboard = () => {
       .join(' ') || '';
 
   const getStatusBadge = (status) => {
+    const neutralBadge = 'bg-burrow-primary/10 text-burrow-primary';
     const config = {
-      submitted: { color: 'bg-burrow-primary/10 text-burrow-primary', label: 'Submitted' },
-      approval_pending: { color: 'bg-burrow-secondary/20 text-burrow-primary', label: 'Pending Approval' },
-      approved: { color: 'bg-burrow-primary/15 text-burrow-primary', label: 'Approved' },
+      submitted: { color: neutralBadge, label: 'Submitted' },
+      approval_pending: { color: neutralBadge, label: 'Pending Approval' },
+      approved: { color: neutralBadge, label: 'Approved' },
       rejected: { color: 'bg-red-100 text-red-700', label: 'Rejected' },
-      parcel_expected: { color: 'bg-burrow-accent/40 text-burrow-primary', label: 'Parcel Expected' },
-      parcel_arrived: { color: 'bg-burrow-secondary/20 text-burrow-primary', label: 'Parcel Arrived' },
-      in_storage: { color: 'bg-burrow-primary/10 text-burrow-primary', label: 'In Storage' },
-      preparing_dispatch: { color: 'bg-burrow-secondary/25 text-burrow-primary', label: 'Preparing Dispatch' },
-      out_for_delivery: { color: 'bg-burrow-primary/15 text-burrow-primary', label: 'Out for Delivery' },
-      delivered: { color: 'bg-burrow-primary/15 text-burrow-primary', label: 'Delivered' }
+      parcel_expected: { color: neutralBadge, label: 'Parcel Expected' },
+      parcel_arrived: { color: neutralBadge, label: 'Parcel Arrived' },
+      in_storage: { color: neutralBadge, label: 'In Storage' },
+      preparing_dispatch: { color: neutralBadge, label: 'Preparing Dispatch' },
+      out_for_delivery: { color: neutralBadge, label: 'Out for Delivery' },
+      delivered: { color: neutralBadge, label: 'Delivered' }
     };
 
     const statusConfig =
-      config[status] || { color: 'bg-burrow-primary/10 text-burrow-primary', label: formatStatusLabel(status) };
+      config[status] || { color: neutralBadge, label: formatStatusLabel(status) };
 
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig.color}`}>
@@ -165,7 +166,7 @@ const OperatorDashboard = () => {
 
   return (
     <div className="min-h-screen bg-burrow-background page-fade">
-      <div className="bg-burrow-surface/95 backdrop-blur-sm shadow-sm border-b border-burrow-border/80 page-fade">
+      <div className="bg-burrow-surface shadow-sm border-b border-burrow-border page-fade">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
             <h1 className="text-2xl font-bold text-burrow-text-primary">Operator Dashboard</h1>
@@ -321,7 +322,7 @@ const OperatorDashboard = () => {
                       <div className="flex items-center space-x-2">
                         <button
                           onClick={() => handleOpenRequest(request)}
-                          className="text-burrow-primary hover:text-burrow-secondary"
+                          className="text-burrow-primary hover:text-burrow-primary/80"
                         >
                           <Eye className="h-4 w-4" />
                         </button>
@@ -331,7 +332,7 @@ const OperatorDashboard = () => {
                             <button
                               onClick={() => handleQuickStatusChange(request.id, 'approved')}
                               disabled={updatingRequestId === request.id}
-                              className={`text-burrow-primary hover:text-burrow-secondary ${
+                              className={`text-burrow-primary hover:text-burrow-primary/80 ${
                                 updatingRequestId === request.id ? 'opacity-50 cursor-not-allowed' : ''
                               }`}
                             >

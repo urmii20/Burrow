@@ -9,9 +9,7 @@ const Footer = () => {
         <div>
           <div className="flex items-center space-x-2 mb-4">
             <Package className="h-8 w-8 text-burrow-primary drop-shadow" />
-            <span className="text-2xl font-extrabold bg-gradient-to-r from-burrow-primary via-burrow-secondary to-burrow-accent bg-clip-text text-transparent tracking-tight">
-              Burrow
-            </span>
+            <span className="text-2xl font-extrabold text-burrow-primary tracking-tight">Burrow</span>
           </div>
           <p className="text-burrow-text-secondary text-sm">
             Delivery rescheduling made simple. Take control of your deliveries and schedule them on your terms.

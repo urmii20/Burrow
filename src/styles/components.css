@@ -8,7 +8,7 @@
   }
 
   .section-hero {
-    @apply bg-gradient-to-br from-burrow-background via-burrow-surface to-burrow-accent/40 py-24;
+    @apply bg-burrow-surface py-24 border-b border-burrow-border/60;
   }
 
   .section-muted {
@@ -56,11 +56,11 @@
   }
 
   .feature-card {
-    @apply rounded-2xl border border-burrow-border/60 bg-burrow-surface p-8 shadow-lg shadow-burrow-border/40 transition-transform duration-200 hover:-translate-y-2;
+    @apply rounded-2xl border border-burrow-border/70 bg-burrow-surface p-8 shadow-md shadow-burrow-border/40 transition-transform duration-200 hover:-translate-y-1 hover:shadow-lg;
   }
 
   .feature-icon {
-    @apply mb-4 flex items-center justify-center text-4xl;
+    @apply mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-burrow-primary/10 text-burrow-primary;
   }
 
   .map-card {
@@ -112,7 +112,7 @@
   }
 
   .btn-primary {
-    @apply btn bg-burrow-primary text-burrow-text-inverse hover:bg-burrow-secondary focus:ring-burrow-primary;
+    @apply btn bg-burrow-primary text-burrow-text-inverse hover:bg-burrow-primary/90 focus:ring-burrow-primary;
   }
 
   .btn-secondary {
@@ -124,7 +124,7 @@
   }
 
   .btn-blue {
-    @apply btn bg-burrow-secondary text-burrow-text-inverse hover:bg-burrow-primary focus:ring-burrow-secondary;
+    @apply btn bg-burrow-primary/15 text-burrow-primary hover:bg-burrow-primary/25 focus:ring-burrow-primary;
   }
 
   .btn-light {
@@ -152,7 +152,7 @@
   }
 
   .nav-link-strong {
-    @apply font-medium text-burrow-primary transition-colors hover:text-burrow-secondary;
+    @apply font-medium text-burrow-primary transition-colors hover:text-burrow-primary/80;
   }
 
   .input-group {

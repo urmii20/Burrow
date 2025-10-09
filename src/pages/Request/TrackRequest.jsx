@@ -142,7 +142,7 @@ const TrackRequest = () => {
 
           <Link
             to={`/request/${request.id}`}
-            className="inline-flex items-center px-4 py-2 text-sm font-medium text-burrow-primary hover:text-burrow-secondary"
+            className="inline-flex items-center px-4 py-2 text-sm font-medium text-burrow-primary hover:text-burrow-primary/80"
           >
             View details
           </Link>
@@ -210,7 +210,7 @@ const TrackRequest = () => {
                   </p>
                   <Link
                     to="/new-request"
-                    className="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium text-burrow-primary hover:text-burrow-secondary"
+                    className="mt-4 inline-flex items-center px-4 py-2 text-sm font-medium text-burrow-primary hover:text-burrow-primary/80"
                   >
                     Schedule a delivery
                   </Link>

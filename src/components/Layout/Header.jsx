@@ -22,7 +22,7 @@ const Header = () => {
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
               <Package className="h-8 w-8 text-burrow-primary drop-shadow" />
-              <span className="text-2xl font-extrabold bg-gradient-to-r from-burrow-primary via-burrow-secondary to-burrow-accent bg-clip-text text-transparent tracking-tight">
+              <span className="text-2xl font-extrabold text-burrow-primary tracking-tight">
                 Burrow
               </span>
             </Link>

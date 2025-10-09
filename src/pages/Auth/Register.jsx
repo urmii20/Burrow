@@ -245,11 +245,11 @@ const Register = () => {
             />
             <label htmlFor="accept-terms" className="ml-2 block text-sm text-burrow-text-secondary">
               I accept the{' '}
-              <Link to="/terms" className="text-burrow-primary hover:text-burrow-secondary">
+              <Link to="/terms" className="text-burrow-primary hover:text-burrow-primary/80">
                 Terms and Conditions
               </Link>{' '}
               and{' '}
-              <Link to="/privacy" className="text-burrow-primary hover:text-burrow-secondary">
+              <Link to="/privacy" className="text-burrow-primary hover:text-burrow-primary/80">
                 Privacy Policy
               </Link>
             </label>

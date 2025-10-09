@@ -13,13 +13,13 @@ const statusConfig = {
     label: 'Payment Pending',
     icon: Clock,
     color: 'text-burrow-primary',
-    bgColor: 'bg-burrow-secondary/20'
+    bgColor: 'bg-burrow-primary/10'
   },
   approval_pending: {
     label: 'Approval Pending',
     icon: Clock,
     color: 'text-burrow-primary',
-    bgColor: 'bg-burrow-secondary/20'
+    bgColor: 'bg-burrow-primary/10'
   },
   approved: {
     label: 'Approved',
@@ -55,7 +55,7 @@ const statusConfig = {
     label: 'Preparing for Dispatch',
     icon: Package,
     color: 'text-burrow-primary',
-    bgColor: 'bg-burrow-secondary/20'
+    bgColor: 'bg-burrow-primary/10'
   },
   out_for_delivery: {
     label: 'Out for Delivery',
@@ -202,7 +202,7 @@ const StatusTracker = ({ currentStatus, statusHistory }) => {
                   }`}>
                     {config.label}
                     {isCurrent && (
-                      <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-burrow-secondary/30 text-burrow-primary">
+                      <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-burrow-primary text-burrow-text-inverse">
                         Current
                       </span>
                     )}
