@@ -257,7 +257,7 @@ const NewRequest = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 page-fade">
+    <div className="min-h-screen bg-burrow-background py-8 page-fade">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8 page-fade">
           <div className="flex items-center justify-between fade-stagger">
@@ -265,20 +265,24 @@ const NewRequest = () => {
               <div key={step} className="flex items-center">
                 <div
                   className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium ${
-                    step <= currentStep ? 'bg-blue-500 text-white' : 'bg-gray-300 text-gray-600'
+                    step <= currentStep
+                      ? 'bg-burrow-primary text-burrow-text-inverse shadow-sm shadow-burrow-border/40'
+                      : 'bg-burrow-background text-burrow-text-muted border border-burrow-border'
                   }`}
                 >
                   {step}
                 </div>
                 <span
                   className={`ml-2 text-sm font-medium ${
-                    step <= currentStep ? 'text-blue-500' : 'text-gray-500'
+                    step <= currentStep ? 'text-burrow-primary' : 'text-burrow-text-muted'
                   }`}
                 >
                   {step === 1 ? 'Order Details' : step === 2 ? 'Schedule Delivery' : 'Payment'}
                 </span>
                 {step < 3 && (
-                  <div className={`w-16 h-1 ml-4 ${step < currentStep ? 'bg-blue-500' : 'bg-gray-300'}`} />
+                  <div className={`w-16 h-1 ml-4 rounded-full ${
+                    step < currentStep ? 'bg-burrow-primary' : 'bg-burrow-border'
+                  }`} />
                 )}
               </div>
             ))}
@@ -286,17 +290,17 @@ const NewRequest = () => {
         </div>
 
         {currentStep === 1 && (
-          <div className="bg-white rounded-lg shadow-md p-6 page-fade">
+          <div className="card p-6 page-fade">
             <div className="flex items-center mb-6">
-              <Upload className="h-6 w-6 text-blue-500 mr-2" />
-              <h2 className="text-2xl font-bold text-gray-900">Order Details</h2>
+              <Upload className="h-6 w-6 text-burrow-primary mr-2" />
+              <h2 className="text-2xl font-bold text-burrow-text-primary">Order Details</h2>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 fade-stagger">
               <div className="space-y-6 fade-stagger">
                 {/* Order number */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-burrow-text-secondary mb-2">
                     Order Number *
                   </label>
                   <input
@@ -304,8 +308,8 @@ const NewRequest = () => {
                     name="orderNumber"
                     value={formData.orderNumber}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.orderNumber ? 'border-red-300' : 'border-gray-300'
+                    className={`input-field-plain ${
+                      errors.orderNumber ? 'border-red-300 focus:border-red-400 focus:ring-red-400' : ''
                     }`}
                     placeholder="e.g., AMZ123456789"
                   />
@@ -314,15 +318,15 @@ const NewRequest = () => {
 
                 {/* Platform */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-burrow-text-secondary mb-2">
                     E-commerce Platform *
                   </label>
                   <select
                     name="platform"
                     value={formData.platform}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.platform ? 'border-red-300' : 'border-gray-300'
+                    className={`input-field-plain ${
+                      errors.platform ? 'border-red-300 focus:border-red-400 focus:ring-red-400' : ''
                     }`}
                   >
                     <option value="">Select Platform</option>
@@ -337,7 +341,7 @@ const NewRequest = () => {
 
                 {/* Description */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-burrow-text-secondary mb-2">
                     Product Description *
                   </label>
                   <textarea
@@ -345,8 +349,10 @@ const NewRequest = () => {
                     value={formData.productDescription}
                     onChange={handleInputChange}
                     rows={3}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.productDescription ? 'border-red-300' : 'border-gray-300'
+                    className={`input-field-plain ${
+                      errors.productDescription
+                        ? 'border-red-300 focus:border-red-400 focus:ring-red-400'
+                        : ''
                     }`}
                     placeholder="Brief description of the product"
                   />
@@ -357,7 +363,7 @@ const NewRequest = () => {
 
                 {/* Original ETA */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-burrow-text-secondary mb-2">
                     Original Delivery Date *
                   </label>
                   <input
@@ -365,8 +371,8 @@ const NewRequest = () => {
                     name="originalETA"
                     value={formData.originalETA}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.originalETA ? 'border-red-300' : 'border-gray-300'
+                    className={`input-field-plain ${
+                      errors.originalETA ? 'border-red-300 focus:border-red-400 focus:ring-red-400' : ''
                     }`}
                   />
                   {errors.originalETA && <p className="text-red-600 text-xs mt-1">{errors.originalETA}</p>}
@@ -374,23 +380,23 @@ const NewRequest = () => {
 
                 {/* Receipt */}
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-burrow-text-secondary mb-2">
                     Upload Receipt (PDF only, max 5MB)
                   </label>
                   <input
                     type="file"
                     accept=".pdf"
                     onChange={handleFileChange}
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="input-field-plain cursor-pointer"
                   />
-                  {selectedFile && <p className="text-green-600 text-sm mt-1">✓ {selectedFile.name} selected</p>}
+                  {selectedFile && <p className="text-burrow-primary text-sm mt-1">✓ {selectedFile.name} selected</p>}
                   {errors.file && <p className="text-red-600 text-xs mt-1">{errors.file}</p>}
                 </div>
               </div>
 
               {/* Map */}
               <div className="page-fade">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Select Warehouse</h3>
+                <h3 className="text-lg font-medium text-burrow-text-primary mb-4">Select Warehouse</h3>
                 <WarehouseMap
                   onWarehouseSelect={(warehouse) => setFormData((prev) => ({ ...prev, warehouse }))}
                   selectedWarehouseId={formData.warehouse?.id}
@@ -402,7 +408,7 @@ const NewRequest = () => {
             <div className="flex justify-end mt-8">
               <button
                 onClick={handleNext}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="btn-primary btn-md"
               >
                 Next Step
               </button>
@@ -411,17 +417,17 @@ const NewRequest = () => {
         )}
 
         {currentStep === 2 && (
-          <div className="bg-white rounded-lg shadow-md p-6 page-fade">
+          <div className="card p-6 page-fade">
             <div className="flex items-center mb-6">
-              <Calendar className="h-6 w-6 text-blue-500 mr-2" />
-              <h2 className="text-2xl font-bold text-gray-900">Schedule Delivery</h2>
+              <Calendar className="h-6 w-6 text-burrow-primary mr-2" />
+              <h2 className="text-2xl font-bold text-burrow-text-primary">Schedule Delivery</h2>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 fade-stagger">
               {/* Left */}
               <div className="space-y-6 fade-stagger">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-burrow-text-secondary mb-2">
                     Preferred Delivery Date *
                   </label>
                   <input
@@ -430,8 +436,10 @@ const NewRequest = () => {
                     value={formData.scheduledDeliveryDate}
                     onChange={handleInputChange}
                     min={new Date().toISOString().split('T')[0]}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.scheduledDeliveryDate ? 'border-red-300' : 'border-gray-300'
+                    className={`input-field-plain ${
+                      errors.scheduledDeliveryDate
+                        ? 'border-red-300 focus:border-red-400 focus:ring-red-400'
+                        : ''
                     }`}
                   />
                   {errors.scheduledDeliveryDate && (
@@ -440,15 +448,15 @@ const NewRequest = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-burrow-text-secondary mb-2">
                     Time Slot *
                   </label>
                   <select
                     name="deliveryTimeSlot"
                     value={formData.deliveryTimeSlot}
                     onChange={handleInputChange}
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors.deliveryTimeSlot ? 'border-red-300' : 'border-gray-300'
+                    className={`input-field-plain ${
+                      errors.deliveryTimeSlot ? 'border-red-300 focus:border-red-400 focus:ring-red-400' : ''
                     }`}
                   >
                     <option value="">Select Time Slot</option>
@@ -466,7 +474,7 @@ const NewRequest = () => {
 
               {/* Right */}
               <div className="space-y-6 fade-stagger">
-                <h3 className="text-lg font-medium text-gray-900">Destination Address</h3>
+                <h3 className="text-lg font-medium text-burrow-text-primary">Destination Address</h3>
 
                 <div className="grid grid-cols-1 gap-4">
                   <input
@@ -475,8 +483,8 @@ const NewRequest = () => {
                     value={formData.destinationAddress.line1}
                     onChange={handleInputChange}
                     placeholder="Address Line 1 *"
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors['address.line1'] ? 'border-red-300' : 'border-gray-300'
+                    className={`input-field-plain ${
+                      errors['address.line1'] ? 'border-red-300 focus:border-red-400 focus:ring-red-400' : ''
                     }`}
                   />
                   {errors['address.line1'] && <p className="text-red-600 text-xs">{errors['address.line1']}</p>}
@@ -487,7 +495,7 @@ const NewRequest = () => {
                     value={formData.destinationAddress.line2}
                     onChange={handleInputChange}
                     placeholder="Address Line 2"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="input-field-plain"
                   />
 
                   <div className="grid grid-cols-2 gap-3">
@@ -497,8 +505,8 @@ const NewRequest = () => {
                       value={formData.destinationAddress.city}
                       onChange={handleInputChange}
                       placeholder="City *"
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        errors['address.city'] ? 'border-red-300' : 'border-gray-300'
+                      className={`input-field-plain ${
+                        errors['address.city'] ? 'border-red-300 focus:border-red-400 focus:ring-red-400' : ''
                       }`}
                     />
                     <input
@@ -507,8 +515,8 @@ const NewRequest = () => {
                       value={formData.destinationAddress.state}
                       onChange={handleInputChange}
                       placeholder="State *"
-                      className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                        errors['address.state'] ? 'border-red-300' : 'border-gray-300'
+                      className={`input-field-plain ${
+                        errors['address.state'] ? 'border-red-300 focus:border-red-400 focus:ring-red-400' : ''
                       }`}
                     />
                   </div>
@@ -521,8 +529,8 @@ const NewRequest = () => {
                     value={formData.destinationAddress.pincode}
                     onChange={handleInputChange}
                     placeholder="Pincode *"
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors['address.pincode'] ? 'border-red-300' : 'border-gray-300'
+                    className={`input-field-plain ${
+                      errors['address.pincode'] ? 'border-red-300 focus:border-red-400 focus:ring-red-400' : ''
                     }`}
                   />
                   {errors['address.pincode'] && (
@@ -535,7 +543,7 @@ const NewRequest = () => {
                     value={formData.destinationAddress.landmark}
                     onChange={handleInputChange}
                     placeholder="Landmark"
-                    className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                    className="input-field-plain"
                   />
 
                   <input
@@ -544,8 +552,10 @@ const NewRequest = () => {
                     value={formData.destinationAddress.contactNumber}
                     onChange={handleInputChange}
                     placeholder="Contact Number *"
-                    className={`w-full px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
-                      errors['address.contactNumber'] ? 'border-red-300' : 'border-gray-300'
+                    className={`input-field-plain ${
+                      errors['address.contactNumber']
+                        ? 'border-red-300 focus:border-red-400 focus:ring-red-400'
+                        : ''
                     }`}
                   />
                   {errors['address.contactNumber'] && (
@@ -561,13 +571,13 @@ const NewRequest = () => {
                   setSubmitError(null);
                   setCurrentStep(1);
                 }}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="btn-secondary btn-md"
               >
                 Previous
               </button>
               <button
                 onClick={handleNext}
-                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="btn-primary btn-md"
               >
                 Next Step
               </button>
@@ -576,56 +586,56 @@ const NewRequest = () => {
         )}
 
         {currentStep === 3 && (
-          <div className="bg-white rounded-lg shadow-md p-6 page-fade">
+          <div className="card p-6 page-fade">
             <div className="flex items-center mb-6">
-              <CreditCard className="h-6 w-6 text-blue-500 mr-2" />
-              <h2 className="text-2xl font-bold text-gray-900">Payment Details</h2>
+              <CreditCard className="h-6 w-6 text-burrow-primary mr-2" />
+              <h2 className="text-2xl font-bold text-burrow-text-primary">Payment Details</h2>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 fade-stagger">
               <div className="page-fade">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Service Charges</h3>
-                <div className="bg-gray-50 rounded-lg p-4 space-y-3 fade-stagger">
+                <h3 className="text-lg font-medium text-burrow-text-primary mb-4">Service Charges</h3>
+                <div className="bg-burrow-background rounded-xl p-4 space-y-3 fade-stagger">
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Base Handling Fee</span>
+                    <span className="text-burrow-text-secondary">Base Handling Fee</span>
                     <span className="font-medium">₹{charges.baseHandlingFee}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Storage Fee (2 extra days)</span>
+                    <span className="text-burrow-text-secondary">Storage Fee (2 extra days)</span>
                     <span className="font-medium">₹{charges.storageFee}</span>
                   </div>
                   <div className="flex justify-between">
-                    <span className="text-gray-600">Delivery Charge</span>
+                    <span className="text-burrow-text-secondary">Delivery Charge</span>
                     <span className="font-medium">₹{charges.deliveryCharge}</span>
                   </div>
-                  <div className="border-t pt-3">
+                  <div className="border-t border-burrow-border/60 pt-3">
                     <div className="flex justify-between">
-                      <span className="text-gray-600">Subtotal</span>
+                      <span className="text-burrow-text-secondary">Subtotal</span>
                       <span className="font-medium">₹{charges.subtotal}</span>
                     </div>
                     <div className="flex justify-between">
-                      <span className="text-gray-600">GST (18%)</span>
+                      <span className="text-burrow-text-secondary">GST (18%)</span>
                       <span className="font-medium">₹{charges.gst.toFixed(2)}</span>
                     </div>
                   </div>
-                  <div className="border-t pt-3">
+                  <div className="border-t border-burrow-border/60 pt-3">
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total Amount</span>
-                      <span className="text-blue-600">₹{charges.total.toFixed(2)}</span>
+                      <span className="text-burrow-primary">₹{charges.total.toFixed(2)}</span>
                     </div>
                   </div>
                 </div>
               </div>
 
               <div className="space-y-4 fade-stagger">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">Payment Method</h3>
+                <h3 className="text-lg font-medium text-burrow-text-primary mb-4">Payment Method</h3>
                 {paymentOptions.map((option) => (
                   <label
                     key={option.id}
-                    className={`flex items-center border rounded-lg p-4 cursor-pointer transition-colors ${
+                    className={`flex items-center rounded-xl border p-4 cursor-pointer transition-colors ${
                       selectedPaymentMethod === option.id
-                        ? 'border-blue-500 bg-blue-50'
-                        : 'border-gray-300 hover:border-gray-400'
+                        ? 'border-burrow-primary bg-burrow-primary/10 shadow-sm'
+                        : 'border-burrow-border hover:border-burrow-primary/60'
                     }`}
                   >
                     <input
@@ -634,9 +644,9 @@ const NewRequest = () => {
                       value={option.id}
                       checked={selectedPaymentMethod === option.id}
                       onChange={() => handlePaymentMethodChange(option.id)}
-                      className="text-blue-600"
+                      className="text-burrow-primary focus:ring-burrow-primary"
                     />
-                    <span className="ml-2">{option.label}</span>
+                    <span className="ml-2 text-burrow-text-secondary">{option.label}</span>
                   </label>
                 ))}
                 {errors.paymentMethod && (
@@ -657,18 +667,14 @@ const NewRequest = () => {
                   setSubmitError(null);
                   setCurrentStep(2);
                 }}
-                className="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
+                className="btn-secondary btn-md"
               >
                 Previous
               </button>
               <button
                 onClick={handleSubmit}
                 disabled={isSubmitting}
-                className={`px-8 py-2 rounded-lg transition-colors ${
-                  isSubmitting
-                    ? 'bg-green-400 text-white cursor-not-allowed'
-                    : 'bg-green-600 text-white hover:bg-green-700'
-                }`}
+                className={`btn-primary btn-md px-8 ${isSubmitting ? 'opacity-60 cursor-not-allowed' : ''}`}
               >
                 {isSubmitting ? 'Processing...' : `Proceed to Pay ₹${charges.total.toFixed(2)}`}
               </button>

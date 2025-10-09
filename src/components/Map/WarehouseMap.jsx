@@ -99,7 +99,7 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
                   <div className="text-sm">
                     <p className="font-semibold text-burrow-text-primary">{warehouse.name}</p>
                     <p className="text-burrow-text-secondary mt-1">{warehouse.address}</p>
-                    <p className="text-gray-500 mt-1 text-xs">
+                    <p className="text-burrow-text-muted mt-1 text-xs">
                       Capacity: {warehouse.capacity} · Hours: {warehouse.operatingHours}
                     </p>
                   </div>
@@ -117,13 +117,15 @@ const WarehouseMap = ({ onWarehouseSelect, selectedWarehouseId }) => {
 
       <div
         className={`card-bordered p-4 flex flex-col gap-2 transition-colors duration-200 ${
-          selectedWarehouse ? 'bg-green-50 border-green-400' : 'bg-burrow-background border-burrow-primary/30'
+          selectedWarehouse
+            ? 'bg-burrow-primary/10 border-burrow-primary'
+            : 'bg-burrow-surface border-burrow-border'
         }`}
       >
         {selectedWarehouse ? (
           <div className="space-y-1">
             <div className="flex items-center gap-2">
-              <CheckCircle className="h-5 w-5 text-green-500" />
+              <CheckCircle className="h-5 w-5 text-burrow-primary" />
               <span className="font-medium text-burrow-text-primary">Warehouse Selected</span>
             </div>
             <p className="text-burrow-text-primary font-semibold">{selectedWarehouse.name}</p>

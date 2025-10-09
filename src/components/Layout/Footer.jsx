@@ -8,10 +8,8 @@ const Footer = () => {
       <div className="footer-container">
         <div>
           <div className="flex items-center space-x-2 mb-4">
-            <Package className="h-8 w-8 text-burrow-primary" />
-            <span className="text-2xl font-extrabold bg-gradient-to-r from-burrow-primary to-burrow-secondary bg-clip-text text-transparent tracking-tight">
-              Burrow
-            </span>
+            <Package className="h-8 w-8 text-burrow-primary drop-shadow" />
+            <span className="text-2xl font-extrabold text-burrow-primary tracking-tight">Burrow</span>
           </div>
           <p className="text-burrow-text-secondary text-sm">
             Delivery rescheduling made simple. Take control of your deliveries and schedule them on your terms.
@@ -57,7 +55,7 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className="layout-container border-t border-gray-200 mt-8 pt-8 text-center">
+      <div className="layout-container border-t border-burrow-border/80 mt-8 pt-8 text-center">
         <p className="text-sm text-burrow-text-secondary">
           © 2024 Burrow. All rights reserved. |
           <Link to="/privacy" className="footer-link ml-1">Privacy Policy</Link>

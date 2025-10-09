@@ -4,6 +4,16 @@
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  body {
+    @apply bg-burrow-background text-burrow-text-primary antialiased;
+  }
+
+  ::selection {
+    @apply bg-burrow-primary text-burrow-text-inverse;
+  }
+}
+
 @keyframes burrow-fade-in-up {
   from {
     opacity: 0;

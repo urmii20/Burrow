@@ -6,26 +6,26 @@ const statusConfig = {
   submitted: {
     label: 'Request Submitted',
     icon: Clock,
-    color: 'text-green-500',
-    bgColor: 'bg-green-100'
+    color: 'text-burrow-primary',
+    bgColor: 'bg-burrow-primary/10'
   },
   payment_pending: {
     label: 'Payment Pending',
     icon: Clock,
-    color: 'text-yellow-500',
-    bgColor: 'bg-yellow-100'
+    color: 'text-burrow-primary',
+    bgColor: 'bg-burrow-primary/10'
   },
   approval_pending: {
     label: 'Approval Pending',
     icon: Clock,
-    color: 'text-blue-500',
-    bgColor: 'bg-blue-100'
+    color: 'text-burrow-primary',
+    bgColor: 'bg-burrow-primary/10'
   },
   approved: {
     label: 'Approved',
     icon: Check,
-    color: 'text-green-500',
-    bgColor: 'bg-green-100'
+    color: 'text-burrow-primary',
+    bgColor: 'bg-burrow-primary/10'
   },
   rejected: {
     label: 'Rejected',
@@ -36,38 +36,38 @@ const statusConfig = {
   parcel_expected: {
     label: 'Parcel Expected at Warehouse',
     icon: Clock,
-    color: 'text-blue-500',
-    bgColor: 'bg-blue-100'
+    color: 'text-burrow-primary',
+    bgColor: 'bg-burrow-primary/10'
   },
   parcel_arrived: {
     label: 'Parcel Arrived at Warehouse',
     icon: Package,
-    color: 'text-green-500',
-    bgColor: 'bg-green-100'
+    color: 'text-burrow-primary',
+    bgColor: 'bg-burrow-primary/10'
   },
   in_storage: {
     label: 'In Storage',
     icon: Package,
-    color: 'text-blue-500',
-    bgColor: 'bg-blue-100'
+    color: 'text-burrow-primary',
+    bgColor: 'bg-burrow-primary/10'
   },
   preparing_dispatch: {
     label: 'Preparing for Dispatch',
     icon: Package,
-    color: 'text-yellow-500',
-    bgColor: 'bg-yellow-100'
+    color: 'text-burrow-primary',
+    bgColor: 'bg-burrow-primary/10'
   },
   out_for_delivery: {
     label: 'Out for Delivery',
     icon: Truck,
-    color: 'text-blue-500',
-    bgColor: 'bg-blue-100'
+    color: 'text-burrow-primary',
+    bgColor: 'bg-burrow-primary/10'
   },
   delivered: {
     label: 'Delivered',
     icon: Home,
-    color: 'text-green-500',
-    bgColor: 'bg-green-100'
+    color: 'text-burrow-primary',
+    bgColor: 'bg-burrow-primary/10'
   },
   issue_reported: {
     label: 'Issue Reported',
@@ -160,7 +160,7 @@ const StatusTracker = ({ currentStatus, statusHistory }) => {
 
   return (
     <div className="card-padded">
-      <h3 className="text-xl font-semibold text-gray-900 mb-6">Order Status</h3>
+      <h3 className="text-xl font-semibold text-burrow-text-primary mb-6">Order Status</h3>
 
       <div className="timeline">
         {statusOrder.map((status, index) => {
@@ -184,13 +184,13 @@ const StatusTracker = ({ currentStatus, statusHistory }) => {
               <div
                 className={`timeline-icon ${
                   isCompleted
-                    ? `${config.bgColor} shadow-sm`
-                    : 'bg-gray-100'
+                    ? `${config.bgColor} shadow-sm shadow-burrow-border/40`
+                    : 'bg-burrow-background border border-burrow-border'
                 }`}
               >
                 <Icon
                   className={`h-5 w-5 transition-colors duration-500 ${
-                    isCompleted ? config.color : 'text-gray-400'
+                    isCompleted ? config.color : 'text-burrow-text-muted'
                   }`}
                 />
               </div>
@@ -198,11 +198,11 @@ const StatusTracker = ({ currentStatus, statusHistory }) => {
               <div className="timeline-content">
                 <div className="flex items-center justify-between">
                   <p className={`timeline-title ${
-                    isCompleted ? 'text-gray-900' : 'text-gray-500'
+                    isCompleted ? 'text-burrow-text-primary' : 'text-burrow-text-muted'
                   }`}>
                     {config.label}
                     {isCurrent && (
-                      <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                      <span className="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-burrow-primary text-burrow-text-inverse">
                         Current
                       </span>
                     )}
@@ -216,15 +216,15 @@ const StatusTracker = ({ currentStatus, statusHistory }) => {
                 </div>
 
                 {statusEntry && (statusEntry.notes || statusEntry.note) && (
-                  <p className="text-sm text-gray-600 mt-1">
+                  <p className="text-sm text-burrow-text-secondary mt-1">
                     {statusEntry.notes ?? statusEntry.note}
                   </p>
                 )}
 
                 {index < statusOrder.length - 1 && (
-                  <div className="relative w-px h-6 ml-5 mt-2 bg-gray-200 overflow-hidden">
+                  <div className="relative w-px h-6 ml-5 mt-2 bg-burrow-border overflow-hidden">
                     <div
-                      className={`absolute inset-0 bg-green-300 transform origin-top transition-transform duration-500 ease-out ${
+                      className={`absolute inset-0 bg-burrow-primary/40 transform origin-top transition-transform duration-500 ease-out ${
                         lineFilled ? 'scale-y-100' : 'scale-y-0'
                       }`}
                     />

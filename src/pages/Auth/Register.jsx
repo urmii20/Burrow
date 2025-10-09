@@ -105,7 +105,7 @@ const Register = () => {
               <label htmlFor="name" className="sr-only">Full Name</label>
               <div className="input-group">
                 <div className="input-icon">
-                  <User className="h-5 w-5 text-gray-400" />
+                  <User className="h-5 w-5" />
                 </div>
                 <input
                   id="name"
@@ -127,7 +127,7 @@ const Register = () => {
               <label htmlFor="email" className="sr-only">Email address</label>
               <div className="input-group">
                 <div className="input-icon">
-                  <Mail className="h-5 w-5 text-gray-400" />
+                  <Mail className="h-5 w-5" />
                 </div>
                 <input
                   id="email"
@@ -149,7 +149,7 @@ const Register = () => {
               <label htmlFor="phone" className="sr-only">Phone Number</label>
               <div className="input-group">
                 <div className="input-icon">
-                  <Phone className="h-5 w-5 text-gray-400" />
+                  <Phone className="h-5 w-5" />
                 </div>
                 <input
                   id="phone"
@@ -171,7 +171,7 @@ const Register = () => {
               <label htmlFor="password" className="sr-only">Password</label>
               <div className="input-group">
                 <div className="input-icon">
-                  <Lock className="h-5 w-5 text-gray-400" />
+                  <Lock className="h-5 w-5" />
                 </div>
                 <input
                   id="password"
@@ -191,9 +191,9 @@ const Register = () => {
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
+                    <EyeOff className="h-5 w-5 text-burrow-text-muted" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
+                    <Eye className="h-5 w-5 text-burrow-text-muted" />
                   )}
                 </button>
               </div>
@@ -204,7 +204,7 @@ const Register = () => {
               <label htmlFor="confirmPassword" className="sr-only">Confirm Password</label>
               <div className="input-group">
                 <div className="input-icon">
-                  <Lock className="h-5 w-5 text-gray-400" />
+                  <Lock className="h-5 w-5" />
                 </div>
                 <input
                   id="confirmPassword"
@@ -224,9 +224,9 @@ const Register = () => {
                   onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 >
                   {showConfirmPassword ? (
-                    <EyeOff className="h-5 w-5 text-gray-400" />
+                    <EyeOff className="h-5 w-5 text-burrow-text-muted" />
                   ) : (
-                    <Eye className="h-5 w-5 text-gray-400" />
+                    <Eye className="h-5 w-5 text-burrow-text-muted" />
                   )}
                 </button>
               </div>
@@ -241,15 +241,15 @@ const Register = () => {
               type="checkbox"
               checked={acceptTerms}
               onChange={(event) => setAcceptTerms(event.target.checked)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-4 w-4 rounded border-burrow-border text-burrow-primary focus:ring-burrow-primary"
             />
-            <label htmlFor="accept-terms" className="ml-2 block text-sm text-gray-700">
+            <label htmlFor="accept-terms" className="ml-2 block text-sm text-burrow-text-secondary">
               I accept the{' '}
-              <Link to="/terms" className="text-blue-600 hover:text-blue-500">
+              <Link to="/terms" className="text-burrow-primary hover:text-burrow-primary/80">
                 Terms and Conditions
               </Link>{' '}
               and{' '}
-              <Link to="/privacy" className="text-blue-600 hover:text-blue-500">
+              <Link to="/privacy" className="text-burrow-primary hover:text-burrow-primary/80">
                 Privacy Policy
               </Link>
             </label>
@@ -259,7 +259,7 @@ const Register = () => {
           <button
             type="submit"
             disabled={state.isLoading}
-            className="btn-blue btn-block btn-md"
+            className="btn-primary btn-block btn-md"
           >
             {state.isLoading ? 'Creating account...' : 'Create account'}
           </button>

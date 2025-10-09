@@ -16,13 +16,13 @@ const Header = () => {
   const isOperatorRoute = location.pathname.startsWith('/operator');
 
   return (
-    <header className="sticky top-0 z-50 bg-burrow-background shadow-sm border-b border-gray-200">
+    <header className="sticky top-0 z-50 bg-burrow-background/95 backdrop-blur-sm shadow-sm border-b border-burrow-border/80">
       <div className="layout-container">
         <div className="flex justify-between items-center h-16">
           <div className="flex items-center">
             <Link to="/" className="flex items-center space-x-2">
-              <Package className="h-8 w-8 text-burrow-primary" />
-              <span className="text-2xl font-extrabold bg-gradient-to-r from-burrow-primary to-burrow-secondary bg-clip-text text-transparent tracking-tight">
+              <Package className="h-8 w-8 text-burrow-primary drop-shadow" />
+              <span className="text-2xl font-extrabold text-burrow-primary tracking-tight">
                 Burrow
               </span>
             </Link>

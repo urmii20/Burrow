@@ -88,30 +88,13 @@ const Home = () => {
           </div>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 mb-16 fade-stagger">
-            {benefits.map((benefit, idx) => (
-              <div
-                key={idx}
-                className={`feature-card ${
-                  idx % 3 === 0
-                    ? 'bg-burrow-accent/20'
-                    : idx % 3 === 1
-                      ? 'bg-burrow-secondary/20'
-                      : 'bg-burrow-primary/20'
-                }`}
-              >
-                <div
-                  className={`feature-icon ${
-                    idx % 3 === 0
-                      ? 'text-burrow-accent'
-                      : idx % 3 === 1
-                        ? 'text-burrow-secondary'
-                        : 'text-burrow-primary'
-                  }`}
-                >
-                  <benefit.icon className="h-8 w-8" />
+            {benefits.map((benefit) => (
+              <div key={benefit.title} className="feature-card text-center">
+                <div className="feature-icon mx-auto">
+                  <benefit.icon className="h-6 w-6" />
                 </div>
-                <h4 className="font-semibold text-burrow-text-primary mb-2 text-center">{benefit.title}</h4>
-                <p className="text-burrow-text-secondary text-sm text-center">{benefit.description}</p>
+                <h4 className="font-semibold text-burrow-text-primary mb-2">{benefit.title}</h4>
+                <p className="text-burrow-text-secondary text-sm">{benefit.description}</p>
               </div>
             ))}
           </div>
@@ -158,7 +141,7 @@ const Home = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8 fade-stagger">
             {howItWorks.map((step, index) => (
               <div key={index} className="text-center">
-                <div className="w-20 h-20 bg-burrow-primary text-white rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4">
+                <div className="w-20 h-20 bg-burrow-primary text-burrow-text-inverse rounded-full flex items-center justify-center text-2xl font-bold mx-auto mb-4 shadow-md shadow-burrow-border/50">
                   {step.step}
                 </div>
                 <h3 className="text-xl font-semibold text-burrow-text-primary mb-3">{step.title}</h3>
@@ -171,10 +154,10 @@ const Home = () => {
 
       <section className="section-primary">
         <div className="layout-container text-center">
-          <h2 className="text-3xl font-bold text-white mb-4">
+          <h2 className="text-3xl font-bold text-burrow-text-inverse mb-4">
             Ready to Take Control of Your Deliveries?
           </h2>
-          <p className="text-xl text-burrow-background mb-8">
+          <p className="text-xl text-burrow-text-inverse/80 mb-8">
             Join thousands of customers who trust Burrow with their packages
           </p>
           <button

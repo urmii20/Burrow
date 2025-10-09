@@ -80,19 +80,19 @@ const RequestStatus = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center page-fade">
-        <p className="text-gray-600">Loading request details...</p>
+      <div className="min-h-screen bg-burrow-background flex items-center justify-center page-fade">
+        <p className="text-burrow-text-secondary">Loading request details...</p>
       </div>
     );
   }
 
   if (notFound) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center page-fade">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900">Request not found</h2>
-          <p className="text-gray-600 mt-2">The request you&apos;re looking for doesn&apos;t exist.</p>
-          <Link to="/dashboard" className="text-blue-600 hover:text-blue-500 mt-4 inline-block">
+      <div className="min-h-screen bg-burrow-background flex items-center justify-center page-fade">
+        <div className="text-center space-y-3">
+          <h2 className="text-2xl font-bold text-burrow-text-primary">Request not found</h2>
+          <p className="text-burrow-text-secondary">The request you&apos;re looking for doesn&apos;t exist.</p>
+          <Link to="/dashboard" className="btn-primary btn-md inline-flex">
             Back to Dashboard
           </Link>
         </div>
@@ -102,11 +102,11 @@ const RequestStatus = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center page-fade">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900">Something went wrong</h2>
-          <p className="text-gray-600 mt-2">{error}</p>
-          <Link to="/dashboard" className="text-blue-600 hover:text-blue-500 mt-4 inline-block">
+      <div className="min-h-screen bg-burrow-background flex items-center justify-center page-fade">
+        <div className="text-center space-y-3">
+          <h2 className="text-2xl font-bold text-burrow-text-primary">Something went wrong</h2>
+          <p className="text-burrow-text-secondary">{error}</p>
+          <Link to="/dashboard" className="btn-primary btn-md inline-flex">
             Back to Dashboard
           </Link>
         </div>
@@ -121,11 +121,11 @@ const RequestStatus = () => {
   const paymentStatus = request.paymentDetails?.paymentStatus ?? 'pending';
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 page-fade">
+    <div className="min-h-screen bg-burrow-background py-8 page-fade">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8 page-fade">
           <div className="flex items-center space-x-4 mb-4">
-            <Link to="/dashboard" className="flex items-center text-gray-600 hover:text-gray-800 transition-colors">
+            <Link to="/dashboard" className="flex items-center text-burrow-text-secondary hover:text-burrow-primary transition-colors">
               <ArrowLeft className="h-5 w-5 mr-1" />
               Back to Dashboard
             </Link>
@@ -133,8 +133,8 @@ const RequestStatus = () => {
 
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Request {request.id}</h1>
-              <p className="text-gray-600 mt-1">Track your delivery request status</p>
+              <h1 className="text-3xl font-bold text-burrow-text-primary">Request {request.id}</h1>
+              <p className="text-burrow-text-secondary mt-1">Track your delivery request status</p>
             </div>
 
             <div className="flex items-center space-x-3">
@@ -173,7 +173,7 @@ const RequestStatus = () => {
                   link.click();
                   URL.revokeObjectURL(url);
                 }}
-                className="flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors"
+                className="btn-secondary btn-md"
               >
                 <Download className="h-4 w-4 mr-2" />
                 Download Receipt
@@ -186,7 +186,7 @@ const RequestStatus = () => {
                     footer.scrollIntoView({ behavior: 'smooth', block: 'start' });
                   }
                 }}
-                className="flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors"
+                className="btn-primary btn-md"
               >
                 <MessageCircle className="h-4 w-4 mr-2" />
                 Contact Support
@@ -201,41 +201,41 @@ const RequestStatus = () => {
           </div>
 
           <div className="space-y-6">
-            <div className="bg-white rounded-lg shadow-md p-6 page-fade">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Order Information</h3>
+            <div className="card p-6 page-fade">
+              <h3 className="text-lg font-semibold text-burrow-text-primary mb-4">Order Information</h3>
 
               <div className="space-y-3 text-sm">
                 <div>
-                  <span className="text-gray-600">Order Number:</span>
-                  <p className="font-medium text-gray-900">{request.orderNumber}</p>
+                  <span className="text-burrow-text-secondary">Order Number:</span>
+                  <p className="font-medium text-burrow-text-primary">{request.orderNumber}</p>
                 </div>
 
                 <div>
-                  <span className="text-gray-600">Platform:</span>
-                  <p className="font-medium text-gray-900">{request.platform}</p>
+                  <span className="text-burrow-text-secondary">Platform:</span>
+                  <p className="font-medium text-burrow-text-primary">{request.platform}</p>
                 </div>
 
                 <div>
-                  <span className="text-gray-600">Product:</span>
-                  <p className="font-medium text-gray-900">{request.productDescription}</p>
+                  <span className="text-burrow-text-secondary">Product:</span>
+                  <p className="font-medium text-burrow-text-primary">{request.productDescription}</p>
                 </div>
 
                 <div>
-                  <span className="text-gray-600">Original ETA:</span>
-                  <p className="font-medium text-gray-900">
+                  <span className="text-burrow-text-secondary">Original ETA:</span>
+                  <p className="font-medium text-burrow-text-primary">
                     {request.originalETA ? new Date(request.originalETA).toLocaleDateString() : 'Not available'}
                   </p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white rounded-lg shadow-md p-6 page-fade">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Delivery Details</h3>
+            <div className="card p-6 page-fade">
+              <h3 className="text-lg font-semibold text-burrow-text-primary mb-4">Delivery Details</h3>
 
               <div className="space-y-3 text-sm">
                 <div>
-                  <span className="text-gray-600">Scheduled Date:</span>
-                  <p className="font-medium text-gray-900">
+                  <span className="text-burrow-text-secondary">Scheduled Date:</span>
+                  <p className="font-medium text-burrow-text-primary">
                     {request.scheduledDeliveryDate
                       ? new Date(request.scheduledDeliveryDate).toLocaleDateString()
                       : 'Not scheduled'}
@@ -243,13 +243,13 @@ const RequestStatus = () => {
                 </div>
 
                 <div>
-                  <span className="text-gray-600">Time Slot:</span>
-                  <p className="font-medium text-gray-900">{request.deliveryTimeSlot || 'Not assigned'}</p>
+                  <span className="text-burrow-text-secondary">Time Slot:</span>
+                  <p className="font-medium text-burrow-text-primary">{request.deliveryTimeSlot || 'Not assigned'}</p>
                 </div>
 
                 <div>
-                  <span className="text-gray-600">Destination:</span>
-                  <p className="font-medium text-gray-900">
+                  <span className="text-burrow-text-secondary">Destination:</span>
+                  <p className="font-medium text-burrow-text-primary">
                     {request.destinationAddress ? (
                       <>
                         {request.destinationAddress.line1}
@@ -270,55 +270,55 @@ const RequestStatus = () => {
             </div>
 
             {warehouse && (
-              <div className="bg-white rounded-lg shadow-md p-6 page-fade">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4">Warehouse Details</h3>
+              <div className="card p-6 page-fade">
+                <h3 className="text-lg font-semibold text-burrow-text-primary mb-4">Warehouse Details</h3>
 
                 <div className="space-y-3 text-sm">
                   <div>
-                    <span className="text-gray-600">Facility:</span>
-                    <p className="font-medium text-gray-900">{warehouse.name}</p>
+                    <span className="text-burrow-text-secondary">Facility:</span>
+                    <p className="font-medium text-burrow-text-primary">{warehouse.name}</p>
                   </div>
 
                   <div>
-                    <span className="text-gray-600">Address:</span>
-                    <p className="font-medium text-gray-900">{warehouse.address}</p>
+                    <span className="text-burrow-text-secondary">Address:</span>
+                    <p className="font-medium text-burrow-text-primary">{warehouse.address}</p>
                   </div>
 
                   <div>
-                    <span className="text-gray-600">Operating Hours:</span>
-                    <p className="font-medium text-gray-900">{warehouse.operatingHours}</p>
+                    <span className="text-burrow-text-secondary">Operating Hours:</span>
+                    <p className="font-medium text-burrow-text-primary">{warehouse.operatingHours}</p>
                   </div>
                 </div>
               </div>
             )}
 
-            <div className="bg-white rounded-lg shadow-md p-6 page-fade">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4">Payment Details</h3>
+            <div className="card p-6 page-fade">
+              <h3 className="text-lg font-semibold text-burrow-text-primary mb-4">Payment Details</h3>
 
               <div className="space-y-2 text-sm">
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Base Handling Fee</span>
+                  <span className="text-burrow-text-secondary">Base Handling Fee</span>
                   <span className="font-medium">₹{request.paymentDetails?.baseHandlingFee ?? 0}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Storage Fee</span>
+                  <span className="text-burrow-text-secondary">Storage Fee</span>
                   <span className="font-medium">₹{request.paymentDetails?.storageFee ?? 0}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">Delivery Charge</span>
+                  <span className="text-burrow-text-secondary">Delivery Charge</span>
                   <span className="font-medium">₹{request.paymentDetails?.deliveryCharge ?? 0}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-gray-600">GST</span>
+                  <span className="text-burrow-text-secondary">GST</span>
                   <span className="font-medium">₹{request.paymentDetails?.gst ?? 0}</span>
                 </div>
-                <div className="border-t pt-2 flex justify-between font-semibold">
+                <div className="border-t border-burrow-border/70 pt-2 flex justify-between font-semibold">
                   <span>Total Amount</span>
-                  <span className="text-blue-600">₹{request.paymentDetails?.totalAmount ?? 0}</span>
+                  <span className="text-burrow-primary">₹{request.paymentDetails?.totalAmount ?? 0}</span>
                 </div>
               </div>
 
-              <div className="mt-3 pt-3 border-t">
+              <div className="mt-3 pt-3 border-t border-burrow-border/70">
                 <span
                   className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
                     paymentStatus === 'completed'
