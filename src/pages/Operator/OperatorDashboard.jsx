@@ -222,23 +222,15 @@ const OperatorDashboard = () => {
         selectedRequest.receipt.fileName?.trim() ||
         (selectedRequest.orderNumber ? `${selectedRequest.orderNumber}.pdf` : 'receipt.pdf');
 
-      const { blob, mimeType } = downloadResponse;
-      const preparedBlob =
-        mimeType && blob.type !== mimeType ? blob.slice(0, blob.size, mimeType) : blob;
-
-      const objectUrl = URL.createObjectURL(preparedBlob);
+      const objectUrl = URL.createObjectURL(downloadResponse.blob);
       const anchor = document.createElement('a');
       anchor.href = objectUrl;
       anchor.download = resolvedFileName;
       anchor.rel = 'noopener noreferrer';
-
       document.body.appendChild(anchor);
       anchor.click();
       document.body.removeChild(anchor);
-
-      window.setTimeout(() => {
-        URL.revokeObjectURL(objectUrl);
-      }, 2000);
+      URL.revokeObjectURL(objectUrl);
     } catch (downloadError) {
       const message = downloadError?.message || 'Unable to download the receipt. Please try again.';
       setReceiptDownloadError(message);
@@ -509,9 +501,6 @@ const OperatorDashboard = () => {
                             {receiptDownloadError && (
                               <p className="text-sm text-red-600">{receiptDownloadError}</p>
                             )}
-                            <p className="text-xs text-burrow-text-muted">
-                              Accepted file format: PDF (.pdf)
-                            </p>
                             <div className="flex justify-end">
                               <button
                                 type="button"
