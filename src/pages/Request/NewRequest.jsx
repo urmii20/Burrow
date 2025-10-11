@@ -122,7 +122,6 @@ const NewRequest = () => {
 
     if (!file) {
       setSelectedFile(null);
-      setSelectedFileData(null);
       setErrors((prev) => {
         if (!prev.file) return prev;
         const rest = { ...prev };
@@ -134,7 +133,6 @@ const NewRequest = () => {
 
     if (file.type !== 'application/pdf') {
       setSelectedFile(null);
-      setSelectedFileData(null);
       setErrors((prev) => ({ ...prev, file: 'Only PDF files are allowed' }));
       event.target.value = '';
       return;
@@ -142,50 +140,18 @@ const NewRequest = () => {
 
     if (file.size > MAX_RECEIPT_SIZE) {
       setSelectedFile(null);
-      setSelectedFileData(null);
       setErrors((prev) => ({ ...prev, file: 'File size must be less than 5MB' }));
       event.target.value = '';
       return;
     }
 
     setSelectedFile(file);
-    setSelectedFileData(null);
-
-    const reader = new FileReader();
-
-    reader.onload = () => {
-      const result = typeof reader.result === 'string' ? reader.result.trim() : '';
-
-      if (!result) {
-        setSelectedFile(null);
-        setSelectedFileData(null);
-        setErrors((prev) => ({
-          ...prev,
-          file: 'Unable to read receipt file. Please try again.'
-        }));
-        return;
-      }
-
-      setSelectedFile(file);
-      setSelectedFileData(result);
-      setErrors((prev) => {
-        if (!prev.file) return prev;
-        const rest = { ...prev };
-        delete rest.file;
-        return rest;
-      });
-    };
-
-    reader.onerror = () => {
-      setSelectedFile(null);
-      setSelectedFileData(null);
-      setErrors((prev) => ({
-        ...prev,
-        file: 'Unable to read receipt file. Please try again.'
-      }));
-    };
-
-    reader.readAsDataURL(file);
+    setErrors((prev) => {
+      if (!prev.file) return prev;
+      const rest = { ...prev };
+      delete rest.file;
+      return rest;
+    });
   };
 
   const validateStep1 = () => {
@@ -222,8 +188,6 @@ const NewRequest = () => {
 
     if (!selectedFile) {
       newErrors.file = 'Receipt PDF is required';
-    } else if (!selectedFileData) {
-      newErrors.file = 'Receipt PDF is still processing. Please wait a moment.';
     }
 
     setErrors(newErrors);
@@ -327,7 +291,7 @@ const NewRequest = () => {
   const handleSubmit = async () => {
     if (isSubmitting) return;
 
-    if (!selectedFile || !selectedFileData) {
+    if (!selectedFile) {
       setErrors((prev) => ({ ...prev, file: 'Receipt PDF is required' }));
       setSubmitError('Please upload your purchase receipt before submitting.');
       setCurrentStep(1);
@@ -369,8 +333,7 @@ const NewRequest = () => {
       fileName: selectedFile.name,
       fileSize: selectedFile.size,
       mimeType: selectedFile.type,
-      uploadedAt: new Date().toISOString(),
-      data: selectedFileData
+      uploadedAt: new Date().toISOString()
     };
 
     const payload = {
