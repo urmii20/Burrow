@@ -76,10 +76,57 @@ function sanitiseReceipt(receipt) {
     throw new Error('receipt exceeds the 5MB size limit.');
   }
 
+  const roundedSize = Math.round(numericSize);
+
+  const rawData = typeof receipt.data === 'string' ? receipt.data.trim() : '';
+
+  if (!rawData) {
+    throw new Error('receipt.data is required.');
+  }
+
+  let base64Data = rawData;
+
+  if (base64Data.startsWith('data:')) {
+    const commaIndex = base64Data.indexOf(',');
+    base64Data = commaIndex >= 0 ? base64Data.slice(commaIndex + 1) : '';
+  }
+
+  base64Data = base64Data.replace(/\s+/g, '');
+
+  if (!base64Data) {
+    throw new Error('receipt.data is required.');
+  }
+
+  const base64Pattern = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}(?:==)?|[A-Za-z0-9+/]{3}=)?$/;
+
+  if (!base64Pattern.test(base64Data)) {
+    throw new Error('receipt.data must be a valid base64 encoded string.');
+  }
+
+  let decodedSize;
+  try {
+    decodedSize = Buffer.from(base64Data, 'base64').length;
+  } catch {
+    throw new Error('receipt.data must be a valid base64 encoded string.');
+  }
+
+  if (!Number.isFinite(decodedSize) || decodedSize <= 0) {
+    throw new Error('receipt.data must contain file contents.');
+  }
+
+  if (decodedSize > MAX_RECEIPT_SIZE) {
+    throw new Error('receipt exceeds the 5MB size limit.');
+  }
+
+  if (decodedSize !== roundedSize) {
+    throw new Error('receipt.fileSize does not match the provided data.');
+  }
+
   return {
     fileName: fileName.trim(),
-    fileSize: Math.round(numericSize),
+    fileSize: roundedSize,
     mimeType: mimeType.trim(),
+    data: base64Data,
     uploadedAt: new Date()
   };
 }

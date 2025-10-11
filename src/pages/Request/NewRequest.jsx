@@ -67,6 +67,7 @@ const NewRequest = () => {
   const [formData, setFormData] = useState(initialFormData);
   const [selectedFile, setSelectedFile] = useState(null);
   const [selectedFileData, setSelectedFileData] = useState(null);
+  const [isProcessingReceipt, setIsProcessingReceipt] = useState(false);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
@@ -122,6 +123,8 @@ const NewRequest = () => {
 
     if (!file) {
       setSelectedFile(null);
+      setSelectedFileData(null);
+      setIsProcessingReceipt(false);
       setErrors((prev) => {
         if (!prev.file) return prev;
         const rest = { ...prev };
@@ -131,8 +134,12 @@ const NewRequest = () => {
       return;
     }
 
+    setSelectedFile(null);
+    setSelectedFileData(null);
+    setIsProcessingReceipt(false);
     if (file.type !== 'application/pdf') {
       setSelectedFile(null);
+      setSelectedFileData(null);
       setErrors((prev) => ({ ...prev, file: 'Only PDF files are allowed' }));
       event.target.value = '';
       return;
@@ -140,18 +147,59 @@ const NewRequest = () => {
 
     if (file.size > MAX_RECEIPT_SIZE) {
       setSelectedFile(null);
+      setSelectedFileData(null);
       setErrors((prev) => ({ ...prev, file: 'File size must be less than 5MB' }));
       event.target.value = '';
       return;
     }
 
-    setSelectedFile(file);
-    setErrors((prev) => {
-      if (!prev.file) return prev;
-      const rest = { ...prev };
-      delete rest.file;
-      return rest;
-    });
+    setIsProcessingReceipt(true);
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const { result } = reader;
+      let base64Data = '';
+
+      if (typeof result === 'string') {
+        const [, extracted = result] = result.split(',');
+        base64Data = extracted.trim();
+      }
+
+      if (!base64Data) {
+        setErrors((prev) => ({
+          ...prev,
+          file: 'Failed to process the selected file. Please try again.'
+        }));
+        setSelectedFile(null);
+        setSelectedFileData(null);
+        setIsProcessingReceipt(false);
+        event.target.value = '';
+        return;
+      }
+
+      setSelectedFile(file);
+      setSelectedFileData(base64Data);
+      setErrors((prev) => {
+        if (!prev.file) return prev;
+        const rest = { ...prev };
+        delete rest.file;
+        return rest;
+      });
+      setIsProcessingReceipt(false);
+    };
+
+    reader.onerror = () => {
+      setErrors((prev) => ({
+        ...prev,
+        file: 'Failed to read the selected file. Please try again.'
+      }));
+      setSelectedFile(null);
+      setSelectedFileData(null);
+      setIsProcessingReceipt(false);
+      event.target.value = '';
+    };
+
+    reader.readAsDataURL(file);
   };
 
   const validateStep1 = () => {
@@ -298,6 +346,19 @@ const NewRequest = () => {
       return;
     }
 
+    if (isProcessingReceipt) {
+      setSubmitError('Please wait for the receipt to finish processing before submitting.');
+      setCurrentStep(1);
+      return;
+    }
+
+    if (!selectedFileData) {
+      setErrors((prev) => ({ ...prev, file: 'Receipt PDF could not be processed. Please upload again.' }));
+      setSubmitError('Please re-upload your purchase receipt before submitting.');
+      setCurrentStep(1);
+      return;
+    }
+
     const isScheduleValid = validateStep2();
     if (!isScheduleValid) {
       setCurrentStep(2);
@@ -333,7 +394,8 @@ const NewRequest = () => {
       fileName: selectedFile.name,
       fileSize: selectedFile.size,
       mimeType: selectedFile.type,
-      uploadedAt: new Date().toISOString()
+      uploadedAt: new Date().toISOString(),
+      data: selectedFileData
     };
 
     const payload = {
@@ -515,7 +577,12 @@ const NewRequest = () => {
                     onChange={handleFileChange}
                     className="input-field-plain cursor-pointer"
                   />
-                  {selectedFile && <p className="text-burrow-primary text-sm mt-1">✓ {selectedFile.name} selected</p>}
+                  {isProcessingReceipt && (
+                    <p className="text-burrow-text-muted text-sm mt-1">Processing receipt...</p>
+                  )}
+                  {selectedFile && !isProcessingReceipt && (
+                    <p className="text-burrow-primary text-sm mt-1">✓ {selectedFile.name} selected</p>
+                  )}
                   {errors.file && <p className="text-red-600 text-xs mt-1">{errors.file}</p>}
                 </div>
               </div>
