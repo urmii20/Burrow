@@ -3,20 +3,17 @@ import { Search, Filter, Eye, CheckCircle, XCircle, Clock } from 'lucide-react';
 
 import apiClient from '../../lib/api';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || '';
-
-const buildReceiptDownloadUrl = (requestId, receipt) => {
-  if (!API_BASE_URL || !requestId || !receipt || typeof receipt !== 'object') {
-    return null;
+const hasReceiptFile = (receipt) => {
+  if (!receipt || typeof receipt !== 'object') {
+    return false;
   }
 
-  const hasFile = receipt.hasData ?? (typeof receipt.fileSize === 'number' && receipt.fileSize > 0);
-
-  if (!hasFile) {
-    return null;
+  if (receipt.hasData === true) {
+    return true;
   }
 
-  return `${API_BASE_URL}/requests/${requestId}/receipt`;
+  const numericFileSize = Number(receipt.fileSize);
+  return Number.isFinite(numericFileSize) && numericFileSize > 0;
 };
 
 const formatFileSize = (bytes) => {
@@ -51,6 +48,8 @@ const OperatorDashboard = () => {
   const [updateError, setUpdateError] = useState(null);
   const [modalStatus, setModalStatus] = useState('');
   const [modalNotes, setModalNotes] = useState('');
+  const [isDownloadingReceipt, setIsDownloadingReceipt] = useState(false);
+  const [receiptDownloadError, setReceiptDownloadError] = useState(null);
   const isMountedRef = useRef(true);
 
   const fetchRequests = useCallback(async () => {
@@ -199,9 +198,54 @@ const OperatorDashboard = () => {
     setModalStatus(request.status);
     setModalNotes('');
     setUpdateError(null);
+    setReceiptDownloadError(null);
+    setIsDownloadingReceipt(false);
   };
 
-  const receiptDownloadUrl = buildReceiptDownloadUrl(selectedRequest?.id, selectedRequest?.receipt);
+  const handleReceiptDownload = useCallback(async () => {
+    if (!selectedRequest?.id || !hasReceiptFile(selectedRequest.receipt)) {
+      return;
+    }
+
+    setIsDownloadingReceipt(true);
+    setReceiptDownloadError(null);
+
+    try {
+      const downloadResponse = await apiClient.download(`/requests/${selectedRequest.id}/receipt`);
+
+      if (!downloadResponse?.blob) {
+        throw new Error('Receipt file is unavailable.');
+      }
+
+      const resolvedFileName =
+        downloadResponse.fileName?.trim() ||
+        selectedRequest.receipt.fileName?.trim() ||
+        (selectedRequest.orderNumber ? `${selectedRequest.orderNumber}.pdf` : 'receipt.pdf');
+
+      const { blob, mimeType } = downloadResponse;
+      const preparedBlob =
+        mimeType && blob.type !== mimeType ? blob.slice(0, blob.size, mimeType) : blob;
+
+      const objectUrl = URL.createObjectURL(preparedBlob);
+      const anchor = document.createElement('a');
+      anchor.href = objectUrl;
+      anchor.download = resolvedFileName;
+      anchor.rel = 'noopener noreferrer';
+
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+
+      window.setTimeout(() => {
+        URL.revokeObjectURL(objectUrl);
+      }, 2000);
+    } catch (downloadError) {
+      const message = downloadError?.message || 'Unable to download the receipt. Please try again.';
+      setReceiptDownloadError(message);
+    } finally {
+      setIsDownloadingReceipt(false);
+    }
+  }, [selectedRequest]);
 
   return (
     <div className="min-h-screen bg-burrow-background page-fade">
@@ -460,15 +504,24 @@ const OperatorDashboard = () => {
                               : '—'}
                           </span>
                         </div>
-                        {receiptDownloadUrl ? (
-                          <div className="pt-3 border-t border-burrow-border/60 flex justify-end">
-                            <a
-                              href={receiptDownloadUrl}
-                              className="btn-secondary btn-sm"
-                              download={selectedRequest.receipt.fileName || 'receipt.pdf'}
-                            >
-                              Download Receipt (PDF)
-                            </a>
+                        {hasReceiptFile(selectedRequest.receipt) ? (
+                          <div className="pt-3 border-t border-burrow-border/60 space-y-2">
+                            {receiptDownloadError && (
+                              <p className="text-sm text-red-600">{receiptDownloadError}</p>
+                            )}
+                            <p className="text-xs text-burrow-text-muted">
+                              Accepted file format: PDF (.pdf)
+                            </p>
+                            <div className="flex justify-end">
+                              <button
+                                type="button"
+                                className="btn-secondary btn-sm"
+                                onClick={handleReceiptDownload}
+                                disabled={isDownloadingReceipt}
+                              >
+                                {isDownloadingReceipt ? 'Preparing download…' : 'Download Receipt'}
+                              </button>
+                            </div>
                           </div>
                         ) : (
                           <p className="text-sm text-burrow-text-muted">
