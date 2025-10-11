@@ -3,7 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
-// Login component manages sign-in state and redirects authenticated users.
+// Login lets returning customers unlock their saved deliveries.
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
@@ -15,7 +15,7 @@ const Login = () => {
   const { state, login } = useAuth();
   const navigate = useNavigate();
 
-  // Handles form submission by calling the auth helper and redirecting on success.
+  // When someone signs in we verify their details and take them to their dashboard.
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -27,7 +27,7 @@ const Login = () => {
     }
   };
 
-  // Updates local state whenever the user types in the form fields.
+  // Keeps the form fields in sync with what the visitor is typing.
   const handleChange = (event) => {
     setFormData({
       ...formData,
@@ -38,20 +38,20 @@ const Login = () => {
   return (
     <div className="auth-wrapper page-fade">
       <div className="auth-container">
-        {/* Intro text clarifies the page purpose for the form below. */}
+        {/* Page introduction reassures users they are signing in to Burrow. */}
         <div className="text-center">
           <h2 className="auth-title">Welcome back</h2>
           <p className="auth-subtitle">Sign in to your Burrow account</p>
         </div>
 
-        {/* Error banner shows any authentication issues from context. */}
+        {/* Error banner plainly states what went wrong with the last attempt. */}
         {state.error && (
           <div className="alert-error">
             <p>{state.error}</p>
           </div>
         )}
 
-        {/* Demo credentials block displays sample operator logins for quick access. */}
+        {/* Demo credentials help testers explore the operator experience quickly. */}
         <div className="alert-info">
           <p className="font-medium mb-2">Demo Credentials For An Operator View:</p>
 
@@ -59,7 +59,7 @@ const Login = () => {
           <p className="text-xs text-burrow-primary">Operator 2: operator.two@burrow.com / OperatorDemo2</p>
         </div>
 
-        {/* Sign-in form wires the inputs to handlers for email and password. */}
+        {/* Sign-in form collects the email and password in a familiar layout. */}
         <form className="mt-8 space-y-6 fade-stagger" onSubmit={handleSubmit}>
           <div className="space-y-4 fade-stagger">
             <div>
