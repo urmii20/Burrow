@@ -13,17 +13,13 @@ import RequestStatus from './pages/Request/RequestStatus';
 import TrackRequest from './pages/Request/TrackRequest';
 import OperatorDashboard from './pages/Operator/OperatorDashboard';
 
+// ProtectedRoute gates views based on authentication and optional role checks.
 const ProtectedRoute = ({ children, requireAuth = true, allowedRoles = [] }) => {
   const { state } = useAuth();
-
-  if (requireAuth && !state.user) {
-    return <Navigate to="/login" replace />;
-  }
-
-  if (allowedRoles.length > 0 && state.user && !allowedRoles.includes(state.user.role)) {
+  if (requireAuth && !state.user) return <Navigate to="/login" replace />;
+  if (allowedRoles.length && state.user && !allowedRoles.includes(state.user.role)) {
     return <Navigate to="/dashboard" replace />;
   }
-
   return <>{children}</>;
 };
 
@@ -33,9 +29,9 @@ ProtectedRoute.propTypes = {
   allowedRoles: PropTypes.arrayOf(PropTypes.string)
 };
 
+// AppContent wires the layout and router once auth is ready.
 const AppContent = () => {
   const { state } = useAuth();
-
   return (
     <div className="min-h-screen bg-burrow-background text-burrow-text-primary flex flex-col">
       <Header />
@@ -108,14 +104,13 @@ const AppContent = () => {
   );
 };
 
-const App = () => {
-  return (
-    <AuthProvider>
-      <Router>
-        <AppContent />
-      </Router>
-    </AuthProvider>
-  );
-};
+// App bootstraps routing with authentication context.
+const App = () => (
+  <AuthProvider>
+    <Router>
+      <AppContent />
+    </Router>
+  </AuthProvider>
+);
 
 export default App;

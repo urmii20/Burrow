@@ -2,6 +2,7 @@ import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { Search, Filter, Eye, CheckCircle, XCircle, Clock } from 'lucide-react';
 
 import apiClient from '../../lib/api';
+import { downloadBlob, formatDate, toTitleFromSnake } from '../../lib/utils';
 
 const hasReceiptFile = (receipt) => {
   if (!receipt || typeof receipt !== 'object') {
@@ -37,6 +38,7 @@ const formatFileSize = (bytes) => {
   return `${mb.toFixed(2)} MB`;
 };
 
+// OperatorDashboard empowers staff to review and manage requests.
 const OperatorDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -52,6 +54,7 @@ const OperatorDashboard = () => {
   const [receiptDownloadError, setReceiptDownloadError] = useState(null);
   const isMountedRef = useRef(true);
 
+  // fetchRequests loads all delivery requests for operators.
   const fetchRequests = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -82,6 +85,7 @@ const OperatorDashboard = () => {
     };
   }, [fetchRequests]);
 
+  // filteredRequests applies text and status filters.
   const filteredRequests = requests.filter(request => {
     const lowerSearch = searchTerm.toLowerCase();
     const matchesSearch =
@@ -92,19 +96,13 @@ const OperatorDashboard = () => {
     return matchesSearch && matchesStatus;
   });
 
+  // stats summarises aggregate counts for quick scanning.
   const stats = {
     total: requests.length,
     pending: requests.filter(req => req.status === 'approval_pending').length,
     approved: requests.filter(req => req.status === 'approved').length,
     delivered: requests.filter(req => req.status === 'delivered').length
   };
-
-  const formatStatusLabel = (status) =>
-    status
-      ?.split('_')
-      .filter(Boolean)
-      .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
-      .join(' ') || '';
 
   const getStatusBadge = (status) => {
     const neutralBadge = 'bg-burrow-primary/10 text-burrow-primary';
@@ -122,7 +120,7 @@ const OperatorDashboard = () => {
     };
 
     const statusConfig =
-      config[status] || { color: neutralBadge, label: formatStatusLabel(status) };
+      config[status] || { color: neutralBadge, label: toTitleFromSnake(status, 'Unknown') };
 
     return (
       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusConfig.color}`}>
@@ -131,6 +129,7 @@ const OperatorDashboard = () => {
     );
   };
 
+  // handleStatusUpdate applies status changes and syncs state.
   const handleStatusUpdate = async (requestId, newStatus, note) => {
     setUpdateError(null);
     setUpdatingRequestId(requestId);
@@ -166,10 +165,12 @@ const OperatorDashboard = () => {
     }
   };
 
+  // handleModalStatusChange updates the pending status in the modal.
   const handleModalStatusChange = (newStatus) => {
     setModalStatus(newStatus);
   };
 
+  // handleModalSubmit persists modal edits to the server.
   const handleModalSubmit = async () => {
     if (!selectedRequest) {
       return;
@@ -189,10 +190,12 @@ const OperatorDashboard = () => {
     }
   };
 
+  // handleQuickStatusChange triggers inline status updates.
   const handleQuickStatusChange = (requestId, newStatus) => {
     handleStatusUpdate(requestId, newStatus).catch(() => {});
   };
 
+  // handleOpenRequest opens a request in the side modal.
   const handleOpenRequest = (request) => {
     setSelectedRequest(request);
     setModalStatus(request.status);
@@ -202,6 +205,7 @@ const OperatorDashboard = () => {
     setIsDownloadingReceipt(false);
   };
 
+  // handleReceiptDownload fetches and downloads the customer receipt.
   const handleReceiptDownload = useCallback(async () => {
     if (!selectedRequest?.id || !hasReceiptFile(selectedRequest.receipt)) {
       return;
@@ -222,15 +226,7 @@ const OperatorDashboard = () => {
         selectedRequest.receipt.fileName?.trim() ||
         (selectedRequest.orderNumber ? `${selectedRequest.orderNumber}.pdf` : 'receipt.pdf');
 
-      const objectUrl = URL.createObjectURL(downloadResponse.blob);
-      const anchor = document.createElement('a');
-      anchor.href = objectUrl;
-      anchor.download = resolvedFileName;
-      anchor.rel = 'noopener noreferrer';
-      document.body.appendChild(anchor);
-      anchor.click();
-      document.body.removeChild(anchor);
-      URL.revokeObjectURL(objectUrl);
+      downloadBlob(downloadResponse.blob, resolvedFileName);
     } catch (downloadError) {
       const message = downloadError?.message || 'Unable to download the receipt. Please try again.';
       setReceiptDownloadError(message);
@@ -275,6 +271,7 @@ const OperatorDashboard = () => {
         </div>
 
         <div className="card p-6 mb-8 page-fade">
+          {/* Filter controls for search and status */}
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
               <div className="relative">
@@ -373,9 +370,7 @@ const OperatorDashboard = () => {
                   <tr key={request.id} className="hover:bg-burrow-background">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="text-sm font-medium text-burrow-text-primary">{request.id}</div>
-                      <div className="text-sm text-burrow-text-muted">
-                        {new Date(request.createdAt).toLocaleDateString()}
-                      </div>
+                      <div className="text-sm text-burrow-text-muted">{formatDate(request.createdAt)}</div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="text-sm font-medium text-burrow-text-primary">{request.orderNumber}</div>
@@ -388,9 +383,7 @@ const OperatorDashboard = () => {
                       {getStatusBadge(request.status)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
-                      <div className="text-sm text-burrow-text-primary">
-                        {new Date(request.scheduledDeliveryDate).toLocaleDateString()}
-                      </div>
+                      <div className="text-sm text-burrow-text-primary">{formatDate(request.scheduledDeliveryDate)}</div>
                       <div className="text-sm text-burrow-text-muted">{request.deliveryTimeSlot}</div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">

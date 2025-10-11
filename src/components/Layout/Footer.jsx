@@ -2,6 +2,7 @@ import React from 'react';
 import { Package, Mail, Phone, MapPin } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
+// Footer provides quick links and contact information.
 const Footer = () => {
   return (
     <footer id="site-footer" className="footer">

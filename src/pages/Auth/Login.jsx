@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
+// Login renders the authentication form for existing users.
 const Login = () => {
   const [formData, setFormData] = useState({
     email: '',
@@ -25,16 +26,15 @@ const Login = () => {
     }
   };
 
-  const handleChange = (event) => {
-    setFormData({
-      ...formData,
-      [event.target.name]: event.target.value
-    });
+  // handleChange syncs input updates with form state.
+  const handleChange = ({ target: { name, value } }) => {
+    setFormData((previous) => ({ ...previous, [name]: value }));
   };
 
   return (
     <div className="auth-wrapper page-fade">
       <div className="auth-container">
+        {/* Heading welcomes returning users */}
         <div className="text-center">
           <h2 className="auth-title">Welcome back</h2>
           <p className="auth-subtitle">Sign in to your Burrow account</p>
@@ -46,6 +46,7 @@ const Login = () => {
           </div>
         )}
 
+        {/* Demo credentials highlight operator access */}
         <div className="alert-info">
           <p className="font-medium mb-2">Demo Credentials For An Operator View:</p>
 
@@ -53,6 +54,7 @@ const Login = () => {
           <p className="text-xs text-burrow-primary">Operator 2: operator.two@burrow.com / OperatorDemo2</p>
         </div>
 
+        {/* Login form captures credentials */}
         <form className="mt-8 space-y-6 fade-stagger" onSubmit={handleSubmit}>
           <div className="space-y-4 fade-stagger">
             <div>
@@ -127,6 +129,7 @@ const Login = () => {
             </div>
           </div>
 
+          {/* Submit button finalises sign in */}
           <button
             type="submit"
             disabled={state.isLoading}
@@ -135,6 +138,7 @@ const Login = () => {
             {state.isLoading ? 'Signing in...' : 'Sign in'}
           </button>
 
+          {/* Registration link encourages new signups */}
           <div className="auth-cta">
             <p>
               Don&apos;t have an account?{' '}
