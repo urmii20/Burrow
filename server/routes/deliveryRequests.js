@@ -165,24 +165,6 @@ function ensureDatabase(req, res) {
   return db;
 }
 
-function serialiseReceipt(receipt) {
-  if (!receipt || typeof receipt !== 'object') {
-    return null;
-  }
-
-  const base64Data = typeof receipt.data === 'string' ? receipt.data.trim() : '';
-  const storedHasData = typeof receipt.hasData === 'boolean' ? receipt.hasData : null;
-  const rawFileSize = Number(receipt.fileSize);
-
-  return {
-    fileName: typeof receipt.fileName === 'string' ? receipt.fileName : '',
-    fileSize: Number.isFinite(rawFileSize) && rawFileSize > 0 ? rawFileSize : null,
-    mimeType: typeof receipt.mimeType === 'string' ? receipt.mimeType : '',
-    uploadedAt: receipt.uploadedAt ?? null,
-    hasData: storedHasData ?? (base64Data.length > 0)
-  };
-}
-
 function serialiseRequest(request) {
   const document = serialiseDocument(request);
 
@@ -190,11 +172,22 @@ function serialiseRequest(request) {
     return document;
   }
 
+  if (!document.receipt || typeof document.receipt !== 'object') {
+    return document;
+  }
+
   const { receipt, ...rest } = document;
+  const hasData = typeof receipt.data === 'string' && receipt.data.trim().length > 0;
 
   return {
     ...rest,
-    receipt: serialiseReceipt(receipt)
+    receipt: {
+      fileName: receipt.fileName ?? '',
+      fileSize: receipt.fileSize ?? null,
+      mimeType: receipt.mimeType ?? '',
+      uploadedAt: receipt.uploadedAt ?? null,
+      hasData
+    }
   };
 }
 
