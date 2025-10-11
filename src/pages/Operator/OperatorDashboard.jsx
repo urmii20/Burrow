@@ -3,23 +3,20 @@ import { Search, Filter, Eye, CheckCircle, XCircle, Clock } from 'lucide-react';
 
 import apiClient from '../../lib/api';
 
-const buildReceiptUrl = (receipt) => {
-  if (!receipt || typeof receipt !== 'object') {
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || '';
+
+const buildReceiptDownloadUrl = (requestId, receipt) => {
+  if (!API_BASE_URL || !requestId || !receipt || typeof receipt !== 'object') {
     return null;
   }
 
-  const data = typeof receipt.data === 'string' ? receipt.data.trim() : '';
+  const hasFile = receipt.hasData ?? (typeof receipt.fileSize === 'number' && receipt.fileSize > 0);
 
-  if (!data) {
+  if (!hasFile) {
     return null;
   }
 
-  if (data.startsWith('data:')) {
-    return data;
-  }
-
-  const mimeType = receipt.mimeType?.trim() || 'application/pdf';
-  return `data:${mimeType};base64,${data}`;
+  return `${API_BASE_URL}/requests/${requestId}/receipt`;
 };
 
 const formatFileSize = (bytes) => {
@@ -204,7 +201,7 @@ const OperatorDashboard = () => {
     setUpdateError(null);
   };
 
-  const receiptUrl = buildReceiptUrl(selectedRequest?.receipt);
+  const receiptDownloadUrl = buildReceiptDownloadUrl(selectedRequest?.id, selectedRequest?.receipt);
 
   return (
     <div className="min-h-screen bg-burrow-background page-fade">
@@ -463,16 +460,14 @@ const OperatorDashboard = () => {
                               : '—'}
                           </span>
                         </div>
-                        {receiptUrl ? (
+                        {receiptDownloadUrl ? (
                           <div className="pt-3 border-t border-burrow-border/60 flex justify-end">
                             <a
-                              href={receiptUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
+                              href={receiptDownloadUrl}
                               className="btn-secondary btn-sm"
                               download={selectedRequest.receipt.fileName || 'receipt.pdf'}
                             >
-                              View Receipt (PDF)
+                              Download Receipt (PDF)
                             </a>
                           </div>
                         ) : (
