@@ -198,16 +198,16 @@ const TrackRequest = () => {
             </div>
           </form>
 
+          {/* Error banner explains why the search could not complete. */}
           {error && (
-            {/* Error banner explains why the search could not complete. */}
             <div className="alert-error mt-6">
               <AlertCircle className="h-5 w-5 mr-2" />
               <span>{error}</span>
             </div>
           )}
 
+          {/* Results area shows matching requests or a friendly empty state. */}
           {hasSearched && !error && (
-            {/* Results area shows matching requests or a friendly empty state. */}
             <div className="mt-8 space-y-4 fade-stagger">
               {results.length > 0 ? (
                 results.map((request) => renderResult(request))

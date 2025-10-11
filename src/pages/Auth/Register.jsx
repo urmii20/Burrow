@@ -98,8 +98,8 @@ const Register = () => {
           <p className="auth-subtitle">Join Burrow and take control of your deliveries</p>
         </div>
 
+        {/* Error banner tells the person if something went wrong while signing up. */}
         {state.error && (
-          {/* Error banner tells the person if something went wrong while signing up. */}
           <div className="alert-error">
             <p>{state.error}</p>
           </div>

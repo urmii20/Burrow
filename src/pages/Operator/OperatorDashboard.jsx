@@ -452,8 +452,8 @@ const OperatorDashboard = () => {
           </div>
         </div>
 
+        {/* Modal reveals full request details and allows updates. */}
         {selectedRequest && (
-          {/* Modal reveals full request details and allows updates. */}
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="card max-w-2xl w-full max-h-screen overflow-y-auto shadow-xl">
               <div className="px-6 py-4 border-b border-burrow-border/80 flex justify-between items-center">

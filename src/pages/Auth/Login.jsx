@@ -44,8 +44,8 @@ const Login = () => {
           <p className="auth-subtitle">Sign in to your Burrow account</p>
         </div>
 
+        {/* Error banner plainly states what went wrong with the last attempt. */}
         {state.error && (
-          {/* Error banner plainly states what went wrong with the last attempt. */}
           <div className="alert-error">
             <p>{state.error}</p>
           </div>

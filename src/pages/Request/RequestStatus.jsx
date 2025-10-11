@@ -289,8 +289,8 @@ const RequestStatus = () => {
 
             </div>
 
+            {/* Warehouse info highlights which facility is handling the parcel. */}
             {warehouse && (
-              {/* Warehouse info highlights which facility is handling the parcel. */}
               <div className="card p-6 page-fade">
                 <h3 className="text-lg font-semibold text-burrow-text-primary mb-4">Warehouse Details</h3>
 
