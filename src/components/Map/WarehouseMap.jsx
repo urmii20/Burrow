@@ -4,15 +4,14 @@ import { CheckCircle, MapPin } from 'lucide-react';
 import { MapContainer, Marker, Popup, TileLayer, useMap } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
-import marker2x from 'leaflet/dist/images/marker-icon-2x.png';
-import marker1x from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import markerRed from '../../../assets/marker-icon-red.svg';
 
 import { warehouses as warehouseOptions } from '../../data/mockData';
 
 const defaultIcon = L.icon({
-  iconUrl: marker1x,
-  iconRetinaUrl: marker2x,
+  iconUrl: markerRed,
+  iconRetinaUrl: markerRed,
   shadowUrl: markerShadow,
   iconSize: [25, 41],
   iconAnchor: [12, 41],

@@ -141,7 +141,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="section-white">
+      <section className="section-muted">
         <div className="layout-container">
           <div className="section-heading">
             <h2 className="section-heading-title mb-4">How It Works</h2>
