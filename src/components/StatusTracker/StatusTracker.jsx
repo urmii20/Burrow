@@ -2,6 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Check, Clock, Package, Truck, Home } from 'lucide-react';
 
+// Maps each lifecycle status to its display properties.
 const statusConfig = {
   submitted: {
     label: 'Request Submitted',
@@ -77,6 +78,7 @@ const statusConfig = {
   }
 };
 
+// Defines the canonical order of request lifecycle statuses.
 const statusOrder = [
   'submitted',
   'payment_pending',
@@ -90,6 +92,7 @@ const statusOrder = [
   'delivered'
 ];
 
+// Renders a timeline that visualises the delivery request status progression.
 const StatusTracker = ({ currentStatus, statusHistory }) => {
   const currentStatusIndex = useMemo(() => statusOrder.indexOf(currentStatus), [currentStatus]);
   const [animatedIndex, setAnimatedIndex] = useState(-1);
@@ -140,6 +143,7 @@ const StatusTracker = ({ currentStatus, statusHistory }) => {
 
   const shouldAnimate = currentStatusIndex >= 0;
 
+  // Determines whether the UI should treat a status as completed for styling.
   const isStatusCompleted = (statusIndex) => {
     if (!shouldAnimate) {
       return statusIndex <= currentStatusIndex;
@@ -148,6 +152,7 @@ const StatusTracker = ({ currentStatus, statusHistory }) => {
     return statusIndex <= animatedIndex && animatedIndex !== -1;
   };
 
+  // Formats ISO timestamps into a readable string for the timeline.
   const formatTimestamp = (timestamp) => {
     return new Date(timestamp).toLocaleString('en-IN', {
       day: '2-digit',
@@ -168,7 +173,9 @@ const StatusTracker = ({ currentStatus, statusHistory }) => {
           const Icon = config.icon;
           const isCompleted = isStatusCompleted(index);
           const isCurrent = status === currentStatus;
-          const statusEntry = statusHistory.find(s => s.status === status);
+          const statusEntry = index <= currentStatusIndex
+            ? statusHistory.find((s) => s.status === status)
+            : null;
           const isRevealed = !shouldAnimate || animationComplete || index <= animatedIndex;
           const lineFilled = !shouldAnimate
             ? index < currentStatusIndex

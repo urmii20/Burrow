@@ -29,6 +29,7 @@ const initialFormData = {
   }
 };
 
+// Calculates static fee breakdown for the delivery request.
 const calculateCharges = () => {
   const baseHandlingFee = 49;
   const storageFee = 20;
@@ -47,6 +48,7 @@ const calculateCharges = () => {
   };
 };
 
+// Manages the multi-step new delivery request creation flow.
 const NewRequest = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -77,6 +79,7 @@ const NewRequest = () => {
     setCurrentStep(initialStep);
   }, [initialStep]);
 
+  // Normalises field updates from the form and clears stale errors.
   const handleInputChange = (event) => {
     const { name, value } = event.target;
 
@@ -86,7 +89,9 @@ const NewRequest = () => {
         ...prev,
         destinationAddress: {
           ...prev.destinationAddress,
-          [addressField]: value
+          [addressField]: addressField === 'contactNumber'
+            ? value.replace(/\D/g, '').slice(0, 15)
+            : value
         }
       }));
     } else {
@@ -104,6 +109,7 @@ const NewRequest = () => {
     }
   };
 
+  // Removes payment method validation errors when selections change.
   const clearPaymentError = () => {
     setErrors((prev) => {
       if (!prev.paymentMethod) return prev;
@@ -113,11 +119,13 @@ const NewRequest = () => {
     });
   };
 
+  // Updates the currently selected payment method option.
   const handlePaymentMethodChange = (method) => {
     setSelectedPaymentMethod(method);
     clearPaymentError();
   };
 
+  // Validates and reads the uploaded invoice receipt file.
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
 
@@ -202,11 +210,14 @@ const NewRequest = () => {
     reader.readAsDataURL(file);
   };
 
+  // Ensures order details inputs are complete and valid.
   const validateStep1 = () => {
     const newErrors = {};
 
     const trimmedOrderNumber = formData.orderNumber.trim();
     const trimmedDescription = formData.productDescription.trim();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
 
     if (!trimmedOrderNumber) {
       newErrors.orderNumber = 'Order number is required';
@@ -228,6 +239,12 @@ const NewRequest = () => {
       newErrors.originalETA = 'Original ETA is required';
     } else if (Number.isNaN(new Date(formData.originalETA).getTime())) {
       newErrors.originalETA = 'Please provide a valid date';
+    } else {
+      const etaDate = new Date(formData.originalETA);
+      etaDate.setHours(0, 0, 0, 0);
+      if (etaDate < today) {
+        newErrors.originalETA = 'Original ETA cannot be in the past';
+      }
     }
 
     if (!formData.warehouse) {
@@ -242,6 +259,7 @@ const NewRequest = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Validates delivery scheduling details and destination address.
   const validateStep2 = () => {
     const newErrors = {};
 
@@ -311,6 +329,7 @@ const NewRequest = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Advances the wizard when the current step passes validation.
   const handleNext = () => {
     if (currentStep === 1 && validateStep1()) {
       setSubmitError(null);
@@ -336,6 +355,7 @@ const NewRequest = () => {
     return true;
   };
 
+  // Submits the composed request payload to the API backend.
   const handleSubmit = async () => {
     if (isSubmitting) return;
 
