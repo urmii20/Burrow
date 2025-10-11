@@ -26,6 +26,30 @@ const STATUS_FLOW = [
 
 const MAX_RECEIPT_SIZE = 5 * 1024 * 1024;
 
+function sanitiseDownloadFileName(fileName) {
+  if (!fileName || typeof fileName !== 'string') {
+    return 'receipt.pdf';
+  }
+
+  const trimmed = fileName.trim();
+
+  if (!trimmed) {
+    return 'receipt.pdf';
+  }
+
+  const cleaned = trimmed.replace(/[/\\?%*:|"<>]/g, '_').replace(/[\s]+/g, ' ');
+  const asciiOnly = cleaned.replace(/[^\x20-\x7E]/g, '_');
+
+  return asciiOnly || 'receipt.pdf';
+}
+
+function buildAttachmentHeader(fileName) {
+  const safeFileName = sanitiseDownloadFileName(fileName);
+  const escapedFileName = safeFileName.replace(/"/g, '\\"');
+
+  return `attachment; filename="${escapedFileName}"`;
+}
+
 function buildStatusHistoryEntry(status, note) {
   return {
     status,
@@ -76,10 +100,57 @@ function sanitiseReceipt(receipt) {
     throw new Error('receipt exceeds the 5MB size limit.');
   }
 
+  const roundedSize = Math.round(numericSize);
+
+  const rawData = typeof receipt.data === 'string' ? receipt.data.trim() : '';
+
+  if (!rawData) {
+    throw new Error('receipt.data is required.');
+  }
+
+  let base64Data = rawData;
+
+  if (base64Data.startsWith('data:')) {
+    const commaIndex = base64Data.indexOf(',');
+    base64Data = commaIndex >= 0 ? base64Data.slice(commaIndex + 1) : '';
+  }
+
+  base64Data = base64Data.replace(/\s+/g, '');
+
+  if (!base64Data) {
+    throw new Error('receipt.data is required.');
+  }
+
+  const base64Pattern = /^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}(?:==)?|[A-Za-z0-9+/]{3}=)?$/;
+
+  if (!base64Pattern.test(base64Data)) {
+    throw new Error('receipt.data must be a valid base64 encoded string.');
+  }
+
+  let decodedSize;
+  try {
+    decodedSize = Buffer.from(base64Data, 'base64').length;
+  } catch {
+    throw new Error('receipt.data must be a valid base64 encoded string.');
+  }
+
+  if (!Number.isFinite(decodedSize) || decodedSize <= 0) {
+    throw new Error('receipt.data must contain file contents.');
+  }
+
+  if (decodedSize > MAX_RECEIPT_SIZE) {
+    throw new Error('receipt exceeds the 5MB size limit.');
+  }
+
+  if (decodedSize !== roundedSize) {
+    throw new Error('receipt.fileSize does not match the provided data.');
+  }
+
   return {
     fileName: fileName.trim(),
-    fileSize: Math.round(numericSize),
+    fileSize: roundedSize,
     mimeType: mimeType.trim(),
+    data: base64Data,
     uploadedAt: new Date()
   };
 }
@@ -94,8 +165,34 @@ function ensureDatabase(req, res) {
   return db;
 }
 
+function serialiseRequest(request) {
+  const document = serialiseDocument(request);
+
+  if (!document || typeof document !== 'object') {
+    return document;
+  }
+
+  if (!document.receipt || typeof document.receipt !== 'object') {
+    return document;
+  }
+
+  const { receipt, ...rest } = document;
+  const hasData = typeof receipt.data === 'string' && receipt.data.trim().length > 0;
+
+  return {
+    ...rest,
+    receipt: {
+      fileName: receipt.fileName ?? '',
+      fileSize: receipt.fileSize ?? null,
+      mimeType: receipt.mimeType ?? '',
+      uploadedAt: receipt.uploadedAt ?? null,
+      hasData
+    }
+  };
+}
+
 function serialiseRequests(requests) {
-  return requests.map((request) => serialiseDocument(request));
+  return requests.map((request) => serialiseRequest(request));
 }
 
 function buildRequestIdQuery(rawId) {
@@ -179,7 +276,56 @@ router.get('/:id', async (req, res) => {
     return res.status(404).json({ message: 'Request not found' });
   }
 
-  return res.json({ data: serialiseDocument(request) });
+  return res.json({ data: serialiseRequest(request) });
+});
+
+router.get('/:id/receipt', async (req, res) => {
+  const db = ensureDatabase(req, res);
+  if (!db) {
+    return;
+  }
+
+  let idQuery;
+  try {
+    idQuery = buildRequestIdQuery(req.params.id);
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+
+  const request = await db
+    .collection('deliveryRequests')
+    .findOne(idQuery, { projection: { receipt: 1, orderNumber: 1 } });
+
+  if (!request || !request.receipt || typeof request.receipt !== 'object') {
+    return res.status(404).json({ message: 'Receipt not found for this request.' });
+  }
+
+  const base64Data = typeof request.receipt.data === 'string' ? request.receipt.data.trim() : '';
+
+  if (!base64Data) {
+    return res.status(404).json({ message: 'Receipt file is unavailable.' });
+  }
+
+  let buffer;
+  try {
+    buffer = Buffer.from(base64Data, 'base64');
+  } catch {
+    return res.status(500).json({ message: 'Stored receipt data is corrupted.' });
+  }
+
+  if (!buffer || buffer.length === 0) {
+    return res.status(404).json({ message: 'Receipt file is unavailable.' });
+  }
+
+  const mimeType = request.receipt.mimeType?.trim() || 'application/pdf';
+  const defaultName = request.receipt.fileName || request.orderNumber || 'receipt.pdf';
+  const attachmentHeader = buildAttachmentHeader(defaultName);
+
+  res.setHeader('Content-Type', mimeType);
+  res.setHeader('Content-Length', buffer.length);
+  res.setHeader('Content-Disposition', attachmentHeader);
+
+  return res.send(buffer);
 });
 
 router.post('/', async (req, res) => {
@@ -288,7 +434,7 @@ router.post('/', async (req, res) => {
   const result = await db.collection('deliveryRequests').insertOne(request);
 
   return res.status(201).json({
-    data: serialiseDocument({ ...request, _id: result.insertedId })
+    data: serialiseRequest({ ...request, _id: result.insertedId })
   });
 });
 
@@ -341,7 +487,7 @@ router.put('/:id/reschedule', async (req, res) => {
     return res.status(404).json({ message: 'Request not found' });
   }
 
-  return res.json({ data: serialiseDocument(updatedRequest) });
+  return res.json({ data: serialiseRequest(updatedRequest) });
 });
 
 router.patch('/:id/status', async (req, res) => {
@@ -385,7 +531,7 @@ router.patch('/:id/status', async (req, res) => {
     return res.status(404).json({ message: 'Request not found' });
   }
 
-  return res.json({ data: serialiseDocument(updatedRequest) });
+  return res.json({ data: serialiseRequest(updatedRequest) });
 });
 
 router.patch('/:id/payment', async (req, res) => {
@@ -452,7 +598,7 @@ router.patch('/:id/payment', async (req, res) => {
     return res.status(404).json({ message: 'Request not found' });
   }
 
-  return res.json({ data: serialiseDocument(updatedRequest) });
+  return res.json({ data: serialiseRequest(updatedRequest) });
 });
 
 export default router;
