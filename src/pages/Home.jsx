@@ -59,32 +59,36 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-burrow-background page-fade">
-      <section className="section-hero">
-        <div className="layout-container">
-          <div className="flex flex-col-reverse items-center gap-10 md:flex-row md:items-center">
-            <div className="text-center md:text-left md:w-1/2">
-              <h1 className="text-5xl font-bold text-burrow-text-primary mb-6">
-                Take Control <span className="text-burrow-primary">of Your Deliveries</span>
-              </h1>
-              <p className="text-xl text-burrow-text-secondary mb-10 max-w-3xl mx-auto italic md:mx-0">
-                Reschedule anytime. Perfect for gifts, travel, or safe storage.
-              </p>
-              <button
-                onClick={handleGetStarted}
-                className="btn-primary btn-lg"
-              >
-                <span>Get Started</span>
-                <ArrowRight className="h-5 w-5" />
-              </button>
+        <section className="section-hero">
+            <div className="layout-container">
+              <div className="flex flex-col-reverse items-center gap-10 md:flex-row md:items-center">
+                <div className="text-center md:text-left md:w-1/2">
+                  <h1 className="text-5xl font-bold text-burrow-text-primary mb-6">
+                    Take Control <span className="text-burrow-primary">of Your Deliveries</span>
+                  </h1>
+                  <p className="text-xl text-burrow-text-secondary mb-10 max-w-3xl mx-auto italic md:mx-0">
+                    Reschedule anytime. Perfect for gifts, travel, or safe storage.
+                  </p>
+                  <button onClick={handleGetStarted} className="btn-primary btn-lg">
+                    <span>Get Started</span>
+                    <ArrowRight className="h-5 w-5" />
+                  </button>
+                </div>
+
+                {/* Squirrel */}
+                <img
+                  src={squirrelImage}
+                  alt="Friendly delivery squirrel"
+                  className="
+                    w-[30rem] md:w-[35rem] lg:w-[40rem] object-contain ml-auto
+                    md:translate-x-4 lg:translate-x-8 xl:translate-x-[9rem]
+                  "
+                />
+              </div>
             </div>
-            <img
-              src={squirrelImage}
-              alt="Friendly delivery squirrel"
-              className="w-48 md:w-64 lg:w-72 object-contain md:ml-auto"
-            />
-          </div>
-        </div>
-      </section>
+        </section>
+
+
 
       <section className="section-muted">
         <div className="layout-container">
