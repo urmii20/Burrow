@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="25" height="41" viewBox="0 0 25 41">
+  <defs>
+    <linearGradient id="markerGradient" x1="50%" x2="50%" y1="0%" y2="100%">
+      <stop offset="0%" stop-color="#ff6b6b" />
+      <stop offset="100%" stop-color="#c81d25" />
+    </linearGradient>
+    <filter id="markerShadow" x="-20%" y="-10%" width="140%" height="130%" filterUnits="objectBoundingBox">
+      <feOffset dy="1" in="SourceAlpha" result="shadowOffset" />
+      <feGaussianBlur stdDeviation="1" in="shadowOffset" result="shadowBlur" />
+      <feColorMatrix
+        in="shadowBlur"
+        type="matrix"
+        values="0 0 0 0 0   0 0 0 0 0   0 0 0 0 0   0 0 0 0.35 0"
+      />
+      <feMerge>
+        <feMergeNode />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+  <g filter="url(#markerShadow)">
+    <path
+      fill="url(#markerGradient)"
+      stroke="#8b0f16"
+      stroke-width="1"
+      d="M12.5 0.5c-6.73 0-12 5.27-12 12 0 9.23 12 28 12 28s12-18.77 12-28c0-6.73-5.27-12-12-12z"
+    />
+    <circle cx="12.5" cy="13" r="6" fill="#fff7f7" />
+  </g>
+</svg>

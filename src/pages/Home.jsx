@@ -58,7 +58,7 @@ const Home = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-burrow-background page-fade">
+    <div className="min-h-screen bg-burrow-surface page-fade">
         <section className="section-hero">
             <div className="layout-container">
               <div className="flex flex-col-reverse items-center gap-10 md:flex-row md:items-center">
@@ -143,7 +143,7 @@ const Home = () => {
         </div>
       </section>
 
-      <section className="section-white">
+      <section className="section-muted">
         <div className="layout-container">
           <div className="section-heading">
             <h2 className="section-heading-title mb-4">How It Works</h2>

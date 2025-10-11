@@ -131,9 +131,16 @@ const RequestStatus = () => {
             </Link>
           </div>
 
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-burrow-text-primary">Request {request.id}</h1>
+              <div className="flex flex-wrap items-center gap-3">
+                <h1 className="text-3xl font-bold text-burrow-text-primary">Delivery Request</h1>
+                {request.orderNumber && (
+                  <span className="inline-flex items-center rounded-full border border-burrow-border/70 bg-burrow-surface px-3 py-1 text-sm font-medium text-burrow-text-secondary">
+                    Order: {request.orderNumber}
+                  </span>
+                )}
+              </div>
               <p className="text-burrow-text-secondary mt-1">Track your delivery request status</p>
             </div>
 
