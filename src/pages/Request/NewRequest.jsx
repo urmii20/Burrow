@@ -5,13 +5,11 @@ import WarehouseMap from '../../components/Map/WarehouseMap';
 import { ecommercePlatforms, timeSlots } from '../../data/mockData';
 import apiClient from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
-import { omitErrorKey } from '../../lib/utils';
 
 const MAX_RECEIPT_SIZE = 5 * 1024 * 1024;
 const ORDER_NUMBER_PATTERN = /^[A-Za-z0-9-]{6,30}$/;
 const PINCODE_PATTERN = /^[0-9]{6}$/;
 
-// initialFormData seeds the form with blank values.
 const initialFormData = {
   orderNumber: '',
   platform: '',
@@ -31,7 +29,6 @@ const initialFormData = {
   }
 };
 
-// calculateCharges returns the static price breakdown.
 const calculateCharges = () => {
   const baseHandlingFee = 49;
   const storageFee = 20;
@@ -50,7 +47,6 @@ const calculateCharges = () => {
   };
 };
 
-// NewRequest guides consumers through submitting delivery requests.
 const NewRequest = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
@@ -81,9 +77,6 @@ const NewRequest = () => {
     setCurrentStep(initialStep);
   }, [initialStep]);
 
-  // clearError removes a specific validation message.
-  const clearError = (key) => omitErrorKey(setErrors, key);
-
   const handleInputChange = (event) => {
     const { name, value } = event.target;
 
@@ -96,46 +89,65 @@ const NewRequest = () => {
           [addressField]: value
         }
       }));
-      clearError(`address.${addressField}`);
     } else {
       setFormData((prev) => ({
         ...prev,
         [name]: value
       }));
-      clearError(name);
+    }
+
+    if (errors[name]) {
+      setErrors((prev) => ({
+        ...prev,
+        [name]: ''
+      }));
     }
   };
 
-  const clearPaymentError = () => clearError('paymentMethod');
+  const clearPaymentError = () => {
+    setErrors((prev) => {
+      if (!prev.paymentMethod) return prev;
+      const rest = { ...prev };
+      delete rest.paymentMethod;
+      return rest;
+    });
+  };
 
   const handlePaymentMethodChange = (method) => {
     setSelectedPaymentMethod(method);
     clearPaymentError();
   };
 
-  const resetFileState = () => {
-    setSelectedFile(null);
-    setSelectedFileData(null);
-    setIsProcessingReceipt(false);
-  };
-
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
 
     if (!file) {
-      resetFileState();
-      clearError('file');
+      setSelectedFile(null);
+      setSelectedFileData(null);
+      setIsProcessingReceipt(false);
+      setErrors((prev) => {
+        if (!prev.file) return prev;
+        const rest = { ...prev };
+        delete rest.file;
+        return rest;
+      });
       return;
     }
 
-    resetFileState();
+    setSelectedFile(null);
+    setSelectedFileData(null);
+    setIsProcessingReceipt(false);
     if (file.type !== 'application/pdf') {
+      setSelectedFile(null);
+      setSelectedFileData(null);
       setErrors((prev) => ({ ...prev, file: 'Only PDF files are allowed' }));
       event.target.value = '';
       return;
     }
 
     if (file.size > MAX_RECEIPT_SIZE) {
+      setSelectedFile(null);
+      setSelectedFileData(null);
       setErrors((prev) => ({ ...prev, file: 'File size must be less than 5MB' }));
       event.target.value = '';
       return;
@@ -154,28 +166,42 @@ const NewRequest = () => {
       }
 
       if (!base64Data) {
-        setErrors((prev) => ({ ...prev, file: 'Failed to process the selected file. Please try again.' }));
-        resetFileState();
+        setErrors((prev) => ({
+          ...prev,
+          file: 'Failed to process the selected file. Please try again.'
+        }));
+        setSelectedFile(null);
+        setSelectedFileData(null);
+        setIsProcessingReceipt(false);
         event.target.value = '';
         return;
       }
 
       setSelectedFile(file);
       setSelectedFileData(base64Data);
-      clearError('file');
+      setErrors((prev) => {
+        if (!prev.file) return prev;
+        const rest = { ...prev };
+        delete rest.file;
+        return rest;
+      });
       setIsProcessingReceipt(false);
     };
 
     reader.onerror = () => {
-      setErrors((prev) => ({ ...prev, file: 'Failed to read the selected file. Please try again.' }));
-      resetFileState();
+      setErrors((prev) => ({
+        ...prev,
+        file: 'Failed to read the selected file. Please try again.'
+      }));
+      setSelectedFile(null);
+      setSelectedFileData(null);
+      setIsProcessingReceipt(false);
       event.target.value = '';
     };
 
     reader.readAsDataURL(file);
   };
 
-  // validateStep1 ensures order metadata is correct.
   const validateStep1 = () => {
     const newErrors = {};
 
@@ -216,7 +242,6 @@ const NewRequest = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // validateStep2 checks delivery scheduling and address fields.
   const validateStep2 = () => {
     const newErrors = {};
 
@@ -286,7 +311,6 @@ const NewRequest = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // handleNext advances the wizard when validation passes.
   const handleNext = () => {
     if (currentStep === 1 && validateStep1()) {
       setSubmitError(null);
@@ -299,10 +323,12 @@ const NewRequest = () => {
 
   const charges = useMemo(() => calculateCharges(), []);
 
-  // validateStep3 ensures a payment method is chosen.
   const validateStep3 = () => {
     if (!selectedPaymentMethod) {
-      setErrors((prev) => ({ ...prev, paymentMethod: 'Please select a payment method' }));
+      setErrors((prev) => ({
+        ...prev,
+        paymentMethod: 'Please select a payment method'
+      }));
       return false;
     }
 
@@ -310,7 +336,6 @@ const NewRequest = () => {
     return true;
   };
 
-  // handleSubmit composes the payload and calls the API.
   const handleSubmit = async () => {
     if (isSubmitting) return;
 
@@ -412,7 +437,6 @@ const NewRequest = () => {
     }
   };
 
-  // paymentOptions defines available payment methods.
   const paymentOptions = [
     { id: 'card', label: 'Credit/Debit Card' },
     { id: 'upi', label: 'UPI' },
@@ -424,7 +448,6 @@ const NewRequest = () => {
     <div className="min-h-screen bg-burrow-background py-8 page-fade">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="mb-8 page-fade">
-          {/* Step indicator shows current wizard stage */}
           <div className="flex items-center justify-between fade-stagger">
             {[1, 2, 3].map((step) => (
               <div key={step} className="flex items-center">
@@ -456,7 +479,6 @@ const NewRequest = () => {
 
         {currentStep === 1 && (
           <div className="card p-6 page-fade">
-            {/* Step 1 collects order and receipt info */}
             <div className="flex items-center mb-6">
               <Upload className="h-6 w-6 text-burrow-primary mr-2" />
               <h2 className="text-2xl font-bold text-burrow-text-primary">Order Details</h2>
@@ -589,7 +611,6 @@ const NewRequest = () => {
 
         {currentStep === 2 && (
           <div className="card p-6 page-fade">
-            {/* Step 2 schedules delivery and captures address */}
             <div className="flex items-center mb-6">
               <Calendar className="h-6 w-6 text-burrow-primary mr-2" />
               <h2 className="text-2xl font-bold text-burrow-text-primary">Schedule Delivery</h2>
@@ -759,7 +780,6 @@ const NewRequest = () => {
 
         {currentStep === 3 && (
           <div className="card p-6 page-fade">
-            {/* Step 3 reviews charges and payment */}
             <div className="flex items-center mb-6">
               <CreditCard className="h-6 w-6 text-burrow-primary mr-2" />
               <h2 className="text-2xl font-bold text-burrow-text-primary">Payment Details</h2>

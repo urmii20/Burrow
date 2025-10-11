@@ -2,9 +2,7 @@ import React, { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, Phone } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
-import { omitErrorKey } from '../../lib/utils';
 
-// Register collects customer details for account creation.
 const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -21,7 +19,6 @@ const Register = () => {
   const { state, register } = useAuth();
   const navigate = useNavigate();
 
-  // validateForm checks inputs before submission.
   const validateForm = () => {
     const newErrors = {};
 
@@ -61,7 +58,6 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // handleSubmit sends registration to the API.
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -75,10 +71,18 @@ const Register = () => {
     }
   };
 
-  // handleChange syncs inputs and clears any field-level errors.
-  const handleChange = ({ target: { name, value } }) => {
-    setFormData((previous) => ({ ...previous, [name]: value }));
-    omitErrorKey(setErrors, name);
+  const handleChange = (event) => {
+    setFormData({
+      ...formData,
+      [event.target.name]: event.target.value
+    });
+
+    if (errors[event.target.name]) {
+      setErrors({
+        ...errors,
+        [event.target.name]: ''
+      });
+    }
   };
 
   return (
@@ -230,7 +234,6 @@ const Register = () => {
             </div>
           </div>
 
-          {/* Terms checkbox ensures consent */}
           <div className="flex items-center">
             <input
               id="accept-terms"
@@ -253,7 +256,6 @@ const Register = () => {
           </div>
           {errors.terms && <p className="text-red-600 text-xs">{errors.terms}</p>}
 
-          {/* Submit button finalises registration */}
           <button
             type="submit"
             disabled={state.isLoading}
@@ -262,7 +264,6 @@ const Register = () => {
             {state.isLoading ? 'Creating account...' : 'Create account'}
           </button>
 
-          {/* Login link supports returning users */}
           <div className="auth-cta">
             <p>
               Already have an account?{' '}

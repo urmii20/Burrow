@@ -2,7 +2,6 @@ import { useEffect, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import { Check, Clock, Package, Truck, Home } from 'lucide-react';
 
-// statusConfig maps statuses to their labels and styling.
 const statusConfig = {
   submitted: {
     label: 'Request Submitted',
@@ -78,7 +77,6 @@ const statusConfig = {
   }
 };
 
-// statusOrder defines the chronological order for animation.
 const statusOrder = [
   'submitted',
   'payment_pending',
@@ -92,7 +90,6 @@ const statusOrder = [
   'delivered'
 ];
 
-// StatusTracker animates and displays the delivery timeline.
 const StatusTracker = ({ currentStatus, statusHistory }) => {
   const currentStatusIndex = useMemo(() => statusOrder.indexOf(currentStatus), [currentStatus]);
   const [animatedIndex, setAnimatedIndex] = useState(-1);
@@ -151,13 +148,15 @@ const StatusTracker = ({ currentStatus, statusHistory }) => {
     return statusIndex <= animatedIndex && animatedIndex !== -1;
   };
 
-  const formatTimestamp = (timestamp) => new Date(timestamp).toLocaleString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  });
+  const formatTimestamp = (timestamp) => {
+    return new Date(timestamp).toLocaleString('en-IN', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
 
   return (
     <div className="card-padded">

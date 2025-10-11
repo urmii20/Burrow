@@ -1,18 +1,16 @@
 
-// DEFAULT_HEADERS sets the baseline request headers.
-const DEFAULT_HEADERS = { Accept: 'application/json' };
+const DEFAULT_HEADERS = {
+  Accept: 'application/json'
+};
 
-// API_BASE_URL resolves to the configured backend root.
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL?.replace(/\/$/, '') || '';
 
 let authToken = null;
 
-// setAuthToken stores the current bearer token.
 export const setAuthToken = (token) => {
   authToken = token || null;
 };
 
-// buildUrl normalises relative paths against the base URL.
 function buildUrl(path) {
   if (!path) {
     throw new Error('A request path is required.');
@@ -29,7 +27,6 @@ function buildUrl(path) {
   return `${API_BASE_URL}${path.startsWith('/') ? path : `/${path}`}`;
 }
 
-// parseJsonResponse safely extracts JSON payloads while surfacing errors.
 async function parseJsonResponse(response) {
   const text = await response.text();
   if (!text) {
@@ -45,17 +42,6 @@ async function parseJsonResponse(response) {
   }
 }
 
-// applyAuthHeader merges the stored token into request headers.
-const applyAuthHeader = (headers) => {
-  if (authToken && !headers.Authorization) {
-    headers.Authorization = authToken.startsWith('Bearer ')
-      ? authToken
-      : `Bearer ${authToken}`;
-  }
-  return headers;
-};
-
-// request performs JSON-based API calls with error handling.
 async function request(path, options = {}) {
   const url = buildUrl(path);
   const headers = {
@@ -69,7 +55,11 @@ async function request(path, options = {}) {
     headers['Content-Type'] = 'application/json';
   }
 
-  applyAuthHeader(headers);
+  if (authToken && !headers.Authorization) {
+    headers.Authorization = authToken.startsWith('Bearer ')
+      ? authToken
+      : `Bearer ${authToken}`;
+  }
 
   const fetchOptions = {
     method: options.method ?? (hasBody ? 'POST' : 'GET'),
@@ -93,7 +83,6 @@ async function request(path, options = {}) {
   return payload?.data ?? payload;
 }
 
-// extractFileNameFromHeaders retrieves filenames from download headers.
 function extractFileNameFromHeaders(contentDisposition = '') {
   if (typeof contentDisposition !== 'string' || !contentDisposition) {
     return '';
@@ -116,12 +105,21 @@ function extractFileNameFromHeaders(contentDisposition = '') {
   return '';
 }
 
-// requestBinary handles blob downloads with friendly error messages.
 async function requestBinary(path, options = {}) {
   const url = buildUrl(path);
-  const headers = { ...(options.headers ?? {}) };
-  if (!headers.Accept && !headers.accept) headers.Accept = '*/*';
-  applyAuthHeader(headers);
+  const headers = {
+    ...(options.headers ?? {})
+  };
+
+  if (!headers.Accept && !headers.accept) {
+    headers.Accept = '*/*';
+  }
+
+  if (authToken && !headers.Authorization) {
+    headers.Authorization = authToken.startsWith('Bearer ')
+      ? authToken
+      : `Bearer ${authToken}`;
+  }
 
   const fetchOptions = {
     method: options.method ?? 'GET',
@@ -164,7 +162,6 @@ async function requestBinary(path, options = {}) {
   };
 }
 
-// apiClient exposes shorthand helpers for the common HTTP verbs.
 const apiClient = {
   request,
   get: (path, options = {}) => request(path, { ...options, method: 'GET' }),

@@ -4,17 +4,14 @@ import PropTypes from 'prop-types';
 
 import apiClient from '../lib/api';
 
-// AuthContext shares authentication state and actions across the app.
 const AuthContext = createContext(null);
 
-// initialState defines the default auth store values.
 const initialState = {
   user: null,
   isLoading: false,
   error: null
 };
 
-// normaliseUser keeps role naming consistent between API and UI.
 const normaliseUser = (user) => {
   if (!user) {
     return user;
@@ -26,7 +23,6 @@ const normaliseUser = (user) => {
   };
 };
 
-// authReducer tracks loading, success, and error transitions.
 const authReducer = (state, action) => {
   switch (action.type) {
     case 'LOGIN_START':
@@ -46,38 +42,47 @@ const authReducer = (state, action) => {
 
 const STORAGE_KEY = 'burrow_user';
 
-// AuthProvider exposes auth state and service calls to descendants.
 export const AuthProvider = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialState);
 
-  // authenticate handles login/register flows with shared behaviour.
-  const authenticate = async (path, payload, defaultError) => {
+  const login = async (email, password) => {
     dispatch({ type: 'LOGIN_START' });
 
     try {
-      const user = await apiClient.post(path, payload);
+      const user = await apiClient.post('/auth/login', { email, password });
       const normalisedUser = normaliseUser(user);
+
       localStorage.setItem(STORAGE_KEY, JSON.stringify(normalisedUser));
       dispatch({ type: 'LOGIN_SUCCESS', payload: normalisedUser });
       return normalisedUser;
     } catch (error) {
       dispatch({
         type: 'LOGIN_FAILURE',
-        payload: error?.message || defaultError
+        payload: error?.message || 'Unable to login. Please try again.'
       });
       throw error;
     }
   };
 
-  // login authenticates a returning user.
-  const login = (email, password) =>
-    authenticate('/auth/login', { email, password }, 'Unable to login. Please try again.');
+  const register = async (userData) => {
+    dispatch({ type: 'LOGIN_START' });
 
-  // register signs up a new user and stores the session.
-  const register = (userData) =>
-    authenticate('/auth/register', userData, 'Unable to register. Please try again.');
+    try {
+      const user = await apiClient.post('/auth/register', userData);
+      const normalisedUser = normaliseUser(user);
 
-  // logout clears local state even if the API call fails.
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(normalisedUser));
+      dispatch({ type: 'LOGIN_SUCCESS', payload: normalisedUser });
+      return normalisedUser;
+    } catch (error) {
+      dispatch({
+        type: 'LOGIN_FAILURE',
+        payload: error?.message || 'Unable to register. Please try again.'
+      });
+      throw error;
+    }
+  };
+
   const logout = async () => {
     try {
       await apiClient.post('/auth/logout');
@@ -89,7 +94,6 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  // On mount we hydrate any persisted user session.
   useEffect(() => {
     const storedUser = localStorage.getItem(STORAGE_KEY);
     if (storedUser) {
@@ -117,7 +121,6 @@ AuthProvider.propTypes = {
   children: PropTypes.node.isRequired,
 };
 
-// useAuth ensures components consume the provider safely.
 export const useAuth = () => {
   const context = useContext(AuthContext);
   if (!context) {

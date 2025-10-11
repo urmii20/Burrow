@@ -3,9 +3,7 @@ import { Package, Search, AlertCircle, MapPin, Calendar, Clock } from 'lucide-re
 import { Link, useNavigate } from 'react-router-dom';
 import apiClient from '../../lib/api';
 import { mockRequests } from '../../data/mockData';
-import { formatAddress, formatDate, toTitleFromSnake } from '../../lib/utils';
 
-// TrackRequest lets consumers locate orders by reference number.
 const TrackRequest = () => {
   const navigate = useNavigate();
   const [orderNumber, setOrderNumber] = useState('');
@@ -14,7 +12,31 @@ const TrackRequest = () => {
   const [results, setResults] = useState([]);
   const [hasSearched, setHasSearched] = useState(false);
 
-  // findMatchingRequest searches for matches in a collection.
+  const formatStatus = (status) => {
+    if (!status) {
+      return 'Unknown';
+    }
+
+    return status
+      .split('_')
+      .map((segment) => segment.charAt(0).toUpperCase() + segment.slice(1))
+      .join(' ');
+  };
+
+  const formatAddress = (address) => {
+    if (!address) {
+      return 'Destination address not available';
+    }
+
+    const parts = [address.line1, address.city, address.state].filter(Boolean);
+
+    if (parts.length === 0) {
+      return 'Destination address not available';
+    }
+
+    return parts.join(', ');
+  };
+
   const findMatchingRequest = (collection, value) => {
     if (!Array.isArray(collection) || collection.length === 0 || !value) {
       return null;
@@ -28,7 +50,6 @@ const TrackRequest = () => {
     });
   };
 
-  // handleSubmit looks up requests via API then falls back to mocks.
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -49,9 +70,9 @@ const TrackRequest = () => {
       const data = await apiClient.get(`/requests?${params.toString()}`);
       const nextResults = Array.isArray(data) ? data : [];
 
-      const normalisedLookup = trimmedOrderNumber.toLowerCase();
+
       const matchingRequest = nextResults.find(
-        (request) => request.orderNumber?.toLowerCase() === normalisedLookup
+        (request) => request.orderNumber?.toLowerCase() === trimmedOrderNumber.toLowerCase(),
       );
 
 
@@ -81,7 +102,6 @@ const TrackRequest = () => {
     }
   };
 
-  // renderResult prints a card summarising a matched request.
   const renderResult = (request) => {
     return (
       <div key={request.id} className="bg-burrow-surface rounded-2xl shadow-sm border border-burrow-border p-6">
@@ -91,7 +111,7 @@ const TrackRequest = () => {
               <Package className="h-6 w-6 text-burrow-primary" />
               <div>
                 <p className="text-sm font-medium text-burrow-text-primary">Order #{request.orderNumber}</p>
-                <p className="text-sm text-burrow-text-muted">Status: {toTitleFromSnake(request.status, 'Unknown')}</p>
+                <p className="text-sm text-burrow-text-muted">Status: {formatStatus(request.status)}</p>
               </div>
             </div>
 
@@ -102,7 +122,9 @@ const TrackRequest = () => {
                 <Calendar className="h-4 w-4 text-burrow-text-muted mr-2" />
                 <span>
                   Scheduled:{' '}
-                  {formatDate(request.scheduledDeliveryDate, 'To be confirmed')}
+                  {request.scheduledDeliveryDate
+                    ? new Date(request.scheduledDeliveryDate).toLocaleDateString()
+                    : 'To be confirmed'}
                 </span>
               </div>
 
@@ -133,13 +155,11 @@ const TrackRequest = () => {
     <div className="bg-burrow-background min-h-full py-12 page-fade">
       <div className="layout-container-narrow">
         <div className="card-panel page-fade">
-          {/* Page heading introduces tracking flow */}
           <h1 className="text-2xl font-bold text-burrow-text-primary mb-2">Track your delivery request</h1>
           <p className="text-sm text-burrow-text-secondary mb-6">
             Enter your order number to view the current status, scheduled date, and destination details of your request.
           </p>
 
-          {/* Search form collects the order number */}
           <form onSubmit={handleSubmit} className="space-y-4 fade-stagger">
             <div>
               <label htmlFor="orderNumber" className="form-label">
@@ -179,7 +199,6 @@ const TrackRequest = () => {
 
           {hasSearched && !error && (
             <div className="mt-8 space-y-4 fade-stagger">
-              {/* Results list displays matches */}
               {results.length > 0 ? (
                 results.map((request) => renderResult(request))
               ) : (
