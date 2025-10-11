@@ -84,20 +84,9 @@ const Home = () => {
                 />
               </div>
             </div>
-<<<<<<< HEAD
-            <img
-              src={squirrelImage}
-              alt="Friendly delivery squirrel"
-              className="w-[30rem] md:w-[35rem] lg:w-[37rem] object-contain ml-auto md:translate-x-4 lg:translate-x-8 xl:translate-x-[9rem]"
-            />
-          </div>
-        </div>
-      </section>
-=======
         </section>
 
 
->>>>>>> parent of 4003d7f (Optimize pages and add documentation comments)
 
       <section className="section-muted">
         <div className="layout-container">
@@ -152,12 +141,7 @@ const Home = () => {
         </div>
       </section>
 
-<<<<<<< HEAD
-      {/* Steps section explains scheduling flow */}
-      <section className="section-white">
-=======
       <section className="section-muted">
->>>>>>> parent of 4003d7f (Optimize pages and add documentation comments)
         <div className="layout-container">
           <div className="section-heading">
             <h2 className="section-heading-title mb-4">How It Works</h2>
