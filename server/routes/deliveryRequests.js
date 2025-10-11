@@ -24,6 +24,8 @@ const STATUS_FLOW = [
   'cancelled'
 ];
 
+const MAX_RECEIPT_SIZE = 5 * 1024 * 1024;
+
 function buildStatusHistoryEntry(status, note) {
   return {
     status,
@@ -39,6 +41,47 @@ function parseDate(value, fieldName) {
   }
 
   return date;
+}
+
+function sanitiseReceipt(receipt) {
+  if (!receipt || typeof receipt !== 'object') {
+    throw new Error('receipt is required.');
+  }
+
+  const { fileName, fileSize, mimeType } = receipt;
+
+  if (!fileName || !fileName.trim()) {
+    throw new Error('receipt.fileName is required.');
+  }
+
+  if (!mimeType || !mimeType.trim()) {
+    throw new Error('receipt.mimeType is required.');
+  }
+
+  if (mimeType !== 'application/pdf') {
+    throw new Error('receipt must be a PDF document.');
+  }
+
+  if (fileSize === undefined || fileSize === null) {
+    throw new Error('receipt.fileSize is required.');
+  }
+
+  const numericSize = Number(fileSize);
+
+  if (!Number.isFinite(numericSize) || numericSize <= 0) {
+    throw new Error('receipt.fileSize must be a positive number.');
+  }
+
+  if (numericSize > MAX_RECEIPT_SIZE) {
+    throw new Error('receipt exceeds the 5MB size limit.');
+  }
+
+  return {
+    fileName: fileName.trim(),
+    fileSize: Math.round(numericSize),
+    mimeType: mimeType.trim(),
+    uploadedAt: new Date()
+  };
 }
 
 function ensureDatabase(req, res) {
@@ -155,6 +198,7 @@ router.post('/', async (req, res) => {
     scheduledDeliveryDate,
     deliveryTimeSlot,
     destinationAddress,
+    receipt,
     paymentDetails = {}
   } = req.body ?? {};
 
@@ -206,6 +250,13 @@ router.post('/', async (req, res) => {
     }
   }
 
+  let sanitisedReceipt;
+  try {
+    sanitisedReceipt = sanitiseReceipt(receipt);
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+
   const now = new Date();
 
   const request = {
@@ -229,6 +280,7 @@ router.post('/', async (req, res) => {
       paymentStatus: paymentDetails.paymentStatus ?? 'pending',
       paymentMethod: paymentDetails.paymentMethod ?? 'card'
     },
+    receipt: sanitisedReceipt,
     createdAt: now,
     updatedAt: now
   };
