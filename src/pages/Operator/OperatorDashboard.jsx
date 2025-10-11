@@ -3,6 +3,46 @@ import { Search, Filter, Eye, CheckCircle, XCircle, Clock } from 'lucide-react';
 
 import apiClient from '../../lib/api';
 
+const buildReceiptUrl = (receipt) => {
+  if (!receipt || typeof receipt !== 'object') {
+    return null;
+  }
+
+  const data = typeof receipt.data === 'string' ? receipt.data.trim() : '';
+
+  if (!data) {
+    return null;
+  }
+
+  if (data.startsWith('data:')) {
+    return data;
+  }
+
+  const mimeType = receipt.mimeType?.trim() || 'application/pdf';
+  return `data:${mimeType};base64,${data}`;
+};
+
+const formatFileSize = (bytes) => {
+  const numeric = Number(bytes);
+
+  if (!Number.isFinite(numeric) || numeric < 0) {
+    return '';
+  }
+
+  if (numeric < 1024) {
+    return `${numeric} B`;
+  }
+
+  const kb = numeric / 1024;
+
+  if (kb < 1024) {
+    return `${kb.toFixed(1)} KB`;
+  }
+
+  const mb = kb / 1024;
+  return `${mb.toFixed(2)} MB`;
+};
+
 const OperatorDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -163,6 +203,8 @@ const OperatorDashboard = () => {
     setModalNotes('');
     setUpdateError(null);
   };
+
+  const receiptUrl = buildReceiptUrl(selectedRequest?.receipt);
 
   return (
     <div className="min-h-screen bg-burrow-background page-fade">
@@ -393,6 +435,55 @@ const OperatorDashboard = () => {
                       <span className="text-burrow-text-secondary">Product:</span>
                       <span className="font-medium text-burrow-text-primary">{selectedRequest.productDescription}</span>
                     </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-medium text-burrow-text-primary mb-2">Receipt</h4>
+                  <div className="bg-burrow-background rounded-xl p-4 space-y-3">
+                    {selectedRequest.receipt ? (
+                      <>
+                        <div className="flex justify-between">
+                          <span className="text-burrow-text-secondary">File Name:</span>
+                          <span className="font-medium text-burrow-text-primary truncate max-w-xs">
+                            {selectedRequest.receipt.fileName}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-burrow-text-secondary">File Size:</span>
+                          <span className="font-medium text-burrow-text-primary">
+                            {formatFileSize(selectedRequest.receipt.fileSize) || '—'}
+                          </span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-burrow-text-secondary">Uploaded:</span>
+                          <span className="font-medium text-burrow-text-primary">
+                            {selectedRequest.receipt.uploadedAt
+                              ? new Date(selectedRequest.receipt.uploadedAt).toLocaleString()
+                              : '—'}
+                          </span>
+                        </div>
+                        {receiptUrl ? (
+                          <div className="pt-3 border-t border-burrow-border/60 flex justify-end">
+                            <a
+                              href={receiptUrl}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="btn-secondary btn-sm"
+                              download={selectedRequest.receipt.fileName || 'receipt.pdf'}
+                            >
+                              View Receipt (PDF)
+                            </a>
+                          </div>
+                        ) : (
+                          <p className="text-sm text-burrow-text-muted">
+                            Receipt file is unavailable.
+                          </p>
+                        )}
+                      </>
+                    ) : (
+                      <p className="text-sm text-burrow-text-muted">No receipt was provided.</p>
+                    )}
                   </div>
                 </div>
 
