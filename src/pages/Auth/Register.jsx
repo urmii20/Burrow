@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Mail, Lock, User, Phone } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
+// Register component collects new user details and creates their account.
 const Register = () => {
   const [formData, setFormData] = useState({
     name: '',
@@ -19,6 +20,7 @@ const Register = () => {
   const { state, register } = useAuth();
   const navigate = useNavigate();
 
+  // Validates each field and records any errors for display.
   const validateForm = () => {
     const newErrors = {};
 
@@ -58,6 +60,7 @@ const Register = () => {
     return Object.keys(newErrors).length === 0;
   };
 
+  // Submits the form through the auth helper after validation succeeds.
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -71,6 +74,7 @@ const Register = () => {
     }
   };
 
+  // Keeps local form state and clears field-specific errors as the user types.
   const handleChange = (event) => {
     setFormData({
       ...formData,
@@ -88,17 +92,20 @@ const Register = () => {
   return (
     <div className="auth-wrapper page-fade">
       <div className="auth-container">
+        {/* Intro text states that this form creates a Burrow account. */}
         <div className="text-center">
           <h2 className="auth-title">Create your account</h2>
           <p className="auth-subtitle">Join Burrow and take control of your deliveries</p>
         </div>
 
+        {/* Error banner renders auth errors returned from the signup attempt. */}
         {state.error && (
           <div className="alert-error">
             <p>{state.error}</p>
           </div>
         )}
 
+        {/* Sign-up form binds inputs for profile, contact, and password details. */}
         <form className="mt-8 space-y-6 fade-stagger" onSubmit={handleSubmit}>
           <div className="space-y-4 fade-stagger">
             <div>

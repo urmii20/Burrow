@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 
 import apiClient from '../../lib/api';
 
+// ConsumerDashboard component shows delivery stats and recent requests for the signed-in user.
 const ConsumerDashboard = () => {
   const { state } = useAuth();
 
@@ -12,6 +13,7 @@ const ConsumerDashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Fetches requests for the signed-in user and updates loading/error flags.
   useEffect(() => {
     let isMounted = true;
 
@@ -49,11 +51,13 @@ const ConsumerDashboard = () => {
     };
   }, [state.user?.id]);
 
+  // Filters the loaded requests so only the current user's items appear.
   const userRequests = useMemo(
     () => requests.filter(req => req.userId === state.user?.id),
     [requests, state.user?.id]
   );
 
+  // Derives counts for active, pending, and completed requests.
   const stats = useMemo(
     () => ({
       active: userRequests.filter(req => !['delivered', 'rejected'].includes(req.status)).length,
@@ -63,6 +67,7 @@ const ConsumerDashboard = () => {
     [userRequests]
   );
 
+  // Returns the right badge UI for each request status.
   const getStatusBadge = (status) => {
     switch (status) {
       case 'submitted':
@@ -122,11 +127,13 @@ const ConsumerDashboard = () => {
   return (
     <div className="min-h-screen bg-burrow-background py-8 page-fade">
       <div className="layout-container">
+        {/* Welcome banner outputs the greeting text and helper sentence. */}
         <div className="mb-8 page-fade">
           <h1 className="text-3xl font-bold text-burrow-text-primary">Welcome back, {state.user?.name}!</h1>
           <p className="text-burrow-text-secondary mt-1">Manage your deliveries and schedule new requests</p>
         </div>
 
+        {/* Stats cards display the derived counts with icons. */}
         <div className="stats-grid mb-8 fade-stagger">
           {[
             { label: 'Active Requests', value: stats.active, icon: Clock },
@@ -147,6 +154,7 @@ const ConsumerDashboard = () => {
           ))}
         </div>
 
+        {/* Quick actions card links to common consumer workflows. */}
         <div className="card-padded mb-8 page-fade">
           <h2 className="text-xl font-semibold text-burrow-text-primary mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -168,6 +176,7 @@ const ConsumerDashboard = () => {
           </div>
         </div>
 
+        {/* Recent requests card renders request summaries with status badges. */}
         <div className="card page-fade">
           <div className="px-6 py-4 border-b border-burrow-border/80">
             <h2 className="text-xl font-semibold text-burrow-text-primary">Recent Requests</h2>

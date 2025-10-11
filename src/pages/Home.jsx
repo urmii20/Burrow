@@ -5,10 +5,12 @@ import WarehouseMap from '../components/Map/WarehouseMap';
 import { warehouses } from '../data/mockData';
 import squirrelImage from '../../assets/squirrel.png';
 
+// Home component organizes the landing page layout and handles navigation to registration.
 const Home = () => {
   const navigate = useNavigate();
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
 
+  // Stores the selected warehouse and navigates to the registration page.
   const handleGetStarted = () => {
     if (selectedWarehouse) {
       localStorage.setItem('selectedWarehouse', JSON.stringify(selectedWarehouse));
@@ -16,6 +18,7 @@ const Home = () => {
     navigate('/register');
   };
 
+  // Defines the benefit cards shown in the features grid.
   const benefits = [
     {
       icon: Calendar,
@@ -39,6 +42,7 @@ const Home = () => {
     }
   ];
 
+  // Defines the data for the three-step process list.
   const howItWorks = [
     {
       step: '1',
@@ -59,6 +63,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-burrow-primary page-fade">
+        {/* Hero section renders the main message, image, and sign-up button. */}
         <section className="section-hero">
             <div className="layout-container">
               <div className="flex flex-col-reverse items-center gap-10 md:flex-row md:items-center">
@@ -88,6 +93,7 @@ const Home = () => {
 
 
 
+      {/* Benefits section maps through benefit items to show feature cards. */}
       <section className="section-muted">
         <div className="layout-container">
           <div className="section-heading">
@@ -141,6 +147,7 @@ const Home = () => {
         </div>
       </section>
 
+      {/* How it works section iterates over steps to display the process timeline. */}
       <section className="section-muted">
         <div className="layout-container">
           <div className="section-heading">
@@ -162,6 +169,7 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Final call-to-action section repeats the signup button for quick access. */}
       <section className="section-primary">
         <div className="layout-container text-center">
           <h2 className="text-3xl font-bold text-burrow-text-inverse mb-4">
