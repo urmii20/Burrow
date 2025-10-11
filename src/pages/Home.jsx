@@ -5,6 +5,22 @@ import WarehouseMap from '../components/Map/WarehouseMap';
 import { warehouses } from '../data/mockData';
 import squirrelImage from '../../assets/squirrel.png';
 
+// benefits outlines key marketing highlights for the landing page.
+const benefits = [
+  { icon: Calendar, title: 'Perfect Gift Timing', description: 'Schedule deliveries for birthdays, anniversaries, and special occasions' },
+  { icon: Shield, title: 'Avoid Porch Piracy', description: "Secure storage until you're ready to receive your packages" },
+  { icon: Clock, title: 'Vacation Holds', description: "Store packages while you're away and schedule delivery for your return" },
+  { icon: MapPin, title: 'Flexible Locations', description: 'Redirect office deliveries to home when working remotely' }
+];
+
+// howItWorks shares the simple three step onboarding flow.
+const howItWorks = [
+  { step: '1', title: 'Order to Our Warehouse', description: 'Use our warehouse address as your delivery location when shopping online' },
+  { step: '2', title: 'Schedule Your Delivery', description: 'Choose your preferred date and time slot for final delivery' },
+  { step: '3', title: 'We Handle the Rest', description: 'We receive, store, and deliver your package exactly when you want it' }
+];
+
+// Home is the marketing landing page for the platform.
 const Home = () => {
   const navigate = useNavigate();
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
@@ -16,78 +32,34 @@ const Home = () => {
     navigate('/register');
   };
 
-  const benefits = [
-    {
-      icon: Calendar,
-      title: 'Perfect Gift Timing',
-      description: 'Schedule deliveries for birthdays, anniversaries, and special occasions'
-    },
-    {
-      icon: Shield,
-      title: 'Avoid Porch Piracy',
-      description: "Secure storage until you're ready to receive your packages"
-    },
-    {
-      icon: Clock,
-      title: 'Vacation Holds',
-      description: "Store packages while you're away and schedule delivery for your return"
-    },
-    {
-      icon: MapPin,
-      title: 'Flexible Locations',
-      description: 'Redirect office deliveries to home when working remotely'
-    }
-  ];
-
-  const howItWorks = [
-    {
-      step: '1',
-      title: 'Order to Our Warehouse',
-      description: 'Use our warehouse address as your delivery location when shopping online'
-    },
-    {
-      step: '2',
-      title: 'Schedule Your Delivery',
-      description: 'Choose your preferred date and time slot for final delivery'
-    },
-    {
-      step: '3',
-      title: 'We Handle the Rest',
-      description: 'We receive, store, and deliver your package exactly when you want it'
-    }
-  ];
-
   return (
     <div className="min-h-screen bg-burrow-primary page-fade">
-        <section className="section-hero">
-            <div className="layout-container">
-              <div className="flex flex-col-reverse items-center gap-10 md:flex-row md:items-center">
-                <div className="text-center md:text-left md:w-1/2">
-                  <h1 className="text-5xl font-bold text-burrow-text-primary mb-6">
-                    Take Control <span className="text-burrow-primary">of Your Deliveries</span>
-                  </h1>
-                  <p className="text-xl text-burrow-text-secondary mb-10 max-w-3xl mx-auto italic md:mx-0">
-                    Reschedule anytime. Perfect for gifts, travel, or safe storage.
-                  </p>
-                  <button onClick={handleGetStarted} className="btn-primary btn-lg">
-                    <span>Get Started</span>
-                    <ArrowRight className="h-5 w-5" />
-                  </button>
-                </div>
-                <img
-                  src={squirrelImage}
-                  alt="Friendly delivery squirrel"
-                  className="
-                    w-[30rem] md:w-[35rem] lg:w-[40rem] object-contain ml-auto
-                    md:translate-x-4 lg:translate-x-8 xl:translate-x-[9rem]
-                  "
-                />
-              </div>
+      {/* Hero section introduces the product and CTA */}
+      <section className="section-hero">
+        <div className="layout-container">
+          <div className="flex flex-col-reverse items-center gap-10 md:flex-row md:items-center">
+            <div className="text-center md:text-left md:w-1/2">
+              <h1 className="text-5xl font-bold text-burrow-text-primary mb-6">
+                Take Control <span className="text-burrow-primary">of Your Deliveries</span>
+              </h1>
+              <p className="text-xl text-burrow-text-secondary mb-10 max-w-3xl mx-auto italic md:mx-0">
+                Reschedule anytime. Perfect for gifts, travel, or safe storage.
+              </p>
+              <button onClick={handleGetStarted} className="btn-primary btn-lg">
+                <span>Get Started</span>
+                <ArrowRight className="h-5 w-5" />
+              </button>
             </div>
-        </section>
+            <img
+              src={squirrelImage}
+              alt="Friendly delivery squirrel"
+              className="w-[30rem] md:w-[35rem] lg:w-[40rem] object-contain ml-auto md:translate-x-4 lg:translate-x-8 xl:translate-x-[9rem]"
+            />
+          </div>
+        </div>
+      </section>
 
-
-
+      {/* Benefits section showcases reasons to trust Burrow */}
       <section className="section-muted">
         <div className="layout-container">
           <div className="section-heading">
@@ -141,6 +113,7 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Steps section explains scheduling flow */}
       <section className="section-muted">
         <div className="layout-container">
           <div className="section-heading">
@@ -162,6 +135,7 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Final CTA encourages signup */}
       <section className="section-primary">
         <div className="layout-container text-center">
           <h2 className="text-3xl font-bold text-burrow-text-inverse mb-4">

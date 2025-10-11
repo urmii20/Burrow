@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Package, User, LogOut } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
+// Header renders navigation links and user actions.
 const Header = () => {
   const { state, logout } = useAuth();
   const navigate = useNavigate();

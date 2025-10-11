@@ -4,7 +4,42 @@ import { Package, Plus, Clock, CheckCircle, AlertTriangle } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 
 import apiClient from '../../lib/api';
+import { formatDate } from '../../lib/utils';
 
+const badgeGroups = [
+  {
+    keys: ['submitted', 'approval_pending', 'payment_pending', 'reschedule_requested'],
+    label: 'Pending',
+    className: 'border border-burrow-border/60 bg-burrow-primary/10 text-burrow-primary'
+  },
+  {
+    keys: ['approved', 'scheduled', 'parcel_expected', 'parcel_arrived', 'in_storage', 'preparing_dispatch', 'out_for_delivery'],
+    label: 'In Progress',
+    className: 'border border-burrow-border/60 bg-burrow-primary/10 text-burrow-primary'
+  },
+  {
+    keys: ['delivered'],
+    label: 'Delivered',
+    className: 'bg-burrow-primary text-burrow-text-inverse shadow-sm shadow-burrow-border/40'
+  },
+  {
+    keys: ['rejected', 'issue_reported'],
+    label: 'Issue Reported',
+    className: 'bg-red-100 text-red-800'
+  },
+  {
+    keys: ['cancelled'],
+    label: 'Cancelled',
+    className: 'border border-burrow-border/60 bg-burrow-background text-burrow-text-muted'
+  }
+];
+
+const statusBadgeMap = badgeGroups.reduce((map, group) => {
+  group.keys.forEach((key) => map.set(key, group));
+  return map;
+}, new Map());
+
+// ConsumerDashboard summarises the consumer's requests and stats.
 const ConsumerDashboard = () => {
   const { state } = useAuth();
 
@@ -12,6 +47,7 @@ const ConsumerDashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // fetchRequests loads the user's recent delivery requests.
   useEffect(() => {
     let isMounted = true;
 
@@ -49,84 +85,50 @@ const ConsumerDashboard = () => {
     };
   }, [state.user?.id]);
 
+  // userRequests ensures the view only shows the signed in user's data.
   const userRequests = useMemo(
     () => requests.filter(req => req.userId === state.user?.id),
     [requests, state.user?.id]
   );
 
+  // stats summarises active, pending, and completed counts.
   const stats = useMemo(
-    () => ({
-      active: userRequests.filter(req => !['delivered', 'rejected'].includes(req.status)).length,
-      pending: userRequests.filter(req => ['submitted', 'approval_pending', 'payment_pending'].includes(req.status)).length,
-      completed: userRequests.filter(req => req.status === 'delivered').length
-    }),
+    () =>
+      userRequests.reduce(
+        (acc, request) => {
+          if (!['delivered', 'rejected'].includes(request.status)) acc.active += 1;
+          if (['submitted', 'approval_pending', 'payment_pending'].includes(request.status)) acc.pending += 1;
+          if (request.status === 'delivered') acc.completed += 1;
+          return acc;
+        },
+        { active: 0, pending: 0, completed: 0 }
+      ),
     [userRequests]
   );
 
+  // getStatusBadge renders the correct badge for any status.
   const getStatusBadge = (status) => {
-    switch (status) {
-      case 'submitted':
-      case 'approval_pending':
-      case 'payment_pending':
-      case 'reschedule_requested':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border border-burrow-border/60 bg-burrow-primary/10 text-burrow-primary">
-            Pending
-          </span>
-        );
-      case 'approved':
-      case 'scheduled':
-      case 'parcel_expected':
-      case 'parcel_arrived':
-      case 'in_storage':
-      case 'preparing_dispatch':
-      case 'out_for_delivery':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border border-burrow-border/60 bg-burrow-primary/10 text-burrow-primary">
-            In Progress
-          </span>
-        );
-      case 'delivered':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-burrow-primary text-burrow-text-inverse shadow-sm shadow-burrow-border/40">
-            Delivered
-          </span>
-        );
-      case 'rejected':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-            Rejected
-          </span>
-        );
-      case 'issue_reported':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-            Issue Reported
-          </span>
-        );
-      case 'cancelled':
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border border-burrow-border/60 bg-burrow-background text-burrow-text-muted">
-            Cancelled
-          </span>
-        );
-      default:
-        return (
-          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border border-burrow-border/60 bg-burrow-background text-burrow-text-muted">
-            Unknown
-          </span>
-        );
-    }
+    const badge = statusBadgeMap.get(status) || {
+      label: 'Unknown',
+      className: 'border border-burrow-border/60 bg-burrow-background text-burrow-text-muted'
+    };
+    return (
+      <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${badge.className}`}>
+        {badge.label}
+      </span>
+    );
   };
 
   return (
     <div className="min-h-screen bg-burrow-background py-8 page-fade">
       <div className="layout-container">
+        {/* Welcome banner greets the user */}
         <div className="mb-8 page-fade">
           <h1 className="text-3xl font-bold text-burrow-text-primary">Welcome back, {state.user?.name}!</h1>
           <p className="text-burrow-text-secondary mt-1">Manage your deliveries and schedule new requests</p>
         </div>
 
+        {/* Stat cards summarise request counts */}
         <div className="stats-grid mb-8 fade-stagger">
           {[
             { label: 'Active Requests', value: stats.active, icon: Clock },
@@ -147,6 +149,7 @@ const ConsumerDashboard = () => {
           ))}
         </div>
 
+        {/* Quick actions provide shortcuts */}
         <div className="card-padded mb-8 page-fade">
           <h2 className="text-xl font-semibold text-burrow-text-primary mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -168,6 +171,7 @@ const ConsumerDashboard = () => {
           </div>
         </div>
 
+        {/* Request list shows latest deliveries */}
         <div className="card page-fade">
           <div className="px-6 py-4 border-b border-burrow-border/80">
             <h2 className="text-xl font-semibold text-burrow-text-primary">Recent Requests</h2>
@@ -193,7 +197,7 @@ const ConsumerDashboard = () => {
                       </div>
                       <p className="text-sm text-burrow-text-secondary mt-1">{request.productDescription}</p>
                       <p className="text-xs text-burrow-text-muted mt-1">
-                        Scheduled: {request.scheduledDeliveryDate ? new Date(request.scheduledDeliveryDate).toLocaleDateString() : 'TBC'}
+                        Scheduled: {formatDate(request.scheduledDeliveryDate, 'TBC')}
                         {request.deliveryTimeSlot ? ` at ${request.deliveryTimeSlot}` : ''}
                       </p>
                     </div>

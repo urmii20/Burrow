@@ -5,7 +5,9 @@ import StatusTracker from '../../components/StatusTracker/StatusTracker';
 
 import apiClient from '../../lib/api';
 import { mockRequests as mockRequestsData, warehouses as mockWarehouseData } from '../../data/mockData';
+import { buildReceiptText, downloadBlob, formatAddress, formatDate, scrollToElement, toTitleFromSnake } from '../../lib/utils';
 
+// RequestStatus displays a detailed timeline and metadata for a request.
 const RequestStatus = () => {
   const { id } = useParams();
   const [request, setRequest] = useState(null);
@@ -14,6 +16,7 @@ const RequestStatus = () => {
   const [error, setError] = useState(null);
   const [notFound, setNotFound] = useState(false);
 
+  // fetchData loads request and warehouse info with mock fallbacks.
   useEffect(() => {
     let isMounted = true;
 
@@ -73,6 +76,7 @@ const RequestStatus = () => {
     };
   }, [id]);
 
+  // warehouse memo picks the matching facility from the list.
   const warehouse = useMemo(
     () => warehouses.find((w) => w.id === request?.warehouseId),
     [warehouses, request?.warehouseId]
@@ -119,10 +123,22 @@ const RequestStatus = () => {
   }
 
   const paymentStatus = request.paymentDetails?.paymentStatus ?? 'pending';
+  const paymentStatusLabel = toTitleFromSnake(paymentStatus, paymentStatus);
+
+  const handleDownloadReceipt = () => {
+    const receiptLines = buildReceiptText(request);
+    const blob = new Blob([receiptLines.join('\n')], {
+      type: 'text/plain;charset=utf-8'
+    });
+    downloadBlob(blob, `burrow-receipt-${request.id}.txt`);
+  };
+
+  const handleContactSupport = () => scrollToElement('site-footer');
 
   return (
     <div className="min-h-screen bg-burrow-background py-8 page-fade">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header allows navigation back and quick actions */}
         <div className="mb-8 page-fade">
           <div className="flex items-center space-x-4 mb-4">
             <Link to="/dashboard" className="flex items-center text-burrow-text-secondary hover:text-burrow-primary transition-colors">
@@ -147,39 +163,7 @@ const RequestStatus = () => {
             <div className="flex items-center space-x-3">
               <button
                 type="button"
-                onClick={() => {
-                  const paymentDetails = request.paymentDetails ?? {};
-                  const paymentStatusValue = paymentDetails.paymentStatus ?? 'pending';
-                  const formattedPaymentStatus =
-                    paymentStatusValue.charAt(0).toUpperCase() + paymentStatusValue.slice(1);
-                  const receiptLines = [
-                    `Receipt for Request ${request.id}`,
-                    `Order Number: ${request.orderNumber}`,
-                    `Platform: ${request.platform}`,
-                    `Product: ${request.productDescription}`,
-                    '',
-                    'Payment Details:',
-                    `  Base Handling Fee: ₹${paymentDetails.baseHandlingFee ?? 0}`,
-                    `  Storage Fee: ₹${paymentDetails.storageFee ?? 0}`,
-                    `  Delivery Charge: ₹${paymentDetails.deliveryCharge ?? 0}`,
-                    `  GST: ₹${paymentDetails.gst ?? 0}`,
-                    `  Total Amount: ₹${paymentDetails.totalAmount ?? 0}`,
-                    `  Payment Method: ${paymentDetails.paymentMethod ?? 'Not specified'}`,
-                    `  Payment Status: ${formattedPaymentStatus}`,
-                    '',
-                    `Generated on: ${new Date().toLocaleString()}`
-                  ];
-
-                  const blob = new Blob([receiptLines.join('\n')], {
-                    type: 'text/plain;charset=utf-8'
-                  });
-                  const url = URL.createObjectURL(blob);
-                  const link = document.createElement('a');
-                  link.href = url;
-                  link.download = `burrow-receipt-${request.id}.txt`;
-                  link.click();
-                  URL.revokeObjectURL(url);
-                }}
+                onClick={handleDownloadReceipt}
                 className="btn-secondary btn-md"
               >
                 <Download className="h-4 w-4 mr-2" />
@@ -187,12 +171,7 @@ const RequestStatus = () => {
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  const footer = document.getElementById('site-footer');
-                  if (footer) {
-                    footer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                  }
-                }}
+                onClick={handleContactSupport}
                 className="btn-primary btn-md"
               >
                 <MessageCircle className="h-4 w-4 mr-2" />
@@ -202,12 +181,14 @@ const RequestStatus = () => {
           </div>
         </div>
 
+        {/* Layout splits timeline and metadata */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 fade-stagger">
           <div className="lg:col-span-2 page-fade">
             <StatusTracker currentStatus={request.status} statusHistory={request.statusHistory ?? []} />
           </div>
 
           <div className="space-y-6">
+            {/* Order information card */}
             <div className="card p-6 page-fade">
               <h3 className="text-lg font-semibold text-burrow-text-primary mb-4">Order Information</h3>
 
@@ -230,12 +211,13 @@ const RequestStatus = () => {
                 <div>
                   <span className="text-burrow-text-secondary">Original ETA:</span>
                   <p className="font-medium text-burrow-text-primary">
-                    {request.originalETA ? new Date(request.originalETA).toLocaleDateString() : 'Not available'}
+                    {formatDate(request.originalETA)}
                   </p>
                 </div>
               </div>
             </div>
 
+            {/* Delivery details card */}
             <div className="card p-6 page-fade">
               <h3 className="text-lg font-semibold text-burrow-text-primary mb-4">Delivery Details</h3>
 
@@ -243,9 +225,7 @@ const RequestStatus = () => {
                 <div>
                   <span className="text-burrow-text-secondary">Scheduled Date:</span>
                   <p className="font-medium text-burrow-text-primary">
-                    {request.scheduledDeliveryDate
-                      ? new Date(request.scheduledDeliveryDate).toLocaleDateString()
-                      : 'Not scheduled'}
+                    {formatDate(request.scheduledDeliveryDate, 'Not scheduled')}
                   </p>
                 </div>
 
@@ -257,19 +237,9 @@ const RequestStatus = () => {
                 <div>
                   <span className="text-burrow-text-secondary">Destination:</span>
                   <p className="font-medium text-burrow-text-primary">
-                    {request.destinationAddress ? (
-                      <>
-                        {request.destinationAddress.line1}
-                        {request.destinationAddress.line2 ? `, ${request.destinationAddress.line2}` : ''}
-                        <br />
-                        {[request.destinationAddress.city, request.destinationAddress.state]
-                          .filter(Boolean)
-                          .join(', ')}
-                        {request.destinationAddress.pincode ? ` ${request.destinationAddress.pincode}` : ''}
-                      </>
-                    ) : (
-                      'Not provided'
-                    )}
+                    {request.destinationAddress
+                      ? formatAddress({ ...request.destinationAddress, line2: undefined })
+                      : 'Not provided'}
                   </p>
                 </div>
               </div>
@@ -277,6 +247,7 @@ const RequestStatus = () => {
             </div>
 
             {warehouse && (
+              /* Warehouse card summarises facility info */
               <div className="card p-6 page-fade">
                 <h3 className="text-lg font-semibold text-burrow-text-primary mb-4">Warehouse Details</h3>
 
@@ -335,7 +306,7 @@ const RequestStatus = () => {
                       : 'bg-red-100 text-red-800'
                   }`}
                 >
-                  {paymentStatus.charAt(0).toUpperCase() + paymentStatus.slice(1)}
+                  {paymentStatusLabel}
                 </span>
               </div>
             </div>
