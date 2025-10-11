@@ -6,6 +6,10 @@ import { ecommercePlatforms, timeSlots } from '../../data/mockData';
 import apiClient from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 
+const MAX_RECEIPT_SIZE = 5 * 1024 * 1024;
+const ORDER_NUMBER_PATTERN = /^[A-Za-z0-9-]{6,30}$/;
+const PINCODE_PATTERN = /^[0-9]{6}$/;
+
 const initialFormData = {
   orderNumber: '',
   platform: '',
@@ -62,6 +66,7 @@ const NewRequest = () => {
   const [currentStep, setCurrentStep] = useState(initialStep);
   const [formData, setFormData] = useState(initialFormData);
   const [selectedFile, setSelectedFile] = useState(null);
+  const [selectedFileData, setSelectedFileData] = useState(null);
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState(null);
@@ -114,28 +119,112 @@ const NewRequest = () => {
 
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
-    if (file) {
-      if (file.type !== 'application/pdf') {
-        setErrors((prev) => ({ ...prev, file: 'Only PDF files are allowed' }));
-        return;
-      }
-      if (file.size > 5 * 1024 * 1024) {
-        setErrors((prev) => ({ ...prev, file: 'File size must be less than 5MB' }));
-        return;
-      }
-      setSelectedFile(file);
-      setErrors((prev) => ({ ...prev, file: '' }));
+
+    if (!file) {
+      setSelectedFile(null);
+      setSelectedFileData(null);
+      setErrors((prev) => {
+        if (!prev.file) return prev;
+        const rest = { ...prev };
+        delete rest.file;
+        return rest;
+      });
+      return;
     }
+
+    if (file.type !== 'application/pdf') {
+      setSelectedFile(null);
+      setSelectedFileData(null);
+      setErrors((prev) => ({ ...prev, file: 'Only PDF files are allowed' }));
+      event.target.value = '';
+      return;
+    }
+
+    if (file.size > MAX_RECEIPT_SIZE) {
+      setSelectedFile(null);
+      setSelectedFileData(null);
+      setErrors((prev) => ({ ...prev, file: 'File size must be less than 5MB' }));
+      event.target.value = '';
+      return;
+    }
+
+    setSelectedFile(file);
+    setSelectedFileData(null);
+
+    const reader = new FileReader();
+
+    reader.onload = () => {
+      const result = typeof reader.result === 'string' ? reader.result.trim() : '';
+
+      if (!result) {
+        setSelectedFile(null);
+        setSelectedFileData(null);
+        setErrors((prev) => ({
+          ...prev,
+          file: 'Unable to read receipt file. Please try again.'
+        }));
+        return;
+      }
+
+      setSelectedFile(file);
+      setSelectedFileData(result);
+      setErrors((prev) => {
+        if (!prev.file) return prev;
+        const rest = { ...prev };
+        delete rest.file;
+        return rest;
+      });
+    };
+
+    reader.onerror = () => {
+      setSelectedFile(null);
+      setSelectedFileData(null);
+      setErrors((prev) => ({
+        ...prev,
+        file: 'Unable to read receipt file. Please try again.'
+      }));
+    };
+
+    reader.readAsDataURL(file);
   };
 
   const validateStep1 = () => {
     const newErrors = {};
 
-    if (!formData.orderNumber.trim()) newErrors.orderNumber = 'Order number is required';
-    if (!formData.platform) newErrors.platform = 'Platform selection is required';
-    if (!formData.productDescription.trim()) newErrors.productDescription = 'Product description is required';
-    if (!formData.originalETA) newErrors.originalETA = 'Original ETA is required';
-    if (!formData.warehouse) newErrors.warehouse = 'Warehouse selection is required';
+    const trimmedOrderNumber = formData.orderNumber.trim();
+    const trimmedDescription = formData.productDescription.trim();
+
+    if (!trimmedOrderNumber) {
+      newErrors.orderNumber = 'Order number is required';
+    } else if (!ORDER_NUMBER_PATTERN.test(trimmedOrderNumber)) {
+      newErrors.orderNumber = 'Order number must be 6-30 characters (letters, numbers, hyphen)';
+    }
+
+    if (!formData.platform) {
+      newErrors.platform = 'Platform selection is required';
+    }
+
+    if (!trimmedDescription) {
+      newErrors.productDescription = 'Product description is required';
+    } else if (trimmedDescription.length < 10) {
+      newErrors.productDescription = 'Product description must be at least 10 characters';
+    }
+
+    if (!formData.originalETA) {
+      newErrors.originalETA = 'Original ETA is required';
+    } else if (Number.isNaN(new Date(formData.originalETA).getTime())) {
+      newErrors.originalETA = 'Please provide a valid date';
+    }
+
+    if (!formData.warehouse) {
+      newErrors.warehouse = 'Warehouse selection is required';
+    }
+
+    if (!selectedFile) {
+      newErrors.file = 'Receipt PDF is required';
+    } else if (!selectedFileData) {
+      newErrors.file = 'Receipt PDF is still processing. Please wait a moment.';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -144,13 +233,67 @@ const NewRequest = () => {
   const validateStep2 = () => {
     const newErrors = {};
 
-    if (!formData.scheduledDeliveryDate) newErrors.scheduledDeliveryDate = 'Delivery date is required';
-    if (!formData.deliveryTimeSlot) newErrors.deliveryTimeSlot = 'Time slot is required';
-    if (!formData.destinationAddress.line1.trim()) newErrors['address.line1'] = 'Address line 1 is required';
-    if (!formData.destinationAddress.city.trim()) newErrors['address.city'] = 'City is required';
-    if (!formData.destinationAddress.state.trim()) newErrors['address.state'] = 'State is required';
-    if (!formData.destinationAddress.pincode.trim()) newErrors['address.pincode'] = 'Pincode is required';
-    if (!formData.destinationAddress.contactNumber.trim()) newErrors['address.contactNumber'] = 'Contact number is required';
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const { destinationAddress } = formData;
+    const scheduledDateValue = formData.scheduledDeliveryDate;
+
+    if (!scheduledDateValue) {
+      newErrors.scheduledDeliveryDate = 'Delivery date is required';
+    } else {
+      const parsedDate = new Date(scheduledDateValue);
+      if (Number.isNaN(parsedDate.getTime())) {
+        newErrors.scheduledDeliveryDate = 'Please select a valid delivery date';
+      } else {
+        parsedDate.setHours(0, 0, 0, 0);
+        if (parsedDate < today) {
+          newErrors.scheduledDeliveryDate = 'Delivery date cannot be in the past';
+        }
+      }
+    }
+
+    if (!formData.deliveryTimeSlot) {
+      newErrors.deliveryTimeSlot = 'Time slot is required';
+    } else if (!timeSlots.includes(formData.deliveryTimeSlot)) {
+      newErrors.deliveryTimeSlot = 'Please select a valid time slot';
+    }
+
+    const line1 = destinationAddress.line1.trim();
+    if (!line1) {
+      newErrors['address.line1'] = 'Address line 1 is required';
+    } else if (line1.length < 5) {
+      newErrors['address.line1'] = 'Address line 1 must be at least 5 characters';
+    }
+
+    const city = destinationAddress.city.trim();
+    if (!city) {
+      newErrors['address.city'] = 'City is required';
+    } else if (city.length < 2) {
+      newErrors['address.city'] = 'City must be at least 2 characters';
+    }
+
+    const state = destinationAddress.state.trim();
+    if (!state) {
+      newErrors['address.state'] = 'State is required';
+    } else if (state.length < 2) {
+      newErrors['address.state'] = 'State must be at least 2 characters';
+    }
+
+    const pincode = destinationAddress.pincode.trim();
+    if (!pincode) {
+      newErrors['address.pincode'] = 'Pincode is required';
+    } else if (!PINCODE_PATTERN.test(pincode)) {
+      newErrors['address.pincode'] = 'Enter a valid 6-digit pincode';
+    }
+
+    const contactNumber = destinationAddress.contactNumber.trim();
+    const digitsOnly = contactNumber.replace(/\D/g, '');
+    if (!contactNumber) {
+      newErrors['address.contactNumber'] = 'Contact number is required';
+    } else if (digitsOnly.length < 10 || digitsOnly.length > 15) {
+      newErrors['address.contactNumber'] = 'Enter a valid contact number (10-15 digits)';
+    }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -184,6 +327,13 @@ const NewRequest = () => {
   const handleSubmit = async () => {
     if (isSubmitting) return;
 
+    if (!selectedFile || !selectedFileData) {
+      setErrors((prev) => ({ ...prev, file: 'Receipt PDF is required' }));
+      setSubmitError('Please upload your purchase receipt before submitting.');
+      setCurrentStep(1);
+      return;
+    }
+
     const isScheduleValid = validateStep2();
     if (!isScheduleValid) {
       setCurrentStep(2);
@@ -201,6 +351,10 @@ const NewRequest = () => {
       return;
     }
 
+    const cleanedContactNumber = formData.destinationAddress.contactNumber
+      .replace(/\D/g, '')
+      .trim();
+
     const normalisedAddress = {
       line1: formData.destinationAddress.line1.trim(),
       line2: formData.destinationAddress.line2.trim(),
@@ -208,7 +362,15 @@ const NewRequest = () => {
       state: formData.destinationAddress.state.trim(),
       pincode: formData.destinationAddress.pincode.trim(),
       landmark: formData.destinationAddress.landmark.trim(),
-      contactNumber: formData.destinationAddress.contactNumber.trim()
+      contactNumber: cleanedContactNumber
+    };
+
+    const receiptMetadata = {
+      fileName: selectedFile.name,
+      fileSize: selectedFile.size,
+      mimeType: selectedFile.type,
+      uploadedAt: new Date().toISOString(),
+      data: selectedFileData
     };
 
     const payload = {
@@ -221,6 +383,7 @@ const NewRequest = () => {
       scheduledDeliveryDate: formData.scheduledDeliveryDate,
       deliveryTimeSlot: formData.deliveryTimeSlot,
       destinationAddress: normalisedAddress,
+      receipt: receiptMetadata,
       paymentDetails: {
         baseHandlingFee: charges.baseHandlingFee,
         storageFee: charges.storageFee,

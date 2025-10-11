@@ -24,6 +24,9 @@ const STATUS_FLOW = [
   'cancelled'
 ];
 
+const MAX_RECEIPT_SIZE = 5 * 1024 * 1024;
+const PDF_DATA_URL_PREFIX = 'data:application/pdf;base64,';
+
 function buildStatusHistoryEntry(status, note) {
   return {
     status,
@@ -39,6 +42,94 @@ function parseDate(value, fieldName) {
   }
 
   return date;
+}
+
+function sanitiseReceipt(receipt) {
+  if (!receipt || typeof receipt !== 'object') {
+    throw new Error('receipt is required.');
+  }
+
+  const { fileName, fileSize, mimeType, data } = receipt;
+
+  if (!fileName || !fileName.trim()) {
+    throw new Error('receipt.fileName is required.');
+  }
+
+  if (!mimeType || !mimeType.trim()) {
+    throw new Error('receipt.mimeType is required.');
+  }
+
+  if (mimeType !== 'application/pdf') {
+    throw new Error('receipt must be a PDF document.');
+  }
+
+  if (fileSize === undefined || fileSize === null) {
+    throw new Error('receipt.fileSize is required.');
+  }
+
+  const numericSize = Number(fileSize);
+
+  if (!Number.isFinite(numericSize) || numericSize <= 0) {
+    throw new Error('receipt.fileSize must be a positive number.');
+  }
+
+  if (numericSize > MAX_RECEIPT_SIZE) {
+    throw new Error('receipt exceeds the 5MB size limit.');
+  }
+
+  if (data === undefined || data === null) {
+    throw new Error('receipt.data is required.');
+  }
+
+  if (typeof data !== 'string') {
+    throw new Error('receipt.data must be a base64-encoded data URL.');
+  }
+
+  const trimmedData = data.trim();
+
+  if (!trimmedData) {
+    throw new Error('receipt.data must be a base64-encoded data URL.');
+  }
+
+  const commaIndex = trimmedData.indexOf(',');
+
+  if (commaIndex === -1) {
+    throw new Error('receipt.data must contain a valid base64 payload.');
+  }
+
+  const prefix = trimmedData.slice(0, commaIndex).toLowerCase();
+  const base64Payload = trimmedData.slice(commaIndex + 1).replace(/\s+/g, '');
+
+  if (!prefix.startsWith('data:application/pdf;base64')) {
+    throw new Error('receipt.data must be a base64-encoded PDF document.');
+  }
+
+  if (!base64Payload) {
+    throw new Error('receipt.data must contain a valid base64 payload.');
+  }
+
+  let buffer;
+  try {
+    buffer = Buffer.from(base64Payload, 'base64');
+  } catch (error) {
+    const invalidBase64 = new Error('receipt.data must contain valid base64-encoded content.');
+    invalidBase64.cause = error;
+    throw invalidBase64;
+  }
+
+  if (!buffer?.byteLength) {
+    throw new Error('receipt.data must contain valid base64-encoded content.');
+  }
+
+  const normalisedDataUrl = `${PDF_DATA_URL_PREFIX}${buffer.toString('base64')}`;
+
+  return {
+    fileName: fileName.trim(),
+    fileSize: Math.round(numericSize),
+    mimeType: mimeType.trim(),
+    uploadedAt: new Date(),
+    data: normalisedDataUrl
+  };
 }
 
 function ensureDatabase(req, res) {
@@ -155,6 +246,7 @@ router.post('/', async (req, res) => {
     scheduledDeliveryDate,
     deliveryTimeSlot,
     destinationAddress,
+    receipt,
     paymentDetails = {}
   } = req.body ?? {};
 
@@ -206,6 +298,13 @@ router.post('/', async (req, res) => {
     }
   }
 
+  let sanitisedReceipt;
+  try {
+    sanitisedReceipt = sanitiseReceipt(receipt);
+  } catch (error) {
+    return res.status(400).json({ message: error.message });
+  }
+
   const now = new Date();
 
   const request = {
@@ -229,6 +328,7 @@ router.post('/', async (req, res) => {
       paymentStatus: paymentDetails.paymentStatus ?? 'pending',
       paymentMethod: paymentDetails.paymentMethod ?? 'card'
     },
+    receipt: sanitisedReceipt,
     createdAt: now,
     updatedAt: now
   };
