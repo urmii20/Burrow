@@ -83,13 +83,93 @@ async function request(path, options = {}) {
   return payload?.data ?? payload;
 }
 
+function extractFileNameFromHeaders(contentDisposition = '') {
+  if (typeof contentDisposition !== 'string' || !contentDisposition) {
+    return '';
+  }
+
+  const fileNameMatch = contentDisposition.match(/filename\*=UTF-8''([^;]+)/i);
+  if (fileNameMatch?.[1]) {
+    try {
+      return decodeURIComponent(fileNameMatch[1]);
+    } catch {
+      return fileNameMatch[1];
+    }
+  }
+
+  const quotedFileNameMatch = contentDisposition.match(/filename="?([^";]+)"?/i);
+  if (quotedFileNameMatch?.[1]) {
+    return quotedFileNameMatch[1];
+  }
+
+  return '';
+}
+
+async function requestBinary(path, options = {}) {
+  const url = buildUrl(path);
+  const headers = {
+    ...(options.headers ?? {})
+  };
+
+  if (!headers.Accept && !headers.accept) {
+    headers.Accept = '*/*';
+  }
+
+  if (authToken && !headers.Authorization) {
+    headers.Authorization = authToken.startsWith('Bearer ')
+      ? authToken
+      : `Bearer ${authToken}`;
+  }
+
+  const fetchOptions = {
+    method: options.method ?? 'GET',
+    ...options,
+    headers
+  };
+
+  const response = await fetch(url, fetchOptions);
+
+  if (!response.ok) {
+    const contentType = response.headers.get('content-type') ?? '';
+    let message = response.statusText || 'Failed to download file.';
+
+    try {
+      if (contentType.includes('application/json')) {
+        const errorPayload = await response.json();
+        message = errorPayload?.message || message;
+      } else {
+        const text = await response.text();
+        message = text || message;
+      }
+    } catch {
+      // Swallow parsing errors and use the default message.
+    }
+
+    const error = new Error(message);
+    error.status = response.status;
+    throw error;
+  }
+
+  const blob = await response.blob();
+  const contentDisposition = response.headers.get('content-disposition') ?? '';
+  const inferredFileName = extractFileNameFromHeaders(contentDisposition);
+  const mimeType = response.headers.get('content-type') || blob.type || 'application/octet-stream';
+
+  return {
+    blob,
+    fileName: inferredFileName,
+    mimeType
+  };
+}
+
 const apiClient = {
   request,
   get: (path, options = {}) => request(path, { ...options, method: 'GET' }),
   post: (path, body, options = {}) => request(path, { ...options, method: 'POST', body }),
   put: (path, body, options = {}) => request(path, { ...options, method: 'PUT', body }),
   patch: (path, body, options = {}) => request(path, { ...options, method: 'PATCH', body }),
-  delete: (path, options = {}) => request(path, { ...options, method: 'DELETE' })
+  delete: (path, options = {}) => request(path, { ...options, method: 'DELETE' }),
+  download: (path, options = {}) => requestBinary(path, options)
 };
 
 export default apiClient;
