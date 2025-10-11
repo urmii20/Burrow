@@ -4,6 +4,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import apiClient from '../../lib/api';
 import { mockRequests } from '../../data/mockData';
 
+// TrackRequest helps someone find an existing delivery with just an order number.
 const TrackRequest = () => {
   const navigate = useNavigate();
   const [orderNumber, setOrderNumber] = useState('');
@@ -12,6 +13,7 @@ const TrackRequest = () => {
   const [results, setResults] = useState([]);
   const [hasSearched, setHasSearched] = useState(false);
 
+  // Turns machine style status codes into friendly words.
   const formatStatus = (status) => {
     if (!status) {
       return 'Unknown';
@@ -23,6 +25,7 @@ const TrackRequest = () => {
       .join(' ');
   };
 
+  // Builds a readable destination string for display cards.
   const formatAddress = (address) => {
     if (!address) {
       return 'Destination address not available';
@@ -37,6 +40,7 @@ const TrackRequest = () => {
     return parts.join(', ');
   };
 
+  // Finds a request within a list by matching order number or request id.
   const findMatchingRequest = (collection, value) => {
     if (!Array.isArray(collection) || collection.length === 0 || !value) {
       return null;
@@ -50,6 +54,7 @@ const TrackRequest = () => {
     });
   };
 
+  // Handles the search form submission and routes to the matching request.
   const handleSubmit = async (event) => {
     event.preventDefault();
 
@@ -102,6 +107,7 @@ const TrackRequest = () => {
     }
   };
 
+  // Formats one search result card with headline details.
   const renderResult = (request) => {
     return (
       <div key={request.id} className="bg-burrow-surface rounded-2xl shadow-sm border border-burrow-border p-6">
@@ -154,12 +160,14 @@ const TrackRequest = () => {
   return (
     <div className="bg-burrow-background min-h-full py-12 page-fade">
       <div className="layout-container-narrow">
+        {/* Intro text explains how to use the tracking page. */}
         <div className="card-panel page-fade">
           <h1 className="text-2xl font-bold text-burrow-text-primary mb-2">Track your delivery request</h1>
           <p className="text-sm text-burrow-text-secondary mb-6">
             Enter your order number to view the current status, scheduled date, and destination details of your request.
           </p>
 
+          {/* Search form collects the order number and starts the lookup. */}
           <form onSubmit={handleSubmit} className="space-y-4 fade-stagger">
             <div>
               <label htmlFor="orderNumber" className="form-label">
@@ -191,6 +199,7 @@ const TrackRequest = () => {
           </form>
 
           {error && (
+            {/* Error banner explains why the search could not complete. */}
             <div className="alert-error mt-6">
               <AlertCircle className="h-5 w-5 mr-2" />
               <span>{error}</span>
@@ -198,6 +207,7 @@ const TrackRequest = () => {
           )}
 
           {hasSearched && !error && (
+            {/* Results area shows matching requests or a friendly empty state. */}
             <div className="mt-8 space-y-4 fade-stagger">
               {results.length > 0 ? (
                 results.map((request) => renderResult(request))

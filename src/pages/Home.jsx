@@ -5,10 +5,12 @@ import WarehouseMap from '../components/Map/WarehouseMap';
 import { warehouses } from '../data/mockData';
 import squirrelImage from '../../assets/squirrel.png';
 
+// Home shares what Burrow does and nudges visitors toward creating an account.
 const Home = () => {
   const navigate = useNavigate();
   const [selectedWarehouse, setSelectedWarehouse] = useState(null);
 
+  // Moves the visitor to sign-up and remembers the warehouse they were viewing.
   const handleGetStarted = () => {
     if (selectedWarehouse) {
       localStorage.setItem('selectedWarehouse', JSON.stringify(selectedWarehouse));
@@ -16,6 +18,7 @@ const Home = () => {
     navigate('/register');
   };
 
+  // Lists the everyday advantages customers get by using Burrow.
   const benefits = [
     {
       icon: Calendar,
@@ -39,6 +42,7 @@ const Home = () => {
     }
   ];
 
+  // Explains the three-step delivery flow in simple terms.
   const howItWorks = [
     {
       step: '1',
@@ -59,6 +63,7 @@ const Home = () => {
 
   return (
     <div className="min-h-screen bg-burrow-primary page-fade">
+        {/* Hero section greets visitors and invites them to start using Burrow. */}
         <section className="section-hero">
             <div className="layout-container">
               <div className="flex flex-col-reverse items-center gap-10 md:flex-row md:items-center">
@@ -88,6 +93,7 @@ const Home = () => {
 
 
 
+      {/* Benefits section reassures people with quick reasons to trust Burrow. */}
       <section className="section-muted">
         <div className="layout-container">
           <div className="section-heading">
@@ -141,6 +147,7 @@ const Home = () => {
         </div>
       </section>
 
+      {/* How it works section gives a plain-language summary of the process. */}
       <section className="section-muted">
         <div className="layout-container">
           <div className="section-heading">
@@ -162,6 +169,7 @@ const Home = () => {
         </div>
       </section>
 
+      {/* Final call-to-action section prompts visitors to sign up immediately. */}
       <section className="section-primary">
         <div className="layout-container text-center">
           <h2 className="text-3xl font-bold text-burrow-text-inverse mb-4">

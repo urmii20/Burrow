@@ -3,6 +3,7 @@ import { Search, Filter, Eye, CheckCircle, XCircle, Clock } from 'lucide-react';
 
 import apiClient from '../../lib/api';
 
+// Checks whether the request includes a receipt file we can download.
 const hasReceiptFile = (receipt) => {
   if (!receipt || typeof receipt !== 'object') {
     return false;
@@ -16,6 +17,7 @@ const hasReceiptFile = (receipt) => {
   return Number.isFinite(numericFileSize) && numericFileSize > 0;
 };
 
+// Turns raw file sizes into easy-to-read numbers for the team.
 const formatFileSize = (bytes) => {
   const numeric = Number(bytes);
 
@@ -37,6 +39,7 @@ const formatFileSize = (bytes) => {
   return `${mb.toFixed(2)} MB`;
 };
 
+// OperatorDashboard equips staff with tools to review and update every request.
 const OperatorDashboard = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState('all');
@@ -52,6 +55,7 @@ const OperatorDashboard = () => {
   const [receiptDownloadError, setReceiptDownloadError] = useState(null);
   const isMountedRef = useRef(true);
 
+  // Retrieves every delivery request so operators see the full queue.
   const fetchRequests = useCallback(async () => {
     setIsLoading(true);
     setError(null);
@@ -73,6 +77,7 @@ const OperatorDashboard = () => {
     }
   }, []);
 
+  // Loads the requests when the dashboard opens and cleans up on exit.
   useEffect(() => {
     isMountedRef.current = true;
     fetchRequests();
@@ -82,6 +87,7 @@ const OperatorDashboard = () => {
     };
   }, [fetchRequests]);
 
+  // Applies text and status filters to help operators focus on specific items.
   const filteredRequests = requests.filter(request => {
     const lowerSearch = searchTerm.toLowerCase();
     const matchesSearch =
@@ -92,6 +98,7 @@ const OperatorDashboard = () => {
     return matchesSearch && matchesStatus;
   });
 
+  // Counts requests by state so the team understands workload at a glance.
   const stats = {
     total: requests.length,
     pending: requests.filter(req => req.status === 'approval_pending').length,
@@ -99,6 +106,7 @@ const OperatorDashboard = () => {
     delivered: requests.filter(req => req.status === 'delivered').length
   };
 
+  // Formats status codes into neat text for display components.
   const formatStatusLabel = (status) =>
     status
       ?.split('_')
@@ -106,6 +114,7 @@ const OperatorDashboard = () => {
       .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
       .join(' ') || '';
 
+  // Chooses badge colours and wording to match each request state.
   const getStatusBadge = (status) => {
     const neutralBadge = 'bg-burrow-primary/10 text-burrow-primary';
     const config = {
@@ -131,6 +140,7 @@ const OperatorDashboard = () => {
     );
   };
 
+  // Updates a request’s status and keeps the list in sync with the server.
   const handleStatusUpdate = async (requestId, newStatus, note) => {
     setUpdateError(null);
     setUpdatingRequestId(requestId);
@@ -166,10 +176,12 @@ const OperatorDashboard = () => {
     }
   };
 
+  // Remembers which status is selected in the modal.
   const handleModalStatusChange = (newStatus) => {
     setModalStatus(newStatus);
   };
 
+  // Saves modal changes, refreshes the UI, and keeps status accurate.
   const handleModalSubmit = async () => {
     if (!selectedRequest) {
       return;
@@ -189,10 +201,12 @@ const OperatorDashboard = () => {
     }
   };
 
+  // Quickly moves a request forward without opening the detail modal.
   const handleQuickStatusChange = (requestId, newStatus) => {
     handleStatusUpdate(requestId, newStatus).catch(() => {});
   };
 
+  // Opens the detail modal and resets temporary fields.
   const handleOpenRequest = (request) => {
     setSelectedRequest(request);
     setModalStatus(request.status);
@@ -202,6 +216,7 @@ const OperatorDashboard = () => {
     setIsDownloadingReceipt(false);
   };
 
+  // Downloads the attached receipt so operators can verify purchases.
   const handleReceiptDownload = useCallback(async () => {
     if (!selectedRequest?.id || !hasReceiptFile(selectedRequest.receipt)) {
       return;
@@ -241,6 +256,7 @@ const OperatorDashboard = () => {
 
   return (
     <div className="min-h-screen bg-burrow-background page-fade">
+      {/* Top bar welcomes operators and frames the workspace. */}
       <div className="bg-burrow-surface shadow-sm border-b border-burrow-border page-fade">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
@@ -253,6 +269,7 @@ const OperatorDashboard = () => {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {/* Stat cards give the team a snapshot of workload and progress. */}
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8 fade-stagger">
           {[
             { label: 'Total Requests', value: stats.total, icon: Clock },
@@ -274,6 +291,7 @@ const OperatorDashboard = () => {
           ))}
         </div>
 
+        {/* Search and filters help operators find the right request quickly. */}
         <div className="card p-6 mb-8 page-fade">
           <div className="flex flex-col sm:flex-row gap-4">
             <div className="flex-1">
@@ -314,6 +332,7 @@ const OperatorDashboard = () => {
           </div>
         </div>
 
+        {/* Table lists every request with status, schedule, and quick actions. */}
         <div className="card overflow-hidden">
           <div className="px-6 py-4 border-b border-burrow-border/80">
             <h2 className="text-lg font-semibold text-burrow-text-primary">Delivery Requests</h2>
@@ -434,6 +453,7 @@ const OperatorDashboard = () => {
         </div>
 
         {selectedRequest && (
+          {/* Modal reveals full request details and allows updates. */}
           <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
             <div className="card max-w-2xl w-full max-h-screen overflow-y-auto shadow-xl">
               <div className="px-6 py-4 border-b border-burrow-border/80 flex justify-between items-center">
@@ -453,6 +473,7 @@ const OperatorDashboard = () => {
               </div>
 
               <div className="px-6 py-4 space-y-6">
+                {/* Order information section captures the basics of the purchase. */}
                 <div>
                   <h4 className="font-medium text-burrow-text-primary mb-2">Order Information</h4>
                   <div className="bg-burrow-background rounded-xl p-4 space-y-2">
@@ -471,6 +492,7 @@ const OperatorDashboard = () => {
                   </div>
                 </div>
 
+                {/* Receipt block shows file details and download controls. */}
                 <div>
                   <h4 className="font-medium text-burrow-text-primary mb-2">Receipt</h4>
                   <div className="bg-burrow-background rounded-xl p-4 space-y-3">
@@ -524,6 +546,7 @@ const OperatorDashboard = () => {
                   </div>
                 </div>
 
+                {/* Delivery block lists when and where the parcel is headed. */}
                 <div>
                   <h4 className="font-medium text-burrow-text-primary mb-2">Delivery Information</h4>
                   <div className="bg-burrow-background rounded-xl p-4 space-y-2">
@@ -550,6 +573,7 @@ const OperatorDashboard = () => {
                   </div>
                 </div>
 
+                {/* Status dropdown allows operators to move the request forward. */}
                 <div>
                   <h4 className="font-medium text-burrow-text-primary mb-2">Update Status</h4>
                   <select
@@ -570,6 +594,7 @@ const OperatorDashboard = () => {
                   </select>
                 </div>
 
+                {/* Notes area captures any internal comments about the request. */}
                 <div>
                   <h4 className="font-medium text-burrow-text-primary mb-2">Add Notes</h4>
                   <textarea
@@ -583,6 +608,7 @@ const OperatorDashboard = () => {
               </div>
 
               <div className="px-6 py-4 border-t border-burrow-border/80 flex justify-end space-x-3">
+                {/* Footer buttons let staff close or confirm their updates. */}
                 <button
                   onClick={() => {
                     setSelectedRequest(null);

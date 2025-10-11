@@ -6,10 +6,14 @@ import { ecommercePlatforms, timeSlots } from '../../data/mockData';
 import apiClient from '../../lib/api';
 import { useAuth } from '../../context/AuthContext';
 
+// Limits the receipt upload size so files stay quick to process.
 const MAX_RECEIPT_SIZE = 5 * 1024 * 1024;
+// Keeps order numbers within a tidy, easy-to-read format.
 const ORDER_NUMBER_PATTERN = /^[A-Za-z0-9-]{6,30}$/;
+// Checks that pincodes contain exactly six digits.
 const PINCODE_PATTERN = /^[0-9]{6}$/;
 
+// Sets up empty answers so the form starts clean every time.
 const initialFormData = {
   orderNumber: '',
   platform: '',
@@ -29,7 +33,7 @@ const initialFormData = {
   }
 };
 
-// Calculates static fee breakdown for the delivery request.
+// Calculates a simple price breakdown so people know the fees upfront.
 const calculateCharges = () => {
   const baseHandlingFee = 49;
   const storageFee = 20;
@@ -48,13 +52,13 @@ const calculateCharges = () => {
   };
 };
 
-// Manages the multi-step new delivery request creation flow.
+// NewRequest walks someone through booking a delivery in three easy steps.
 const NewRequest = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const { state } = useAuth();
 
-  // derive initial step from query ?step=schedule|payment|1..3
+  // Figures out which step to show first based on the link someone used.
   const initialStep = useMemo(() => {
     const stepParam = searchParams.get('step');
     if (stepParam === 'schedule') return 2;
@@ -75,11 +79,12 @@ const NewRequest = () => {
   const [submitError, setSubmitError] = useState(null);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState('card');
 
+  // Keeps the visible step in sync if someone opens the page with a step link.
   useEffect(() => {
     setCurrentStep(initialStep);
   }, [initialStep]);
 
-  // Normalises field updates from the form and clears stale errors.
+  // Updates the form answers as people type and clears any old warnings.
   const handleInputChange = (event) => {
     const { name, value } = event.target;
 
@@ -109,7 +114,7 @@ const NewRequest = () => {
     }
   };
 
-  // Removes payment method validation errors when selections change.
+  // Clears payment warnings when a different payment option is chosen.
   const clearPaymentError = () => {
     setErrors((prev) => {
       if (!prev.paymentMethod) return prev;
@@ -119,13 +124,13 @@ const NewRequest = () => {
     });
   };
 
-  // Updates the currently selected payment method option.
+  // Remembers which payment option the person picked.
   const handlePaymentMethodChange = (method) => {
     setSelectedPaymentMethod(method);
     clearPaymentError();
   };
 
-  // Validates and reads the uploaded invoice receipt file.
+  // Checks the uploaded receipt and saves it for later.
   const handleFileChange = (event) => {
     const file = event.target.files?.[0];
 
@@ -210,7 +215,7 @@ const NewRequest = () => {
     reader.readAsDataURL(file);
   };
 
-  // Ensures order details inputs are complete and valid.
+  // Makes sure the order details in step one are filled in correctly.
   const validateStep1 = () => {
     const newErrors = {};
 
@@ -259,7 +264,7 @@ const NewRequest = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Validates delivery scheduling details and destination address.
+  // Makes sure the delivery schedule and address in step two look right.
   const validateStep2 = () => {
     const newErrors = {};
 
@@ -329,7 +334,7 @@ const NewRequest = () => {
     return Object.keys(newErrors).length === 0;
   };
 
-  // Advances the wizard when the current step passes validation.
+  // Moves to the next step only after the current answers look good.
   const handleNext = () => {
     if (currentStep === 1 && validateStep1()) {
       setSubmitError(null);
@@ -340,8 +345,10 @@ const NewRequest = () => {
     }
   };
 
+  // Works out the charges once so the totals stay consistent.
   const charges = useMemo(() => calculateCharges(), []);
 
+  // Confirms the payment choice in the final step.
   const validateStep3 = () => {
     if (!selectedPaymentMethod) {
       setErrors((prev) => ({
@@ -355,7 +362,7 @@ const NewRequest = () => {
     return true;
   };
 
-  // Submits the composed request payload to the API backend.
+  // Sends the full request to our server once everything is ready.
   const handleSubmit = async () => {
     if (isSubmitting) return;
 
@@ -457,6 +464,7 @@ const NewRequest = () => {
     }
   };
 
+  // Lists the available ways someone can pay.
   const paymentOptions = [
     { id: 'card', label: 'Credit/Debit Card' },
     { id: 'upi', label: 'UPI' },
@@ -467,6 +475,7 @@ const NewRequest = () => {
   return (
     <div className="min-h-screen bg-burrow-background py-8 page-fade">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Progress tracker shows which booking step the person is on. */}
         <div className="mb-8 page-fade">
           <div className="flex items-center justify-between fade-stagger">
             {[1, 2, 3].map((step) => (
@@ -499,12 +508,14 @@ const NewRequest = () => {
 
         {currentStep === 1 && (
           <div className="card p-6 page-fade">
+            {/* Step one gathers order basics and receipt proof. */}
             <div className="flex items-center mb-6">
               <Upload className="h-6 w-6 text-burrow-primary mr-2" />
               <h2 className="text-2xl font-bold text-burrow-text-primary">Order Details</h2>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 fade-stagger">
+              {/* Left column collects purchase details and the receipt upload. */}
               <div className="space-y-6 fade-stagger">
                 {/* Order number */}
                 <div>
@@ -607,7 +618,7 @@ const NewRequest = () => {
                 </div>
               </div>
 
-              {/* Map */}
+              {/* Map picker helps people choose their nearest warehouse. */}
               <div className="page-fade">
                 <h3 className="text-lg font-medium text-burrow-text-primary mb-4">Select Warehouse</h3>
                 <WarehouseMap
@@ -631,13 +642,14 @@ const NewRequest = () => {
 
         {currentStep === 2 && (
           <div className="card p-6 page-fade">
+            {/* Step two lets the customer choose a delivery date and time. */}
             <div className="flex items-center mb-6">
               <Calendar className="h-6 w-6 text-burrow-primary mr-2" />
               <h2 className="text-2xl font-bold text-burrow-text-primary">Schedule Delivery</h2>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 fade-stagger">
-              {/* Left */}
+              {/* Left column sets the delivery day and preferred window. */}
               <div className="space-y-6 fade-stagger">
                 <div>
                   <label className="block text-sm font-medium text-burrow-text-secondary mb-2">
@@ -685,7 +697,7 @@ const NewRequest = () => {
                 </div>
               </div>
 
-              {/* Right */}
+              {/* Right column double-checks the address details before booking. */}
               <div className="space-y-6 fade-stagger">
                 <h3 className="text-lg font-medium text-burrow-text-primary">Destination Address</h3>
 
@@ -800,12 +812,14 @@ const NewRequest = () => {
 
         {currentStep === 3 && (
           <div className="card p-6 page-fade">
+            {/* Step three reviews the costs and confirms how payment is made. */}
             <div className="flex items-center mb-6">
               <CreditCard className="h-6 w-6 text-burrow-primary mr-2" />
               <h2 className="text-2xl font-bold text-burrow-text-primary">Payment Details</h2>
             </div>
 
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 fade-stagger">
+              {/* Left column summarises every fee in a friendly list. */}
               <div className="page-fade">
                 <h3 className="text-lg font-medium text-burrow-text-primary mb-4">Service Charges</h3>
                 <div className="bg-burrow-background rounded-xl p-4 space-y-3 fade-stagger">
@@ -840,6 +854,7 @@ const NewRequest = () => {
                 </div>
               </div>
 
+              {/* Right column lets people pick how they want to pay. */}
               <div className="space-y-4 fade-stagger">
                 <h3 className="text-lg font-medium text-burrow-text-primary mb-4">Payment Method</h3>
                 {paymentOptions.map((option) => (

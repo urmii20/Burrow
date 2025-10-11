@@ -5,6 +5,7 @@ import { useAuth } from '../../context/AuthContext';
 
 import apiClient from '../../lib/api';
 
+// ConsumerDashboard gives everyday customers a friendly overview of their deliveries.
 const ConsumerDashboard = () => {
   const { state } = useAuth();
 
@@ -12,6 +13,7 @@ const ConsumerDashboard = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
 
+  // Loads the customer’s delivery requests and keeps the page updated.
   useEffect(() => {
     let isMounted = true;
 
@@ -49,11 +51,13 @@ const ConsumerDashboard = () => {
     };
   }, [state.user?.id]);
 
+  // Filters the full list to only the signed-in customer’s requests.
   const userRequests = useMemo(
     () => requests.filter(req => req.userId === state.user?.id),
     [requests, state.user?.id]
   );
 
+  // Counts active, pending, and completed deliveries for quick stats.
   const stats = useMemo(
     () => ({
       active: userRequests.filter(req => !['delivered', 'rejected'].includes(req.status)).length,
@@ -63,6 +67,7 @@ const ConsumerDashboard = () => {
     [userRequests]
   );
 
+  // Chooses a colourful badge label that matches each delivery status.
   const getStatusBadge = (status) => {
     switch (status) {
       case 'submitted':
@@ -122,11 +127,13 @@ const ConsumerDashboard = () => {
   return (
     <div className="min-h-screen bg-burrow-background py-8 page-fade">
       <div className="layout-container">
+        {/* Welcome banner greets the customer and sets the tone. */}
         <div className="mb-8 page-fade">
           <h1 className="text-3xl font-bold text-burrow-text-primary">Welcome back, {state.user?.name}!</h1>
           <p className="text-burrow-text-secondary mt-1">Manage your deliveries and schedule new requests</p>
         </div>
 
+        {/* Stats cards summarise how many deliveries are in each stage. */}
         <div className="stats-grid mb-8 fade-stagger">
           {[
             { label: 'Active Requests', value: stats.active, icon: Clock },
@@ -147,6 +154,7 @@ const ConsumerDashboard = () => {
           ))}
         </div>
 
+        {/* Quick actions offer simple buttons for the most common tasks. */}
         <div className="card-padded mb-8 page-fade">
           <h2 className="text-xl font-semibold text-burrow-text-primary mb-4">Quick Actions</h2>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -168,6 +176,7 @@ const ConsumerDashboard = () => {
           </div>
         </div>
 
+        {/* Recent requests table keeps the latest deliveries in view. */}
         <div className="card page-fade">
           <div className="px-6 py-4 border-b border-burrow-border/80">
             <h2 className="text-xl font-semibold text-burrow-text-primary">Recent Requests</h2>
