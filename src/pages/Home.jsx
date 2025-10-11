@@ -74,8 +74,6 @@ const Home = () => {
                     <ArrowRight className="h-5 w-5" />
                   </button>
                 </div>
-
-                {/* Squirrel */}
                 <img
                   src={squirrelImage}
                   alt="Friendly delivery squirrel"
