@@ -6,6 +6,7 @@ import StatusTracker from '../../components/StatusTracker/StatusTracker';
 import apiClient from '../../lib/api';
 import { mockRequests as mockRequestsData, warehouses as mockWarehouseData } from '../../data/mockData';
 
+// RequestStatus shows the full story of one delivery request in plain language.
 const RequestStatus = () => {
   const { id } = useParams();
   const [request, setRequest] = useState(null);
@@ -14,6 +15,7 @@ const RequestStatus = () => {
   const [error, setError] = useState(null);
   const [notFound, setNotFound] = useState(false);
 
+  // Fetches live data and falls back to sample information if needed.
   useEffect(() => {
     let isMounted = true;
 
@@ -73,12 +75,14 @@ const RequestStatus = () => {
     };
   }, [id]);
 
+  // Looks up the warehouse linked to this request for quick reference.
   const warehouse = useMemo(
     () => warehouses.find((w) => w.id === request?.warehouseId),
     [warehouses, request?.warehouseId]
   );
 
   if (isLoading) {
+    // Friendly loading state keeps people informed while data arrives.
     return (
       <div className="min-h-screen bg-burrow-background flex items-center justify-center page-fade">
         <p className="text-burrow-text-secondary">Loading request details...</p>
@@ -87,6 +91,7 @@ const RequestStatus = () => {
   }
 
   if (notFound) {
+    // Clear message explains when no matching request exists.
     return (
       <div className="min-h-screen bg-burrow-background flex items-center justify-center page-fade">
         <div className="text-center space-y-3">
@@ -101,6 +106,7 @@ const RequestStatus = () => {
   }
 
   if (error) {
+    // Error screen gives a simple explanation and a safe way back.
     return (
       <div className="min-h-screen bg-burrow-background flex items-center justify-center page-fade">
         <div className="text-center space-y-3">
@@ -118,11 +124,13 @@ const RequestStatus = () => {
     return null;
   }
 
+  // Remembers whether the payment for this request is complete.
   const paymentStatus = request.paymentDetails?.paymentStatus ?? 'pending';
 
   return (
     <div className="min-h-screen bg-burrow-background py-8 page-fade">
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+        {/* Header area gives quick navigation and the request title. */}
         <div className="mb-8 page-fade">
           <div className="flex items-center space-x-4 mb-4">
             <Link to="/dashboard" className="flex items-center text-burrow-text-secondary hover:text-burrow-primary transition-colors">
@@ -145,6 +153,7 @@ const RequestStatus = () => {
             </div>
 
             <div className="flex items-center space-x-3">
+              {/* Download button quickly creates a simple receipt text file. */}
               <button
                 type="button"
                 onClick={() => {
@@ -185,6 +194,7 @@ const RequestStatus = () => {
                 <Download className="h-4 w-4 mr-2" />
                 Download Receipt
               </button>
+              {/* Support button scrolls down to the help section for assistance. */}
               <button
                 type="button"
                 onClick={() => {
@@ -203,11 +213,13 @@ const RequestStatus = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 fade-stagger">
+          {/* Timeline panel shows every status update at a glance. */}
           <div className="lg:col-span-2 page-fade">
             <StatusTracker currentStatus={request.status} statusHistory={request.statusHistory ?? []} />
           </div>
 
           <div className="space-y-6">
+            {/* Order summary lists the basic purchase details. */}
             <div className="card p-6 page-fade">
               <h3 className="text-lg font-semibold text-burrow-text-primary mb-4">Order Information</h3>
 
@@ -236,6 +248,7 @@ const RequestStatus = () => {
               </div>
             </div>
 
+            {/* Delivery summary explains when and where the package is heading. */}
             <div className="card p-6 page-fade">
               <h3 className="text-lg font-semibold text-burrow-text-primary mb-4">Delivery Details</h3>
 
@@ -276,6 +289,7 @@ const RequestStatus = () => {
 
             </div>
 
+            {/* Warehouse info highlights which facility is handling the parcel. */}
             {warehouse && (
               <div className="card p-6 page-fade">
                 <h3 className="text-lg font-semibold text-burrow-text-primary mb-4">Warehouse Details</h3>
@@ -299,6 +313,7 @@ const RequestStatus = () => {
               </div>
             )}
 
+            {/* Payment summary breaks down every charge in one place. */}
             <div className="card p-6 page-fade">
               <h3 className="text-lg font-semibold text-burrow-text-primary mb-4">Payment Details</h3>
 
